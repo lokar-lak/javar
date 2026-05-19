@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="be">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>JAVAR — Адмін</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link rel="preload" as="style"
+    href="https://fonts.googleapis.com/css2?family=Jaro&family=Manrope:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap"
+    onload="this.onload=null;this.rel='stylesheet'"/>
+  <style>
+    :root {
+      --bg:#181824; --surface:#1F1F2E; --surface-2:#262638;
+      --border:#2E2E44; --text:#FFFFFF; --text-muted:#7A7A9A;
+      --text-dim:#444466; --accent:#FF2626; --accent-glow:rgba(255,38,38,.15);
+      --green:#4ADE80; --yellow:#FACC15; --red:#FF2626;
+      --font:'Manrope',system-ui,sans-serif;
+      --mono:'IBM Plex Mono','Consolas',monospace;
+      --r:8px; --r-lg:12px;
+      --sidebar:220px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px;min-height:100vh;display:flex}
+    a{color:inherit;text-decoration:none}
+    button{cursor:pointer;border:none;background:none;font-family:var(--font)}
+    input,textarea,select{font-family:var(--font);outline:none;border:none}
+
+    /* ── Login ─────────────────────────────────────────────── */
+    #login-screen{
+      display:flex;align-items:center;justify-content:center;
+      width:100%;min-height:100vh;
+    }
+    .login-box{
+      background:var(--surface);border:1px solid var(--border);border-radius:16px;
+      padding:48px 40px;width:380px;display:flex;flex-direction:column;gap:20px;
+    }
+    .login-box h2{font-size:24px;font-weight:700}
+    .login-box p{font-size:13px;color:var(--text-muted)}
+
+    /* ── Layout ────────────────────────────────────────────── */
+    #app{display:flex;width:100%;display:none}
+
+    /* ── Sidebar ────────────────────────────────────────────── */
+    .sidebar{
+      width:var(--sidebar);flex-shrink:0;
+      background:var(--surface);border-right:1px solid var(--border);
+      display:flex;flex-direction:column;
+      position:sticky;top:0;height:100vh;overflow-y:auto;
+    }
+    .sidebar__logo{
+      padding:24px 20px 20px;
+      font-size:28px;font-weight:700;letter-spacing:2px;
+      color:var(--accent);font-family:'Jaro','Arial Black',sans-serif;
+      border-bottom:1px solid var(--border);
+    }
+    .sidebar__logo span{display:block;font-family:var(--font);font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--text-muted);margin-top:2px}
+    .sidebar__nav{padding:12px 0;flex:1}
+    .nav-item{
+      display:flex;align-items:center;gap:10px;
+      padding:10px 20px;font-size:13px;font-weight:600;
+      color:var(--text-muted);cursor:pointer;border-radius:0;
+      transition:background .15s,color .15s;
+    }
+    .nav-item:hover{background:var(--surface-2);color:var(--text)}
+    .nav-item.active{background:var(--accent-glow);color:var(--accent);border-right:2px solid var(--accent)}
+    .nav-item .icon{font-size:16px;width:20px;text-align:center}
+    .sidebar__footer{
+      padding:16px 20px;border-top:1px solid var(--border);
+      font-size:12px;color:var(--text-muted);
+    }
+    .sidebar__footer button{color:var(--text-muted);font-size:12px}
+    .sidebar__footer button:hover{color:var(--accent)}
+
+    /* ── Main content ───────────────────────────────────────── */
+    .content{flex:1;padding:32px 36px;overflow-y:auto;max-width:1100px}
+    .section{display:none}
+    .section.active{display:block}
+
+    /* ── Page heading ───────────────────────────────────────── */
+    .page-heading{
+      display:flex;align-items:center;justify-content:space-between;
+      margin-bottom:28px;gap:16px;flex-wrap:wrap;
+    }
+    .page-heading h1{font-size:28px;font-weight:700}
+    .page-heading__bar{height:3px;background:var(--accent);border-radius:2px;width:40px;margin-top:4px}
+
+    /* ── Stat cards ─────────────────────────────────────────── */
+    .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:32px}
+    .stat-box{
+      background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);
+      padding:20px;display:flex;flex-direction:column;gap:4px;
+    }
+    .stat-box__label{font-size:11px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--text-muted)}
+    .stat-box__value{font-family:var(--mono);font-size:36px;font-weight:600;line-height:1}
+    .stat-box__sub{font-size:12px;color:var(--text-muted)}
+
+    /* ── Table ──────────────────────────────────────────────── */
+    .tbl-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;margin-bottom:24px}
+    .tbl-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)}
+    .tbl-head h3{font-size:15px;font-weight:700}
+    table{width:100%;border-collapse:collapse}
+    thead tr{background:var(--surface-2)}
+    th{padding:10px 16px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border)}
+    td{padding:12px 16px;font-size:13px;border-bottom:1px solid var(--border);vertical-align:middle}
+    tr:last-child td{border-bottom:none}
+    tr:hover td{background:rgba(255,255,255,.02)}
+    .td-actions{display:flex;gap:8px;align-items:center}
+
+    /* ── Buttons ────────────────────────────────────────────── */
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 16px;border-radius:var(--r);font-size:13px;font-weight:600;cursor:pointer;transition:opacity .2s,transform .15s;border:none}
+    .btn:hover{opacity:.85;transform:translateY(-1px)}
+    .btn-primary{background:var(--accent);color:#fff}
+    .btn-ghost{background:var(--surface-2);border:1px solid var(--border);color:var(--text-muted)}
+    .btn-ghost:hover{color:var(--text)}
+    .btn-danger{background:rgba(255,38,38,.15);border:1px solid rgba(255,38,38,.3);color:var(--accent)}
+    .btn-sm{padding:5px 10px;font-size:12px}
+    .btn-success{background:rgba(74,222,128,.15);border:1px solid rgba(74,222,128,.3);color:var(--green)}
+
+    /* ── Form ───────────────────────────────────────────────── */
+    .form-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:24px;margin-bottom:24px}
+    .form-card h3{font-size:15px;font-weight:700;margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .form-grid.cols-1{grid-template-columns:1fr}
+    .form-group{display:flex;flex-direction:column;gap:6px}
+    .form-group.span-2{grid-column:1/-1}
+    label{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--text-muted)}
+    .form-input{
+      height:40px;background:var(--surface-2);border:1px solid var(--border);
+      border-radius:var(--r);padding:0 12px;font-size:14px;color:var(--text);
+      transition:border-color .2s;width:100%;
+    }
+    .form-input:focus{border-color:var(--accent)}
+    .form-input::placeholder{color:var(--text-muted)}
+    textarea.form-input{height:auto;padding:10px 12px;resize:vertical;min-height:80px}
+    select.form-input{cursor:pointer}
+    .form-actions{display:flex;gap:10px;margin-top:20px}
+
+    /* ── Badge ──────────────────────────────────────────────── */
+    .badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;letter-spacing:.5px}
+    .badge-manual{background:rgba(74,222,128,.12);color:var(--green)}
+    .badge-ai{background:rgba(122,122,154,.15);color:var(--text-muted)}
+    .badge-genre{background:var(--accent-glow);color:var(--accent)}
+    .badge-orth{background:var(--surface-2);border:1px solid var(--border);color:var(--text-muted)}
+
+    /* ── Stars ──────────────────────────────────────────────── */
+    .stars{color:var(--accent);letter-spacing:2px}
+
+    /* ── Rating cell ────────────────────────────────────────── */
+    .rating-num{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--yellow)}
+
+    /* ── Empty ──────────────────────────────────────────────── */
+    .empty{padding:40px;text-align:center;color:var(--text-muted);font-size:14px}
+
+    /* ── Toast ──────────────────────────────────────────────── */
+    #toast{
+      position:fixed;bottom:24px;right:24px;z-index:9999;
+      background:var(--surface);border:1px solid var(--border);
+      border-radius:var(--r-lg);padding:14px 20px;
+      font-size:14px;font-weight:600;
+      box-shadow:0 8px 24px rgba(0,0,0,.4);
+      transform:translateY(80px);opacity:0;
+      transition:transform .3s,opacity .3s;
+      max-width:320px;
+    }
+    #toast.show{transform:translateY(0);opacity:1}
+    #toast.ok{border-color:var(--green);color:var(--green)}
+    #toast.err{border-color:var(--accent);color:var(--accent)}
+
+    /* ── Modal ──────────────────────────────────────────────── */
+    .modal-overlay{
+      display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);
+      z-index:1000;align-items:center;justify-content:center;
+    }
+    .modal-overlay.open{display:flex}
+    .modal{
+      background:var(--surface);border:1px solid var(--border);
+      border-radius:16px;padding:28px;width:620px;max-width:95vw;
+      max-height:90vh;overflow-y:auto;
+    }
+    .modal h3{font-size:18px;font-weight:700;margin-bottom:20px}
+    .modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)}
+
+    /* ── Confirm ────────────────────────────────────────────── */
+    .confirm-box{width:380px}
+    .confirm-box p{font-size:14px;color:var(--text-muted);margin-bottom:4px}
+
+    /* ── Responsive ─────────────────────────────────────────── */
+    @media(max-width:900px){
+      .stat-grid{grid-template-columns:1fr 1fr}
+      .form-grid{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Login ──────────────────────────────────────────────── -->
+<div id="login-screen">
+  <div class="login-box">
+    <div>
+      <div style="font-family:'Jaro','Arial Black',sans-serif;font-size:32px;color:var(--accent);letter-spacing:2px">JAVAR</div>
+      <h2 style="margin-top:8px">Адмін панэль</h2>
+      <p style="margin-top:6px">Увядзіце токен для доступу</p>
+    </div>
+    <div class="form-group">
+      <label>Admin Token</label>
+      <input class="form-input" type="password" id="token-input" placeholder="••••••••" />
+    </div>
+    <button class="btn btn-primary" onclick="doLogin()" style="width:100%;height:44px">Увайсці</button>
+    
+  </div>
+</div>
+
+<!-- ── App ────────────────────────────────────────────────── -->
+<div id="app">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar__logo">JAVAR <span>Адміністрацыя</span></div>
+    <nav class="sidebar__nav">
+      <div class="nav-item active" data-section="dashboard" onclick="gotoSection('dashboard',this)">
+        <span class="icon">📊</span> Дашборд
+      </div>
+      <div class="nav-item" data-section="games" onclick="gotoSection('games',this)">
+        <span class="icon">🎮</span> Гульні
+      </div>
+      <div class="nav-item" data-section="translations" onclick="gotoSection('translations',this)">
+        <span class="icon">📝</span> Пераклады
+      </div>
+      <div class="nav-item" data-section="reviews" onclick="gotoSection('reviews',this)">
+        <span class="icon">💬</span> Водгукі
+      </div>
+      <div class="nav-item" data-section="genres" onclick="gotoSection('genres',this)">
+        <span class="icon">🏷️</span> Жанры
+      </div>
+      <div class="nav-item" data-section="export" onclick="gotoSection('export',this)">
+        <span class="icon">📤</span> Экспарт
+      </div>
+    </nav>
+    <div class="sidebar__footer">
+      <div style="margin-bottom:6px">Вы ўвайшлі як адмін</div>
+      <button onclick="doLogout()">Выйсці →</button>
+    </div>
+  </aside>
+
+  <!-- Content -->
+  <main class="content">
+
+    <!-- ══ DASHBOARD ══════════════════════════════════════════ -->
+    <div class="section active" id="sec-dashboard">
+      <div class="page-heading">
+        <div><h1>Дашборд</h1><div class="page-heading__bar"></div></div>
+        <button class="btn btn-ghost btn-sm" onclick="loadDashboard()">↻ Абнавіць</button>
+      </div>
+
+      <div class="stat-grid" id="stat-grid">
+        <div class="stat-box"><div class="stat-box__label">Гульні</div><div class="stat-box__value" id="s-games">—</div></div>
+        <div class="stat-box"><div class="stat-box__label">Пераклады</div><div class="stat-box__value" id="s-tr">—</div></div>
+        <div class="stat-box"><div class="stat-box__label">Водгукі</div><div class="stat-box__value" id="s-rv">—</div></div>
+        <div class="stat-box"><div class="stat-box__label">Клікаў</div><div class="stat-box__value" id="s-cl">—</div></div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px">
+        <div class="stat-box">
+          <div class="stat-box__label">Ручных перакладаў</div>
+          <div class="stat-box__value" id="s-manual" style="color:var(--green)">—</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box__label">ШІ-перакладаў</div>
+          <div class="stat-box__value" id="s-ai" style="color:var(--text-muted)">—</div>
+        </div>
+      </div>
+
+      <div class="tbl-wrap">
+        <div class="tbl-head"><h3>Топ гульняў па кліках</h3></div>
+        <table>
+          <thead><tr><th>#</th><th>Назва</th><th>Клікаў</th><th>Водгукаў</th></tr></thead>
+          <tbody id="top-games-body"><tr><td colspan="4" class="empty">Загрузка...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ GAMES ══════════════════════════════════════════════ -->
+    <div class="section" id="sec-games">
+      <div class="page-heading">
+        <div><h1>Гульні</h1><div class="page-heading__bar"></div></div>
+        <button class="btn btn-primary btn-sm" onclick="openGameModal(null)">+ Дадаць гульню</button>
+      </div>
+
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Назва</th><th>Распрацоўшчык</th><th>Steam</th><th>Жанры</th><th>Дата</th><th></th></tr></thead>
+          <tbody id="games-body"><tr><td colspan="6" class="empty">Загрузка...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ TRANSLATIONS ════════════════════════════════════════ -->
+    <div class="section" id="sec-translations">
+      <div class="page-heading">
+        <div><h1>Пераклады</h1><div class="page-heading__bar"></div></div>
+        <button class="btn btn-primary btn-sm" onclick="openTranslationModal(null)">+ Дадаць пераклад</button>
+      </div>
+
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Гульня</th><th>Студыя</th><th>Тып</th><th>Правапіс</th><th>Ахоп</th><th>Клікаў</th><th>Ацэнка</th><th></th></tr></thead>
+          <tbody id="translations-body"><tr><td colspan="8" class="empty">Загрузка...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ REVIEWS ════════════════════════════════════════════ -->
+    <div class="section" id="sec-reviews">
+      <div class="page-heading">
+        <div><h1>Мадэрацыя водгукаў</h1><div class="page-heading__bar"></div></div>
+        <span id="review-count" style="font-size:13px;color:var(--text-muted)"></span>
+      </div>
+
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Гульня</th><th>Студыя</th><th>Аўтар</th><th>★</th><th>Тэкст</th><th>Дата</th><th></th></tr></thead>
+          <tbody id="reviews-body"><tr><td colspan="7" class="empty">Загрузка...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ GENRES ══════════════════════════════════════════════ -->
+    <div class="section" id="sec-genres">
+      <div class="page-heading">
+        <div><h1>Жанры</h1><div class="page-heading__bar"></div></div>
+      </div>
+
+      <div class="form-card" style="max-width:480px">
+        <h3>Дадаць жанр</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Назва</label>
+            <input class="form-input" id="genre-name" placeholder="Хорар"/>
+          </div>
+          <div class="form-group">
+            <label>Slug</label>
+            <input class="form-input" id="genre-slug" placeholder="horror"/>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-primary" onclick="createGenre()">Дадаць</button>
+        </div>
+      </div>
+
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>ID</th><th>Назва</th><th>Slug</th><th></th></tr></thead>
+          <tbody id="genres-body"><tr><td colspan="4" class="empty">Загрузка...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ EXPORT ══════════════════════════════════════════════ -->
+    <div class="section" id="sec-export">
+      <div class="page-heading">
+        <div><h1>Экспарт</h1><div class="page-heading__bar"></div></div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:16px;max-width:520px">
+        <div class="form-card">
+          <h3>CSV — поўная статыстыка</h3>
+          
+          <a class="btn btn-primary" id="csv-link" href="#" onclick="downloadCSV(event)">
+            ↓ Спампаваць CSV
+          </a>
+        </div>
+
+        <div class="form-card">
+          <h3>JSON — поўная статыстыка</h3>
+          
+          <button class="btn btn-ghost" onclick="downloadJSON()">↓ Спампаваць JSON</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ══ MODAL — GAME ════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-game">
+  <div class="modal">
+    <h3 id="modal-game-title">Новая гульня</h3>
+    <input type="hidden" id="game-id"/>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Назва *</label>
+        <input class="form-input" id="g-title" placeholder="Silent Hill 2"/>
+      </div>
+      <div class="form-group">
+        <label>Slug * (URL-ідэнтыфікатар)</label>
+        <input class="form-input" id="g-slug" placeholder="silent-hill-2-2025"/>
+      </div>
+      <div class="form-group">
+        <label>Распрацоўшчык *</label>
+        <input class="form-input" id="g-dev" placeholder="Bloober Team"/>
+      </div>
+      <div class="form-group">
+        <label>Выдавец</label>
+        <input class="form-input" id="g-pub" placeholder="Konami"/>
+      </div>
+      <div class="form-group">
+        <label>Дата выхаду (YYYY-MM-DD)</label>
+        <input class="form-input" id="g-date" placeholder="2024-10-08"/>
+      </div>
+      <div class="form-group">
+        <label>SteamDB URL</label>
+        <input class="form-input" id="g-steam" placeholder="https://store.steampowered.com/app/..."/>
+      </div>
+      <div class="form-group span-2">
+        <label>Вокладка</label>
+        <div style="display:flex;gap:8px;align-items:flex-start">
+          <input class="form-input" id="g-cover" placeholder="https://... або загрузі файл справа" style="flex:1"/>
+          <label class="btn btn-ghost" style="cursor:pointer;white-space:nowrap;height:40px;padding:0 14px;display:flex;align-items:center;gap:6px">
+            📁 Загрузіць
+            <input type="file" id="g-cover-file" accept="image/jpeg,image/png,image/webp"
+              style="display:none" onchange="uploadCover(this)"/>
+          </label>
+        </div>
+        <div id="cover-preview" style="margin-top:10px;display:none">
+          <img id="cover-img" src="" style="height:120px;border-radius:8px;border:1px solid var(--border);object-fit:cover"/>
+          <button onclick="clearCover()" style="display:block;margin-top:6px;font-size:12px;color:var(--accent);background:none;border:none;cursor:pointer">✕ Выдаліць</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Steam рэйтынг (%)</label>
+        <input class="form-input" id="g-rating" type="number" min="0" max="100" placeholder="83"/>
+      </div>
+      <div class="form-group span-2">
+        <label>Апісанне</label>
+        <textarea class="form-input" id="g-desc" placeholder="Кароткае апісанне гульні..."></textarea>
+      </div>
+      <div class="form-group span-2">
+        <label>Жанры</label>
+        <div id="g-genres-list" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-game')">Адмяніць</button>
+      <button class="btn btn-primary" onclick="saveGame()">Захаваць</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL — TRANSLATION ════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-translation">
+  <div class="modal">
+    <h3 id="modal-tr-title">Новы пераклад</h3>
+    <input type="hidden" id="tr-id"/>
+    <div class="form-grid">
+      <div class="form-group span-2">
+        <label>Гульня *</label>
+        <select class="form-input" id="tr-game"></select>
+      </div>
+      <div class="form-group">
+        <label>Студыя *</label>
+        <input class="form-input" id="tr-studio" placeholder="Студыя АБВ"/>
+      </div>
+      <div class="form-group">
+        <label>Тып *</label>
+        <select class="form-input" id="tr-type">
+          <option value="manual">Ручны</option>
+          <option value="ai">ШІ</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Правапіс</label>
+        <select class="form-input" id="tr-orth">
+          <option value="academic">Академічны</option>
+          <option value="tarashkevitsa">Альтэрнатыўны</option>
+          <option value="lacinka">Лацінка</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Версія</label>
+        <input class="form-input" id="tr-version" placeholder="1.0.0"/>
+      </div>
+      <div class="form-group span-2">
+        <label>Перакладчыкі (праз коску)</label>
+        <input class="form-input" id="tr-translators" placeholder="Іван Іваноў, Марыя Петрова"/>
+      </div>
+      <div class="form-group span-2">
+        <label>Ахоп перакладу (праз коску)</label>
+        <input class="form-input" id="tr-coverage" placeholder="Субтытры, Меню, Інвентар"/>
+      </div>
+      <div class="form-group span-2">
+        <label>Спасылка *</label>
+        <input class="form-input" id="tr-url" placeholder="https://www.nexusmods.com/..."/>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-translation')">Адмяніць</button>
+      <button class="btn btn-primary" onclick="saveTranslation()">Захаваць</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL — CONFIRM ════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-confirm">
+  <div class="modal confirm-box">
+    <h3>Пацвердзіць выдаленне</h3>
+    <p id="confirm-text">Вы ўпэўнены?</p>
+    <p style="color:var(--accent);font-size:12px;margin-top:4px">Гэта дзеянне нельга адмяніць.</p>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-confirm')">Адмяніць</button>
+      <button class="btn btn-danger" id="confirm-ok">Выдаліць</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script>
+const API = '';
+let TOKEN = '';
+let _genres = [];
+let _games  = [];
+let _gamesMap = {};        // id → game object
+let _translationsMap = {}; // id → translation object
+
+// ── Auth ──────────────────────────────────────────────────────────────────
+async function doLogin() {
+  const val = document.getElementById('token-input').value.trim();
+  if (!val) { showLoginError('Увядзіце токен'); return; }
+
+  // Правяраем токен праз рэальны запыт да API
+  const res = await fetch('/api/admin/stats', {
+    headers: { 'X-Admin-Token': val }
+  });
+
+  if (res.status === 401) {
+    showLoginError('Няправільны токен');
+    return;
+  }
+  if (!res.ok) {
+    showLoginError('Памылка сервера, паспрабуйце яшчэ раз');
+    return;
+  }
+
+  TOKEN = val;
+  sessionStorage.setItem('javar_token', TOKEN);
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  initApp();
+}
+
+function showLoginError(msg) {
+  let el = document.getElementById('login-error');
+  if (!el) {
+    el = document.createElement('p');
+    el.id = 'login-error';
+    el.style.cssText = 'color:var(--accent);font-size:13px;text-align:center;font-weight:600';
+    document.querySelector('.login-box .btn').before(el);
+  }
+  el.textContent = '⚠ ' + msg;
+}
+
+function doLogout() {
+  sessionStorage.removeItem('javar_token');
+  location.reload();
+}
+
+async function apiReq(method, path, body) {
+  const opts = {
+    method,
+    headers: { 'Content-Type': 'application/json', 'X-Admin-Token': TOKEN }
+  };
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(API + path, opts);
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({error: res.statusText}));
+    throw new Error(err.error || res.statusText);
+  }
+  return res.json();
+}
+
+// ── Toast ─────────────────────────────────────────────────────────────────
+function toast(msg, type = 'ok') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = `show ${type}`;
+  setTimeout(() => el.className = '', 3000);
+}
+
+// ── Navigation ────────────────────────────────────────────────────────────
+function gotoSection(id, el) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('sec-' + id).classList.add('active');
+  el.classList.add('active');
+  const loaders = { dashboard:'loadDashboard', games:'loadGames',
+    translations:'loadTranslations', reviews:'loadReviews',
+    genres:'loadGenres', export:null };
+  if (loaders[id]) window[loaders[id]]();
+}
+
+// ── Modal ─────────────────────────────────────────────────────────────────
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
+});
+
+// ── Confirm ───────────────────────────────────────────────────────────────
+function confirm(text, cb) {
+  document.getElementById('confirm-text').textContent = text;
+  document.getElementById('confirm-ok').onclick = () => { closeModal('modal-confirm'); cb(); };
+  openModal('modal-confirm');
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────
+async function initApp() {
+  try {
+    _genres = await fetch(API + '/api/genres').then(r => r.json());
+    _games  = await fetch(API + '/api/games?limit=50').then(r => r.json());
+    _gamesMap = Object.fromEntries(_games.map(g => [g.id, g]));
+  } catch {}
+  loadDashboard();
+}
+
+// ══ DASHBOARD ════════════════════════════════════════════════════════════
+
+async function loadDashboard() {
+  try {
+    const s = await apiReq('GET', '/api/admin/stats');
+    document.getElementById('s-games').textContent  = s.total_games;
+    document.getElementById('s-tr').textContent     = s.total_translations;
+    document.getElementById('s-rv').textContent     = s.total_reviews;
+    document.getElementById('s-cl').textContent     = s.total_clicks;
+    document.getElementById('s-manual').textContent = s.manual_translations;
+    document.getElementById('s-ai').textContent     = s.ai_translations;
+
+    const tbody = document.getElementById('top-games-body');
+    if (!s.top_games?.length) {
+      tbody.innerHTML = '<tr><td colspan="4" class="empty">Дадзеных пакуль няма</td></tr>';
+      return;
+    }
+    tbody.innerHTML = s.top_games.map((g, i) => `
+      <tr>
+        <td style="color:var(--text-muted);font-family:var(--mono)">${i + 1}</td>
+        <td><a href="game.html?slug=${g.slug}" target="_blank" style="color:var(--accent)">${g.title}</a></td>
+        <td style="font-family:var(--mono);color:var(--yellow)">${g.clicks}</td>
+        <td style="font-family:var(--mono)">${g.reviews}</td>
+      </tr>`).join('');
+  } catch (e) { toast('Памылка загрузкі: ' + e.message, 'err'); }
+}
+
+// ══ GAMES ═════════════════════════════════════════════════════════════════
+
+async function loadGames() {
+  try {
+    _games = await apiReq('GET', '/api/games?limit=50');
+    _gamesMap = Object.fromEntries(_games.map(g => [g.id, g]));
+    const tbody = document.getElementById('games-body');
+    if (!_games.length) {
+      tbody.innerHTML = '<tr><td colspan="6" class="empty">Гульняў няма</td></tr>'; return;
+    }
+    tbody.innerHTML = _games.map(g => `
+      <tr>
+        <td><strong>${g.title}</strong><br/><span style="font-size:11px;color:var(--text-muted)">${g.slug}</span></td>
+        <td>${g.developer}</td>
+        <td>${g.steam_rating != null ? `<span style="color:var(--green);font-family:var(--mono)">${g.steam_rating}%</span>` : '—'}</td>
+        <td>${(g.genres||[]).map(x => `<span class="badge badge-genre" style="font-size:10px">${x.name}</span>`).join(' ')}</td>
+        <td style="color:var(--text-muted);font-size:12px">${g.release_date||'—'}</td>
+        <td>
+          <div class="td-actions">
+            <button class="btn btn-ghost btn-sm" onclick="openGameModal(${g.id})">✏️</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteGame(${g.id},'${g.title.replace(/'/g,"\\'")}')">🗑</button>
+          </div>
+        </td>
+      </tr>`).join('');
+  } catch (e) { toast(e.message, 'err'); }
+}
+
+function openGameModal(gameOrId) {
+  const game = (typeof gameOrId === 'number' || typeof gameOrId === 'string')
+    ? _gamesMap[gameOrId]
+    : gameOrId;
+  document.getElementById('modal-game-title').textContent = game ? 'Рэдагаваць гульню' : 'Новая гульня';
+  document.getElementById('game-id').value   = game?.id || '';
+  document.getElementById('g-title').value   = game?.title || '';
+  document.getElementById('g-slug').value    = game?.slug || '';
+  document.getElementById('g-dev').value     = game?.developer || '';
+  document.getElementById('g-pub').value     = game?.publisher || '';
+  document.getElementById('g-date').value    = game?.release_date || '';
+  document.getElementById('g-steam').value   = game?.steamdb_url || '';
+  document.getElementById('g-cover').value   = game?.cover_url || '';
+  // Прагляд вокладкі пры рэдагаванні
+  const prevEl = document.getElementById('cover-preview');
+  const imgEl  = document.getElementById('cover-img');
+  if (game?.cover_url) {
+    imgEl.src = game.cover_url;
+    prevEl.style.display = 'block';
+  } else {
+    imgEl.src = '';
+    prevEl.style.display = 'none';
+  }
+  document.getElementById('g-rating').value  = game?.steam_rating ?? '';
+  document.getElementById('g-desc').value    = game?.description || '';
+
+  const selectedIDs = (game?.genres||[]).map(g => g.id);
+  document.getElementById('g-genres-list').innerHTML = _genres.map(g => `
+    <label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;
+      background:var(--surface-2);border:1px solid ${selectedIDs.includes(g.id)?'var(--accent)':'var(--border)'};
+      border-radius:6px;padding:4px 10px;font-size:12px;font-weight:600;color:${selectedIDs.includes(g.id)?'var(--accent)':'var(--text-muted)'};
+      transition:all .15s">
+      <input type="checkbox" value="${g.id}" ${selectedIDs.includes(g.id)?'checked':''} style="display:none"
+        onchange="this.parentElement.style.borderColor=this.checked?'var(--accent)':'var(--border)';
+                  this.parentElement.style.color=this.checked?'var(--accent)':'var(--text-muted)'">
+      ${g.name}
+    </label>`).join('');
+
+  openModal('modal-game');
+}
+
+async function saveGame() {
+  const id = document.getElementById('game-id').value;
+  const genreIDs = [...document.querySelectorAll('#g-genres-list input:checked')].map(i => parseInt(i.value));
+  const rating = document.getElementById('g-rating').value;
+  const body = {
+    title:       document.getElementById('g-title').value.trim(),
+    slug:        document.getElementById('g-slug').value.trim(),
+    developer:   document.getElementById('g-dev').value.trim(),
+    publisher:   document.getElementById('g-pub').value.trim(),
+    release_date:document.getElementById('g-date').value.trim(),
+    steamdb_url: document.getElementById('g-steam').value.trim(),
+    cover_url:   document.getElementById('g-cover').value.trim(),
+    steam_rating:rating ? parseInt(rating) : null,
+    description: document.getElementById('g-desc').value.trim(),
+    genre_ids:   genreIDs,
+  };
+  if (!body.title || !body.slug || !body.developer) {
+    toast('Назва, slug і распрацоўшчык — абавязковыя', 'err'); return;
+  }
+  try {
+    if (id) {
+      await apiReq('PUT', `/api/admin/games/${id}`, body);
+      toast('Гульня абноўлена ✓');
+    } else {
+      await apiReq('POST', '/api/admin/games', body);
+      toast('Гульня дададзена ✓');
+    }
+    closeModal('modal-game');
+    loadGames();
+  } catch (e) { toast(e.message, 'err'); }
+}
+
+function deleteGame(id, title) {
+  confirm(`Выдаліць гульню «${title}»? Усе пераклады і водгукі таксама будуць выдаленыя.`, async () => {
+    try {
+      await apiReq('DELETE', `/api/admin/games/${id}`);
+      toast('Гульня выдалена');
+      loadGames();
+    } catch (e) { toast(e.message, 'err'); }
+  });
+}
+
+// ══ TRANSLATIONS ══════════════════════════════════════════════════════════
+
+const ORTH = { academic:'Академічны', tarashkevitsa:'Альтэрнатыўны', lacinka:'Лацінка' };
+
+async function loadTranslations() {
+  try {
+    const list = await apiReq('GET', '/api/admin/translations');
+    _translationsMap = Object.fromEntries((list||[]).map(t => [t.id, t]));
+    const tbody = document.getElementById('translations-body');
+    if (!list.length) {
+      tbody.innerHTML = '<tr><td colspan="8" class="empty">Перакладаў няма</td></tr>'; return;
+    }
+    tbody.innerHTML = list.map(t => `
+      <tr>
+        <td><a href="game.html?slug=${t.game_slug}" target="_blank" style="color:var(--accent)">${t.game_title}</a></td>
+        <td>${t.studio_name}</td>
+        <td><span class="badge badge-${t.type}">${t.type==='manual'?'Ручны':'ШІ'}</span></td>
+        <td><span class="badge badge-orth">${ORTH[t.orthography]||t.orthography}</span></td>
+        <td style="font-size:12px;color:var(--text-muted)">${(t.coverage||[]).join(', ')||'—'}</td>
+        <td style="font-family:var(--mono)">${t.click_count}</td>
+        <td class="rating-num">${t.avg_rating ? t.avg_rating.toFixed(1) : '—'}</td>
+        <td>
+          <div class="td-actions">
+            <button class="btn btn-ghost btn-sm" onclick="openTranslationModal(${t.id})">✏️</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteTranslation(${t.id},'${t.studio_name.replace(/'/g,"\\'")}')">🗑</button>
+          </div>
+        </td>
+      </tr>`).join('');
+  } catch (e) { toast(e.message, 'err'); }
+}
+
+function openTranslationModal(tOrId) {
+  const t = (typeof tOrId === 'number' || typeof tOrId === 'string')
+    ? _translationsMap[tOrId]
+    : tOrId;
+  document.getElementById('modal-tr-title').textContent = t ? 'Рэдагаваць пераклад' : 'Новы пераклад';
+  document.getElementById('tr-id').value = t?.id || '';
+
+  // Запаўняем select гульняў
+  const sel = document.getElementById('tr-game');
+  sel.innerHTML = _games.map(g => `<option value="${g.id}" ${t?.game_id===g.id?'selected':''}>${g.title}</option>`).join('');
+
+  document.getElementById('tr-studio').value      = t?.studio_name || '';
+  document.getElementById('tr-type').value        = t?.type || 'manual';
+  document.getElementById('tr-orth').value        = t?.orthography || 'academic';
+  document.getElementById('tr-version').value     = t?.version || '';
+  document.getElementById('tr-translators').value = (t?.translator_names||[]).join(', ');
+  document.getElementById('tr-coverage').value    = (t?.coverage||[]).join(', ');
+  document.getElementById('tr-url').value         = t?.external_url || '';
+  openModal('modal-translation');
+}
+
+async function saveTranslation() {
+  const id = document.getElementById('tr-id').value;
+  const body = {
+    game_id:          parseInt(document.getElementById('tr-game').value),
+    studio_name:      document.getElementById('tr-studio').value.trim(),
+    type:             document.getElementById('tr-type').value,
+    orthography:      document.getElementById('tr-orth').value,
+    external_url:     document.getElementById('tr-url').value.trim(),
+    translator_names: document.getElementById('tr-translators').value.split(',').map(s=>s.trim()).filter(Boolean),
+    coverage:         document.getElementById('tr-coverage').value.split(',').map(s=>s.trim()).filter(Boolean),
+  };
+  if (!body.studio_name || !body.external_url) {
+    toast('Студыя і спасылка — абавязковыя', 'err'); return;
+  }
+  try {
+    if (id) {
+      await apiReq('PUT', `/api/admin/translations/${id}`, body);
+      toast('Пераклад абноўлены ✓');
+    } else {
+      await apiReq('POST', '/api/admin/translations', body);
+      toast('Пераклад дадadzены ✓');
+    }
+    closeModal('modal-translation');
+    loadTranslations();
+  } catch (e) { toast(e.message, 'err'); }
+}
+
+function deleteTranslation(id, name) {
+  confirm(`Выдаліць пераклад «${name}»?`, async () => {
+    try {
+      await apiReq('DELETE', `/api/admin/translations/${id}`);
+      toast('Пераклад выдалены');
+      loadTranslations();
+    } catch (e) { toast(e.message, 'err'); }
+  });
+}
+
+// ══ REVIEWS ═══════════════════════════════════════════════════════════════
+
+function starsStr(n) { return '★'.repeat(n) + '☆'.repeat(5-n); }
+
+async function loadReviews() {
+  try {
+    const list = await apiReq('GET', '/api/admin/reviews');
+    document.getElementById('review-count').textContent = `Усяго: ${list.length}`;
+    const tbody = document.getElementById('reviews-body');
+    if (!list.length) {
+      tbody.innerHTML = '<tr><td colspan="7" class="empty">Водгукаў няма</td></tr>'; return;
+    }
+    tbody.innerHTML = list.map(rv => `
+      <tr>
+        <td><a href="game.html?slug=${rv.game_slug}" target="_blank" style="color:var(--accent);font-size:12px">${rv.game_title}</a></td>
+        <td style="font-size:12px;color:var(--text-muted)">${rv.studio_name}</td>
+        <td><strong>${rv.author_name}</strong></td>
+        <td><span class="stars" style="font-size:12px">${starsStr(rv.rating)}</span></td>
+        <td style="max-width:260px;font-size:13px">${rv.body.length > 80 ? rv.body.slice(0,80)+'…' : rv.body}</td>
+        <td style="font-size:12px;color:var(--text-muted);white-space:nowrap">${new Date(rv.created_at).toLocaleDateString('be-BY')}</td>
+        <td><button class="btn btn-danger btn-sm" onclick="deleteReview(${rv.id})">🗑</button></td>
+      </tr>`).join('');
+  } catch (e) { toast(e.message, 'err'); }
+}
+
+function deleteReview(id) {
+  confirm('Выдаліць гэты водгук?', async () => {
+    try {
+      await apiReq('DELETE', `/api/admin/reviews/${id}`);
+      toast('Водгук выдалены');
+      loadReviews();
+    } catch (e) { toast(e.message, 'err'); }
+  });
+}
+
+// ══ GENRES ════════════════════════════════════════════════════════════════
+
+async function loadGenres() {
+  try {
+    _genres = await fetch(API + '/api/genres').then(r => r.json());
+    const tbody = document.getElementById('genres-body');
+    if (!_genres.length) {
+      tbody.innerHTML = '<tr><td colspan="4" class="empty">Жанраў няма</td></tr>'; return;
+    }
+    tbody.innerHTML = _genres.map(g => `
+      <tr>
+        <td style="font-family:var(--mono);color:var(--text-muted)">${g.id}</td>
+        <td>${g.name}</td>
+        <td style="color:var(--text-muted)">${g.slug}</td>
+        <td><button class="btn btn-danger btn-sm" onclick="deleteGenre(${g.id},'${g.name}')">🗑</button></td>
+      </tr>`).join('');
+  } catch (e) { toast(e.message, 'err'); }
+}
+
+async function createGenre() {
+  const name = document.getElementById('genre-name').value.trim();
+  const slug = document.getElementById('genre-slug').value.trim();
+  if (!name || !slug) { toast('Запоўніце назву і slug', 'err'); return; }
+  try {
+    await apiReq('POST', '/api/admin/genres', { name, slug });
+    toast('Жанр дададзены ✓');
+    document.getElementById('genre-name').value = '';
+    document.getElementById('genre-slug').value = '';
+    loadGenres();
+  } catch (e) { toast(e.message, 'err'); }
+}
+
+function deleteGenre(id, name) {
+  confirm(`Выдаліць жанр «${name}»?`, async () => {
+    try {
+      await apiReq('DELETE', `/api/admin/genres/${id}`);
+      toast('Жанр выдалены');
+      loadGenres();
+    } catch (e) { toast(e.message, 'err'); }
+  });
+}
+
+// ══ EXPORT ════════════════════════════════════════════════════════════════
+
+function downloadCSV(e) {
+  e.preventDefault();
+  const url = `${API}/api/admin/export/csv`;
+  const a = document.createElement('a');
+  a.href = url;
+  a.setAttribute('download', 'javar_export.csv');
+  // Дадаем токен у загаловак немагчыма праз <a>, таму робім fetch
+  fetch(url, { headers: { 'X-Admin-Token': TOKEN } })
+    .then(r => r.blob())
+    .then(b => {
+      a.href = URL.createObjectURL(b);
+      a.click();
+    });
+}
+
+async function downloadJSON() {
+  try {
+    const stats = await apiReq('GET', '/api/admin/stats');
+    const blob = new Blob([JSON.stringify(stats, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'javar_stats.json';
+    a.click();
+    toast('JSON экспартаваны ✓');
+  } catch (e) { toast(e.message, 'err'); }
+}
+
+// ── Cover upload ─────────────────────────────────────────────────────────────
+async function uploadCover(input) {
+  if (!input.files[0]) return;
+  const file = input.files[0];
+
+  // Лакальны прагляд адразу
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById('cover-img').src = e.target.result;
+    document.getElementById('cover-preview').style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+
+  // Загрузка на сервер
+  const btn = input.previousElementSibling || input.parentElement;
+  const origText = input.parentElement.childNodes[0]?.textContent?.trim();
+
+  try {
+    const fd = new FormData();
+    fd.append('file', file);
+    const res = await fetch('/api/admin/upload', {
+      method: 'POST',
+      headers: { 'X-Admin-Token': TOKEN },
+      body: fd
+    });
+    if (!res.ok) throw new Error((await res.json()).error);
+    const data = await res.json();
+    document.getElementById('g-cover').value = data.url;
+
+    // Паказваем сапраўдную выяву з сервера
+    document.getElementById('cover-img').src = data.url;
+    toast('Выява загружана ✓');
+  } catch (e) {
+    toast('Памылка загрузкі: ' + e.message, 'err');
+    clearCover();
+  }
+}
+
+function clearCover() {
+  document.getElementById('g-cover').value = '';
+  document.getElementById('g-cover-file').value = '';
+  document.getElementById('cover-img').src = '';
+  document.getElementById('cover-preview').style.display = 'none';
+}
+
+// ── Auto-slug ─────────────────────────────────────────────────────────────
+document.getElementById('g-title').addEventListener('input', function() {
+  const slugField = document.getElementById('g-slug');
+  if (!slugField.dataset.manual) {
+    slugField.value = this.value
+      .toLowerCase()
+      .replace(/[^a-zа-яёіўa-ząćęłńóśźż0-9\s-]/gi, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-');
+  }
+});
+document.getElementById('g-slug').addEventListener('input', function() {
+  this.dataset.manual = this.value ? '1' : '';
+});
+
+// ── Genre slug auto ───────────────────────────────────────────────────────
+document.getElementById('genre-name').addEventListener('input', function() {
+  document.getElementById('genre-slug').value = this.value
+    .toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+});
+
+// ── Start ─────────────────────────────────────────────────────────────────
+(function() {
+  const saved = sessionStorage.getItem('javar_token');
+  if (saved) {
+    // Правяраем ці токен яшчэ дзейнічае
+    fetch('/api/admin/stats', { headers: { 'X-Admin-Token': saved } })
+      .then(r => {
+        if (r.ok) {
+          TOKEN = saved;
+          document.getElementById('login-screen').style.display = 'none';
+          document.getElementById('app').style.display = 'flex';
+          initApp();
+        } else {
+          sessionStorage.removeItem('javar_token');
+        }
+      })
+      .catch(() => sessionStorage.removeItem('javar_token'));
+  }
+  document.getElementById('token-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') doLogin();
+  });
+})();
+</script>
+</body>
+</html>

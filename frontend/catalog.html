@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="be">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JAVAR — Каталог</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* ── Skeleton ─────────────────────────────────── */
+    .skeleton {
+      background: linear-gradient(90deg, var(--surface) 25%, var(--surface-2) 50%, var(--surface) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+      border-radius: 8px;
+    }
+    @keyframes shimmer { to { background-position: -200% 0; } }
+
+    /* ── Filter bar ───────────────────────────────── */
+    .filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 28px;
+    }
+
+    /* ── Dropdown filter ──────────────────────────── */
+    .dropdown {
+      position: relative;
+      display: inline-block;
+    }
+
+    .dropdown__trigger {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 16px;
+      height: 40px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      font-family: var(--font-body);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: border-color .2s, color .2s;
+      user-select: none;
+    }
+    .dropdown__trigger:hover { border-color: #4a4a6a; color: var(--text); }
+    .dropdown__trigger.has-value {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-glow);
+    }
+
+    .dropdown__arrow {
+      font-size: 10px;
+      margin-left: 2px;
+      transition: transform .2s;
+      color: var(--text-muted);
+    }
+    .dropdown.open .dropdown__arrow { transform: rotate(180deg); }
+    .dropdown__trigger.has-value .dropdown__arrow { color: var(--accent); }
+
+    .dropdown__menu {
+      display: none;
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      min-width: 200px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 6px;
+      z-index: 200;
+      box-shadow: 0 8px 24px rgba(0,0,0,.4);
+    }
+    .dropdown.open .dropdown__menu { display: block; }
+
+    .dropdown__item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: background .15s, color .15s;
+    }
+    .dropdown__item:hover { background: var(--surface-2); color: var(--text); }
+    .dropdown__item.selected {
+      color: var(--accent);
+      background: var(--accent-glow);
+    }
+    .dropdown__item .check {
+      width: 16px;
+      font-size: 12px;
+      color: var(--accent);
+      flex-shrink: 0;
+      text-align: center;
+    }
+
+    .dropdown__divider {
+      height: 1px;
+      background: var(--border);
+      margin: 4px 0;
+    }
+
+    /* ── Separator ────────────────────────────────── */
+    .filter-sep { width: 1px; height: 32px; background: var(--border); flex-shrink: 0; }
+
+    /* ── Inline search ────────────────────────────── */
+    .catalog-search {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 16px;
+      height: 40px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      min-width: 260px;
+      transition: border-color .2s;
+    }
+    .catalog-search:focus-within { border-color: var(--accent); }
+    .catalog-search input {
+      flex: 1; font-size: 14px; color: var(--text);
+      background: none; border: none; outline: none;
+      font-family: var(--font-body);
+    }
+    .catalog-search input::placeholder { color: var(--text-muted); }
+
+    /* ── Active filters chips ─────────────────────── */
+    .active-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+      min-height: 0;
+    }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px 4px 12px;
+      background: var(--accent-glow);
+      border: 1px solid var(--accent);
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent);
+    }
+    .chip__remove {
+      cursor: pointer;
+      font-size: 14px;
+      line-height: 1;
+      opacity: .7;
+    }
+    .chip__remove:hover { opacity: 1; }
+
+    /* ── Empty / Error ────────────────────────────── */
+    .empty-state {
+      grid-column: 1 / -1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 60px 0;
+      gap: 12px;
+      color: var(--text-muted);
+    }
+    .empty-state__icon  { font-size: 48px; opacity: .4; }
+    .empty-state__title { font-size: 18px; font-weight: 700; color: var(--text); }
+
+    /* ── Pagination ───────────────────────────────── */
+    .pagination { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 36px; }
+    .page-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 36px; height: 36px; padding: 0 12px;
+      border-radius: var(--radius-sm);
+      background: var(--surface-2); border: 1px solid var(--border);
+      font-family: var(--font-body); font-size: 13px; font-weight: 600;
+      color: var(--text-muted); cursor: pointer; transition: border-color .2s, color .2s;
+    }
+    .page-btn:hover { border-color: #4a4a6a; color: var(--text); }
+    .page-btn.active { background: var(--accent-glow); border-color: var(--accent); color: var(--accent); }
+    .page-btn:disabled { opacity: .35; cursor: default; pointer-events: none; }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <nav class="navbar">
+    <a href="index.html" class="navbar__logo" aria-label="JAVAR">
+      <img src="JaVar_SVG.svg" alt="JAVAR" style="height:28px;width:auto;display:block" />
+    </a>
+    <ul class="navbar__links">
+      <li><a href="index.html">Галоўная</a></li>
+      <li><a href="catalog.html" class="active">Каталог</a></li>
+      <li><a href="contacts.html">Кантакты</a></li>
+      <li><a href="faq.html">FAQ</a></li>
+    </ul>
+    <div class="navbar__search">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <circle cx="6.5" cy="6.5" r="5" stroke="#7A7A9A" stroke-width="1.5"/>
+        <line x1="10.5" y1="10.5" x2="14" y2="14" stroke="#7A7A9A" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <input type="text" id="nav-search" placeholder="Пошук..." />
+    </div>
+  </nav>
+
+  <main class="main">
+    <section class="section">
+
+      <div class="section-heading">
+        <h2>Каталог</h2>
+        <div class="section-heading__bar" style="width:100px"></div>
+      </div>
+
+      <!-- ── Filters ── -->
+      <div class="filter-bar">
+
+        <!-- Search -->
+        <div class="catalog-search">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
+            <circle cx="6.5" cy="6.5" r="5" stroke="#7A7A9A" stroke-width="1.5"/>
+            <line x1="10.5" y1="10.5" x2="14" y2="14" stroke="#7A7A9A" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <input type="text" id="search-input" placeholder="Назва або распрацоўшчык..." />
+        </div>
+
+        <div class="filter-sep"></div>
+
+        <!-- Genre -->
+        <div class="dropdown" id="dd-genre">
+          <div class="dropdown__trigger" id="dd-genre-trigger">
+            Жанр <span class="dropdown__arrow">▾</span>
+          </div>
+          <div class="dropdown__menu" id="dd-genre-menu">
+            <div class="dropdown__item selected" data-value="">
+              <span class="check">✓</span> Усе жанры
+            </div>
+            <div class="dropdown__divider"></div>
+            <!-- populated from API -->
+          </div>
+        </div>
+
+        <!-- Translation type -->
+        <div class="dropdown" id="dd-type">
+          <div class="dropdown__trigger" id="dd-type-trigger">
+            Тып перакладу <span class="dropdown__arrow">▾</span>
+          </div>
+          <div class="dropdown__menu">
+            <div class="dropdown__item selected" data-value="">
+              <span class="check">✓</span> Усе тыпы
+            </div>
+            <div class="dropdown__divider"></div>
+            <div class="dropdown__item" data-value="manual">
+              <span class="check"></span>
+              <span style="color:#26C26A">●</span> Ручны пераклад
+            </div>
+            <div class="dropdown__item" data-value="ai">
+              <span class="check"></span>
+              <span style="color:#7A7A9A">●</span> ШІ-пераклад
+            </div>
+          </div>
+        </div>
+
+        <!-- Orthography -->
+        <div class="dropdown" id="dd-orth">
+          <div class="dropdown__trigger" id="dd-orth-trigger">
+            Правапіс <span class="dropdown__arrow">▾</span>
+          </div>
+          <div class="dropdown__menu">
+            <div class="dropdown__item selected" data-value="">
+              <span class="check">✓</span> Любы правапіс
+            </div>
+            <div class="dropdown__divider"></div>
+            <div class="dropdown__item" data-value="academic">
+              <span class="check"></span> Акадэмічны
+            </div>
+            <div class="dropdown__item" data-value="tarashkevitsa">
+              <span class="check"></span> Альтэрнатыўны
+            </div>
+            <div class="dropdown__item" data-value="lacinka">
+              <span class="check"></span> Лацінка
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Active filters (chips) -->
+      <div class="active-filters" id="active-filters"></div>
+
+      <!-- Grid -->
+      <div class="games-grid" id="grid">
+        <div class="game-card"><div style="aspect-ratio:16/9" class="skeleton"></div><div class="game-card__body" style="gap:10px"><div class="skeleton" style="height:16px;width:60%"></div><div class="skeleton" style="height:20px;width:80%"></div><div class="skeleton" style="height:32px;width:110px;margin-top:8px"></div></div></div>
+        <div class="game-card"><div style="aspect-ratio:16/9" class="skeleton"></div><div class="game-card__body" style="gap:10px"><div class="skeleton" style="height:16px;width:60%"></div><div class="skeleton" style="height:20px;width:80%"></div><div class="skeleton" style="height:32px;width:110px;margin-top:8px"></div></div></div>
+        <div class="game-card"><div style="aspect-ratio:16/9" class="skeleton"></div><div class="game-card__body" style="gap:10px"><div class="skeleton" style="height:16px;width:60%"></div><div class="skeleton" style="height:20px;width:80%"></div><div class="skeleton" style="height:32px;width:110px;margin-top:8px"></div></div></div>
+      </div>
+
+      <div class="pagination" id="pagination"></div>
+
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer__brand">
+      <span class="footer__logo">
+        <img src="JaVar_SVG.svg" alt="JAVAR" style="height:24px;width:auto;display:block" />
+      </span>
+      <span class="footer__copy">© 2024 САА «БЫВАЕ»</span>
+    </div>
+    <ul class="footer__nav">
+      <li><a href="index.html">Галоўная</a></li>
+      <li><a href="catalog.html">Каталог</a></li>
+      <li><a href="contacts.html">Кантакты</a></li>
+      <li><a href="faq.html">FAQ</a></li>
+    </ul>
+    <ul class="footer__legal">
+      <li><a href="#">Палітыка прыватнасці</a></li>
+      <li><a href="#">Умовы выкарыстання</a></li>
+    </ul>
+  </footer>
+</div>
+
+<script src="shared.js"></script>
+<script>
+const PAGE_SIZE = 9;
+
+// ── State ────────────────────────────────────────────────────────────────
+const state = {
+  search:      new URLSearchParams(location.search).get('search') || '',
+  genreId:     0,
+  genreName:   '',
+  type:        '',
+  orthography: '',
+  page:        0,
+};
+
+// ── Navbar search ─────────────────────────────────────────────────────────
+document.getElementById('nav-search').addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    const q = e.target.value.trim();
+    if (q) location.href = `catalog.html?search=${encodeURIComponent(q)}`;
+  }
+});
+
+// ── Dropdown logic ────────────────────────────────────────────────────────
+function initDropdown(ddId, onSelect) {
+  const dd      = document.getElementById(ddId);
+  const trigger = dd.querySelector('.dropdown__trigger');
+  const menu    = dd.querySelector('.dropdown__menu');
+
+  // Open / close
+  trigger.addEventListener('click', e => {
+    e.stopPropagation();
+    const isOpen = dd.classList.contains('open');
+    // Close all
+    document.querySelectorAll('.dropdown.open').forEach(d => d.classList.remove('open'));
+    if (!isOpen) dd.classList.add('open');
+  });
+
+  // Select item
+  menu.addEventListener('click', e => {
+    const item = e.target.closest('.dropdown__item');
+    if (!item) return;
+    const value = item.dataset.value ?? '';
+
+    menu.querySelectorAll('.dropdown__item').forEach(i => {
+      i.classList.remove('selected');
+      i.querySelector('.check').textContent = '';
+    });
+    item.classList.add('selected');
+    item.querySelector('.check').textContent = '✓';
+
+    if (value) {
+      trigger.classList.add('has-value');
+    } else {
+      trigger.classList.remove('has-value');
+    }
+
+    dd.classList.remove('open');
+    onSelect(value, item.textContent.trim().replace('✓', '').trim());
+  });
+}
+
+// Close dropdowns on outside click
+document.addEventListener('click', () => {
+  document.querySelectorAll('.dropdown.open').forEach(d => d.classList.remove('open'));
+});
+
+// ── Initialize dropdowns ──────────────────────────────────────────────────
+initDropdown('dd-genre', (value, label) => {
+  state.genreId   = parseInt(value) || 0;
+  state.genreName = label === 'Усе жанры' ? '' : label;
+  state.page = 0;
+  updateChips();
+  loadGames();
+});
+
+initDropdown('dd-type', (value, label) => {
+  state.type = value;
+  state.page = 0;
+  updateChips();
+  loadGames();
+});
+
+initDropdown('dd-orth', (value, label) => {
+  state.orthography = value;
+  state.page = 0;
+  updateChips();
+  loadGames();
+});
+
+// ── Load genres ───────────────────────────────────────────────────────────
+async function loadGenres() {
+  try {
+    const genres = await apiFetch('/api/genres');
+    const menu   = document.querySelector('#dd-genre .dropdown__menu');
+    genres.forEach(g => {
+      const item = document.createElement('div');
+      item.className = 'dropdown__item';
+      item.dataset.value = g.id;
+      item.innerHTML = `<span class="check"></span> ${g.name}`;
+      menu.appendChild(item);
+    });
+  } catch {}
+}
+
+// ── Search with debounce ──────────────────────────────────────────────────
+const searchInput = document.getElementById('search-input');
+searchInput.value = state.search;
+let debTimer;
+searchInput.addEventListener('input', () => {
+  clearTimeout(debTimer);
+  debTimer = setTimeout(() => {
+    state.search = searchInput.value.trim();
+    state.page   = 0;
+    updateChips();
+    loadGames();
+  }, 320);
+});
+
+// ── Active filter chips ───────────────────────────────────────────────────
+const ORTH_LABELS = { academic: 'Акадэмічны', tarashkevitsa: 'Альтэрнатыўны', lacinka: 'Лацінка' };
+const TYPE_LABELS = { manual: 'Ручны пераклад', ai: 'ШІ-пераклад' };
+
+function updateChips() {
+  const cont = document.getElementById('active-filters');
+  const chips = [];
+
+  if (state.search)
+    chips.push({ label: `Пошук: ${state.search}`, clear: () => { state.search = ''; searchInput.value = ''; } });
+  if (state.genreId)
+    chips.push({ label: `Жанр: ${state.genreName}`, clear: () => {
+      state.genreId = 0; state.genreName = '';
+      resetDropdown('dd-genre');
+    }});
+  if (state.type)
+    chips.push({ label: TYPE_LABELS[state.type], clear: () => { state.type = ''; resetDropdown('dd-type'); } });
+  if (state.orthography)
+    chips.push({ label: ORTH_LABELS[state.orthography], clear: () => { state.orthography = ''; resetDropdown('dd-orth'); } });
+
+  cont.innerHTML = chips.map((c, i) =>
+    `<div class="chip">${c.label}<span class="chip__remove" data-idx="${i}">✕</span></div>`
+  ).join('');
+
+  cont.querySelectorAll('.chip__remove').forEach(btn => {
+    btn.addEventListener('click', () => {
+      chips[parseInt(btn.dataset.idx)].clear();
+      state.page = 0;
+      updateChips();
+      loadGames();
+    });
+  });
+}
+
+function resetDropdown(ddId) {
+  const dd = document.getElementById(ddId);
+  dd.querySelectorAll('.dropdown__item').forEach(i => {
+    i.classList.remove('selected');
+    i.querySelector('.check').textContent = '';
+  });
+  const first = dd.querySelector('.dropdown__item[data-value=""]');
+  if (first) { first.classList.add('selected'); first.querySelector('.check').textContent = '✓'; }
+  dd.querySelector('.dropdown__trigger').classList.remove('has-value');
+}
+
+// ── Load games ────────────────────────────────────────────────────────────
+async function loadGames() {
+  const grid   = document.getElementById('grid');
+  const pageEl = document.getElementById('pagination');
+
+  grid.innerHTML = Array.from({length: 3}, () => `
+    <div class="game-card">
+      <div style="aspect-ratio:16/9" class="skeleton"></div>
+      <div class="game-card__body" style="gap:10px">
+        <div class="skeleton" style="height:16px;width:60%"></div>
+        <div class="skeleton" style="height:20px;width:80%"></div>
+        <div class="skeleton" style="height:32px;width:110px;margin-top:8px"></div>
+      </div>
+    </div>`).join('');
+  pageEl.innerHTML = '';
+
+  const params = new URLSearchParams();
+  if (state.search)      params.set('search',      state.search);
+  if (state.genreId)     params.set('genre_id',    state.genreId);
+  if (state.type)        params.set('type',         state.type);
+  if (state.orthography) params.set('orthography',  state.orthography);
+  params.set('page',  state.page);
+  params.set('limit', PAGE_SIZE);
+
+  try {
+    const games = await apiFetch(`/api/games?${params}`);
+
+    if (!games.length) {
+      grid.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state__icon">🔍</div>
+          <div class="empty-state__title">Нічога не знойдзена</div>
+          <div style="font-size:14px">Паспрабуйце змяніць фільтры</div>
+        </div>`;
+      return;
+    }
+
+    grid.innerHTML = games.map((g, i) => renderGameCard(g, i)).join('');
+    renderPagination(games.length, pageEl);
+
+  } catch {
+    grid.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state__icon">⚠️</div>
+        <div class="empty-state__title">Памылка загрузкі</div>
+        <div style="font-size:14px">Праверце, ці запушчаны сервер</div>
+      </div>`;
+  }
+}
+
+// ── Pagination ────────────────────────────────────────────────────────────
+function renderPagination(count, container) {
+  if (state.page === 0 && count < PAGE_SIZE) return;
+  container.innerHTML = `
+    <button class="page-btn" id="btn-prev" ${state.page === 0 ? 'disabled' : ''}>← Назад</button>
+    <button class="page-btn active" style="cursor:default">${state.page + 1}</button>
+    <button class="page-btn" id="btn-next" ${count < PAGE_SIZE ? 'disabled' : ''}>Далей →</button>
+  `;
+  document.getElementById('btn-prev')?.addEventListener('click', () => {
+    state.page--; scrollTo({top:0,behavior:'smooth'}); loadGames();
+  });
+  document.getElementById('btn-next')?.addEventListener('click', () => {
+    state.page++; scrollTo({top:0,behavior:'smooth'}); loadGames();
+  });
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────
+(async () => {
+  await loadGenres();
+  if (state.search) updateChips();
+  await loadGames();
+})();
+</script>
+</body>
+</html>

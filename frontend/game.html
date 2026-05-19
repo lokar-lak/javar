@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="be">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JAVAR — Гульня</title>
+  <!-- Fonts: async, non-blocking for rendering -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preload" as="style"
+    href="https://fonts.googleapis.com/css2?family=Jaro&family=Manrope:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap"
+    onload="this.onload=null;this.rel='stylesheet'" />
+  <noscript><link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Jaro&family=Manrope:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap"
+  /></noscript>
+  
+  
+  
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* ── Translation Cards ─────────────────────────── */
+    .translation-cards { display: flex; flex-direction: column; gap: 16px; }
+
+    .translation-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      transition: border-color .2s;
+    }
+    .translation-card.active { border-color: var(--accent); }
+
+    .translation-card__head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 22px;
+      cursor: pointer;
+      gap: 16px;
+    }
+
+    .translation-card__left { display: flex; flex-direction: column; gap: 6px; }
+
+    .translation-card__studio {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .translation-card__meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .translation-card__right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .translation-card__rating {
+      font-family: var(--font-mono);
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .translation-card__rating span {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .translation-card__body {
+      border-top: 1px solid var(--border);
+      padding: 20px 22px;
+      display: none;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .translation-card.active .translation-card__body { display: flex; }
+
+    .translation-card__info-row {
+      display: flex;
+      gap: 32px;
+      flex-wrap: wrap;
+    }
+    .translation-card__info-item { display: flex; flex-direction: column; gap: 4px; }
+    .translation-card__info-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .translation-card__info-value {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .translation-card__go {
+      align-self: flex-start;
+    }
+
+    /* ── Reviews section ──────────────────────────── */
+    .reviews-block { display: flex; flex-direction: column; gap: 14px; }
+
+    /* ── Stars selector ───────────────────────────── */
+    .stars-input { display: flex; gap: 4px; cursor: pointer; }
+    .stars-input span {
+      font-size: 26px;
+      color: var(--border);
+      transition: color .15s;
+      user-select: none;
+      line-height: 1;
+    }
+    .stars-input span.on { color: var(--accent); }
+
+    /* ── Anonymous name input ─────────────────────── */
+    .anon-input {
+      width: 100%;
+      height: 44px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 0 16px;
+      font-size: 14px;
+      color: var(--text);
+      font-family: var(--font-body);
+      transition: border-color .2s;
+    }
+    .anon-input::placeholder { color: var(--text-muted); }
+    .anon-input:focus { outline: none; border-color: var(--accent); }
+
+    .form-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    /* ── Loading state ────────────────────────────── */
+    .skeleton {
+      background: linear-gradient(90deg, var(--surface) 25%, var(--surface-2) 50%, var(--surface) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+      border-radius: 8px;
+    }
+    @keyframes shimmer { to { background-position: -200% 0; } }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a href="index.html" class="navbar__logo" aria-label="JAVAR">
+      <img src="JaVar_SVG.svg" alt="JAVAR" style="height:28px;width:auto;display:block" />
+    </a>
+    <ul class="navbar__links">
+      <li><a href="index.html">Галоўная</a></li>
+      <li><a href="catalog.html">Каталог</a></li>
+      <li><a href="contacts.html">Кантакты</a></li>
+      <li><a href="faq.html">FAQ</a></li>
+    </ul>
+    <div class="navbar__search">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <circle cx="6.5" cy="6.5" r="5" stroke="#7A7A9A" stroke-width="1.5"/>
+        <line x1="10.5" y1="10.5" x2="14" y2="14" stroke="#7A7A9A" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <input type="text" placeholder="Пошук..." />
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="main" id="main-content">
+    <!-- Filled by JS -->
+    <div style="display:flex;flex-direction:column;gap:16px;padding-top:24px;">
+      <div class="skeleton" style="height:20px;width:300px"></div>
+      <div class="skeleton" style="height:48px;width:480px"></div>
+      <div class="skeleton" style="height:400px;width:100%"></div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer__brand">
+      <span class="footer__logo">
+        <img src="JaVar_SVG.svg" alt="JAVAR" style="height:24px;width:auto;display:block" />
+      </span>
+      <span class="footer__copy">© 2024 САА «БЫВАЕ»</span>
+    </div>
+    <ul class="footer__nav">
+      <li><a href="index.html">Галоўная</a></li>
+      <li><a href="catalog.html">Каталог</a></li>
+      <li><a href="contacts.html">Кантакты</a></li>
+      <li><a href="faq.html">FAQ</a></li>
+    </ul>
+    <ul class="footer__legal">
+      <li><a href="#">Палітыка прыватнасці</a></li>
+      <li><a href="#">Умовы выкарыстання</a></li>
+    </ul>
+  </footer>
+</div>
+
+<script>
+const API = '';  // same origin
+
+// ── Helpers ──────────────────────────────────────────────────────────────
+function stars(n, total = 5) {
+  return Array.from({length: total}, (_, i) => i < Math.round(n) ? '★' : '☆').join('');
+}
+
+function formatDate(iso) {
+  if (!iso) return '—';
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return '—';
+  const dd = String(date.getDate()).padStart(2, '0');
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  const yyyy = date.getFullYear();
+  return `${dd}.${mm}.${yyyy}`;
+}
+
+function badge(type) {
+  if (type === 'manual') return `<span class="badge badge--manual">Ручны</span>`;
+  return `<span class="badge badge--ai">ШІ</span>`;
+}
+
+// ── Render game page ──────────────────────────────────────────────────────
+function renderGame(game) {
+  document.title = `JAVAR — ${game.title}`;
+  const translations = game.translations || [];
+  const bestTranslation = translations.reduce((best, current) => {
+    const bestRating = best?.avg_rating || 0;
+    const currentRating = current?.avg_rating || 0;
+    return currentRating > bestRating ? current : best;
+  }, null);
+  const bestAvgRating = (bestTranslation?.avg_rating || 0) > 0
+    ? bestTranslation.avg_rating.toFixed(1)
+    : '—';
+
+  const genreTags = (game.genres || []).map(g =>
+    `<span class="badge badge--genre">${g.name}</span>`
+  ).join('');
+
+  const translationCards = translations.map((t, i) =>
+    renderTranslationCard(t, i === 0)
+  ).join('');
+
+  document.getElementById('main-content').innerHTML = `
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+      <a href="index.html">Галоўная</a>
+      <span class="breadcrumb__sep">›</span>
+      <a href="catalog.html">Каталог</a>
+      <span class="breadcrumb__sep">›</span>
+      <span class="breadcrumb__current">${game.title}</span>
+    </nav>
+
+    <!-- Title -->
+    <div class="game-title-block">
+      <h1>${game.title}</h1>
+      <div class="game-title-block__bar"></div>
+    </div>
+
+    <!-- Stat bar - full width -->
+    <div style="display:flex;gap:16px;margin-bottom:24px;flex-wrap:wrap">
+      <div class="stat-card" style="flex:1;min-width:140px">
+        <div class="stat-card__label">Steam</div>
+        <div class="stat-card__value stat-card__value--green">${game.steam_rating != null ? game.steam_rating + '%' : '—'}</div>
+        <div class="stat-card__sub">станоўчых водгукаў</div>
+      </div>
+      <div class="stat-card" style="flex:1;min-width:140px">
+        <div class="stat-card__label">Наш рэйтынг</div>
+        <div class="stat-card__value" style="color:var(--accent)">${bestAvgRating}</div>
+        <div class="stat-card__sub">сярэдняя ацэнка</div>
+      </div>
+      <div class="stat-card" style="flex:1;min-width:140px">
+        <div class="stat-card__label">Перакладаў</div>
+        <div class="stat-card__value" style="color:var(--text)">${(game.translations||[]).length}</div>
+        <div class="stat-card__sub">даступна</div>
+      </div>
+      <div class="stat-card" style="flex:1;min-width:140px">
+        <div class="stat-card__label">Усяго пераходаў</div>
+        <div class="stat-card__value" style="color:var(--text-muted)">${(game.translations||[]).reduce((s,t)=>s+(t.click_count||0),0)}</div>
+        <div class="stat-card__sub">на пошук</div>
+      </div>
+    </div>
+
+    <!-- Layout -->
+    <div class="game-layout">
+      <!-- Cover -->
+      <div class="game-cover-col">
+        <div class="game-cover" style="${game.cover_url
+          ? `background-image:url('${game.cover_url}')`
+          : `background:linear-gradient(160deg,#0a0a14,#1a0505)`}">
+          ${!game.cover_url ? `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:80px;opacity:.1">👻</div>` : ''}
+        </div>
+      </div>
+
+      <!-- Right -->
+      <div>
+        <!-- Info table -->
+        <div class="info-table">
+          <div class="info-row">
+            <div class="info-cell">
+              <span class="info-cell__label">Дата выхаду</span>
+              <span class="info-cell__value">${formatDate(game.release_date)}</span>
+            </div>
+            <div class="info-cell">
+              <span class="info-cell__label">Распрацоўшчык</span>
+              <span class="info-cell__value">${game.developer}</span>
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-cell">
+              <span class="info-cell__label">Выдавец</span>
+              <span class="info-cell__value">${game.publisher || '—'}</span>
+            </div>
+            <div class="info-cell">
+              <span class="info-cell__label">Жанры</span>
+              <div class="tag-list">${genreTags}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div style="margin-top:20px">
+          <h3 class="section-h2">Пра гульню</h3>
+          <p class="game-desc">${game.description || ''}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Translations -->
+    <div class="section" style="margin-top:52px">
+      <h3 class="section-h2">Пераклады</h3>
+      <div class="translation-cards" id="translation-cards">
+        ${translationCards}
+      </div>
+    </div>
+
+    <!-- Reviews (for first translation by default) -->
+    ${translations.length > 0 ? renderReviewsSection(translations[0]) : ''}
+  `;
+
+  // Expand/collapse card headers
+  document.querySelectorAll('.translation-card__head').forEach(head => {
+    head.addEventListener('click', () => {
+      const card = head.closest('.translation-card');
+      const wasActive = card.classList.contains('active');
+      document.querySelectorAll('.translation-card').forEach(c => c.classList.remove('active'));
+      if (!wasActive) {
+        card.classList.add('active');
+        const tid = card.dataset.tid;
+        loadReviews(parseInt(tid));
+      }
+    });
+  });
+
+  // "Go to" buttons
+  document.querySelectorAll('.btn-goto').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const tid = btn.dataset.tid;
+      try {
+        const res = await fetch(`${API}/api/translations/${tid}/click`, {method:'POST'});
+        const data = await res.json();
+        window.open(data.url, '_blank', 'noopener');
+      } catch {
+        alert('Не атрымалася атрымаць спасылку');
+      }
+    });
+  });
+
+  // First card is open by default: load its reviews
+  if (translations.length > 0) {
+    loadReviews(translations[0].id);
+  }
+}
+
+
+const ORTH_LABELS = { academic: 'Акадэмічны', tarashkevitsa: 'Альтэрнатыўны', lacinka: 'Лацінка' };
+function renderTranslationCard(t, open = false) {
+  const coverageHTML = (t.coverage || []).map(c =>
+    `<span class="tag-sm tag-sm--neutral">${c}</span>`
+  ).join('');
+  const translatorsHTML = (t.translator_names || []).join(', ') || '—';
+  const avgStr = t.avg_rating > 0 ? t.avg_rating.toFixed(1) : '—';
+
+  return `
+    <div class="translation-card ${open ? 'active' : ''}" data-tid="${t.id}">
+      <div class="translation-card__head">
+        <div class="translation-card__left">
+          <div class="translation-card__studio">${t.studio_name}</div>
+          <div class="translation-card__meta">
+            ${badge(t.type)}
+            <span class="tag-sm" style="font-size:10px;padding:2px 7px;background:var(--surface-2);border:1px solid var(--border);color:var(--text-muted)">${ORTH_LABELS[t.orthography] || 'Акадэмічны'}</span>
+            <span style="font-size:12px;color:var(--text-muted)">Пераходаў: ${t.click_count}</span>
+          </div>
+        </div>
+        <div class="translation-card__right">
+          <div class="translation-card__rating">
+            ${avgStr} <span>/ 5.0</span>
+          </div>
+          <div class="stars" style="font-size:14px;letter-spacing:2px">${stars(t.avg_rating)}</div>
+          <div style="font-size:11px;color:var(--text-muted)">Колькасць водгукаў: ${t.review_count}</div>
+        </div>
+      </div>
+      <div class="translation-card__body">
+        <div class="translation-card__info-row">
+          <div class="translation-card__info-item">
+            <span class="translation-card__info-label">Аўтары</span>
+            <span class="translation-card__info-value">${translatorsHTML}</span>
+          </div>
+          <div class="translation-card__info-item">
+            <span class="translation-card__info-label">Перакладзена</span>
+            <div class="tag-list">${coverageHTML}</div>
+          </div>
+        </div>
+        <button class="btn btn--primary translation-card__go btn-goto" data-tid="${t.id}">
+          Знайсці пераклад ↗
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+// ── Reviews ───────────────────────────────────────────────────────────────
+function renderReviewsSection(t) {
+  return `
+    <div class="section" style="margin-top:52px" id="reviews-section">
+      <h3 class="section-h2" id="reviews-title">Водгукі — ${t.studio_name}</h3>
+
+      <!-- Rating summary -->
+      <div id="rating-summary"></div>
+
+      <!-- Review form -->
+      <div style="margin:24px 0 20px">
+        <h4 style="font-size:16px;font-weight:700;margin-bottom:14px;color:var(--text)">Пакінуць водгук</h4>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div>
+            <label class="form-label" for="review-name">Імя (неабавязкова)</label>
+            <input class="anon-input" id="review-name" type="text" placeholder="Ананім" maxlength="60"/>
+          </div>
+          <div>
+            <label class="form-label">Рэйтынг</label>
+            <div class="stars-input" id="stars-input">
+              <span data-v="1">★</span>
+              <span data-v="2">★</span>
+              <span data-v="3">★</span>
+              <span data-v="4">★</span>
+              <span data-v="5">★</span>
+            </div>
+          </div>
+          <div>
+            <label class="form-label" for="review-body">Каментарый</label>
+            <textarea class="review-textarea" id="review-body" placeholder="Напішыце свой водгук..."></textarea>
+          </div>
+          <div style="display:flex;justify-content:flex-end">
+            <button class="btn btn--primary" id="submit-review"
+              style="height:40px;padding:0 24px"
+              data-tid="${t.id}">
+              Адправіць
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reviews list -->
+      <div class="reviews-block" id="reviews-list">
+        <div class="skeleton" style="height:100px;width:100%"></div>
+      </div>
+    </div>
+  `;
+}
+
+// Keep game data globally
+let _gameData = null;
+
+function loadReviews(tid) {
+  const section = document.getElementById('reviews-section');
+  if (!section) return;
+
+  // Find translation in cached game data
+  const translation = (_gameData?.translations || []).find(t => t.id === tid);
+  const studioName = translation?.studio_name || '';
+
+  // Update section title
+  const titleEl = document.getElementById('reviews-title');
+  if (titleEl) titleEl.textContent = `Водгукі — ${studioName}`;
+
+  // Update data-tid on submit button
+  const submitBtn = document.getElementById('submit-review');
+  if (submitBtn) submitBtn.dataset.tid = tid;
+
+  const listEl   = document.getElementById('reviews-list');
+  const ratingEl = document.getElementById('rating-summary');
+
+  // Reviews are already present in payload: no extra request needed
+  const reviews = translation?.reviews || [];
+
+  if (reviews.length > 0) {
+    const avg    = reviews.reduce((s, r) => s + r.rating, 0) / reviews.length;
+    const counts = [0,0,0,0,0];
+    reviews.forEach(r => counts[r.rating - 1]++);
+    ratingEl.innerHTML = renderRatingSummary(avg, reviews.length, counts);
+    listEl.innerHTML   = reviews.map(renderReviewCard).join('');
+  } else {
+    ratingEl.innerHTML = '';
+    listEl.innerHTML   = `<p style="color:var(--text-muted);font-size:14px">Водгукаў пакуль няма. Будзьце першым!</p>`;
+  }
+}
+
+// Reload reviews after posting by fetching full game payload again
+async function reloadReviews(tid) {
+  try {
+    const slug = new URLSearchParams(location.search).get('slug');
+    const res  = await fetch(`${API}/api/games/${slug}`);
+    if (!res.ok) return;
+    _gameData = await res.json();
+    loadReviews(tid);
+  } catch {
+    const listEl = document.getElementById('reviews-list');
+    if (listEl) listEl.innerHTML = `<p style="color:var(--text-muted)">Памылка абнаўлення.</p>`;
+  }
+}
+
+function renderRatingSummary(avg, total, counts) {
+  const bars = [5,4,3,2,1].map(n => {
+    const pct = total > 0 ? Math.round(counts[n-1] / total * 100) : 0;
+    return `
+      <div class="rating-bar">
+        <span class="rating-bar__num">${n}</span>
+        <div class="rating-bar__track"><div class="rating-bar__fill" style="width:${pct}%"></div></div>
+        <span class="rating-bar__count">${counts[n-1]}</span>
+      </div>`;
+  }).join('');
+
+  return `
+    <div class="rating-summary">
+      <div class="rating-summary__left">
+        <div class="rating-summary__score">${avg.toFixed(1)}</div>
+        <div class="stars rating-summary__stars">${stars(avg)}</div>
+        <div class="rating-summary__count">Колькасць водгукаў: ${total}</div>
+      </div>
+      <div class="rating-bars">${bars}</div>
+    </div>`;
+}
+
+function renderReviewCard(rev) {
+  const initials = rev.author_name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+  return `
+    <div class="review-card">
+      <div class="review-card__header">
+        <div class="review-card__user">
+          <div class="user-avatar">${initials}</div>
+          <div>
+            <div class="review-card__name">${rev.author_name}</div>
+            <div class="review-card__date">${formatDate(rev.created_at)}</div>
+          </div>
+        </div>
+        <div class="stars review-card__stars">${stars(rev.rating)}</div>
+      </div>
+      <p class="review-card__text">${rev.body}</p>
+    </div>`;
+}
+
+// ── Stars input ───────────────────────────────────────────────────────────
+let selectedRating = 0;
+
+document.addEventListener('click', (e) => {
+  const star = e.target.closest('#stars-input span');
+  if (!star) return;
+  selectedRating = parseInt(star.dataset.v);
+  document.querySelectorAll('#stars-input span').forEach(s => {
+    s.classList.toggle('on', parseInt(s.dataset.v) <= selectedRating);
+  });
+});
+
+document.addEventListener('mouseover', (e) => {
+  const star = e.target.closest('#stars-input span');
+  if (!star) return;
+  const v = parseInt(star.dataset.v);
+  document.querySelectorAll('#stars-input span').forEach(s => {
+    s.classList.toggle('on', parseInt(s.dataset.v) <= v);
+  });
+});
+
+document.addEventListener('mouseout', (e) => {
+  if (!e.target.closest('#stars-input')) return;
+  document.querySelectorAll('#stars-input span').forEach(s => {
+    s.classList.toggle('on', parseInt(s.dataset.v) <= selectedRating);
+  });
+});
+
+// ── Submit review ─────────────────────────────────────────────────────────
+document.addEventListener('click', async (e) => {
+  const btn = e.target.closest('#submit-review');
+  if (!btn) return;
+
+  const tid = parseInt(btn.dataset.tid);
+  const name = document.getElementById('review-name').value.trim();
+  const body = document.getElementById('review-body').value.trim();
+
+  if (!selectedRating) { alert('Абярыце рэйтынг'); return; }
+  if (!body) { alert('Напішыце каментарый'); return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Адпраўляю...';
+
+  try {
+    const res = await fetch(`${API}/api/reviews`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ translation_id: tid, author_name: name || 'Ананім', rating: selectedRating, body })
+    });
+
+    if (!res.ok) throw new Error();
+
+    document.getElementById('review-name').value = '';
+    document.getElementById('review-body').value = '';
+    selectedRating = 0;
+    document.querySelectorAll('#stars-input span').forEach(s => s.classList.remove('on'));
+
+    await reloadReviews(tid);
+  } catch {
+    alert('Памылка адпраўкі');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Адправіць';
+  }
+});
+
+// ── Init ──────────────────────────────────────────────────────────────────
+(async () => {
+  const slug = new URLSearchParams(location.search).get('slug');
+  if (!slug) {
+    document.getElementById('main-content').innerHTML =
+      `<p style="color:var(--text-muted);padding:40px 0">Гульня не знойдзена. <a href="catalog.html" style="color:var(--accent)">Вярнуцца ў каталог</a></p>`;
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API}/api/games/${slug}`);
+    if (!res.ok) throw new Error();
+    const game = await res.json();
+    _gameData = game;
+    renderGame(game);
+  } catch {
+    document.getElementById('main-content').innerHTML =
+      `<p style="color:var(--text-muted);padding:40px 0">Памылка загрузкі. <a href="catalog.html" style="color:var(--accent)">Вярнуцца ў каталог</a></p>`;
+  }
+})();
+</script>
+
+</body>
+</html>

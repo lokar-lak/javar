@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="be">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JAVAR — Кантакты</title>
+  <!-- Fonts: async, non-blocking for rendering -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preload" as="style"
+    href="https://fonts.googleapis.com/css2?family=Jaro&family=Manrope:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap"
+    onload="this.onload=null;this.rel='stylesheet'" />
+  <noscript><link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Jaro&family=Manrope:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap"
+  /></noscript>
+  
+  
+  
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="page">
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a href="index.html" class="navbar__logo" aria-label="JAVAR">
+      <img src="JaVar_SVG.svg" alt="JAVAR" style="height:28px;width:auto;display:block" />
+    </a>
+    <ul class="navbar__links">
+      <li><a href="index.html">Галоўная</a></li>
+      <li><a href="catalog.html">Каталог</a></li>
+      <li><a href="contacts.html" class="active">Кантакты</a></li>
+      <li><a href="faq.html">FAQ</a></li>
+    </ul>
+    <div class="navbar__search">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <circle cx="6.5" cy="6.5" r="5" stroke="#7A7A9A" stroke-width="1.5"/>
+        <line x1="10.5" y1="10.5" x2="14" y2="14" stroke="#7A7A9A" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <input type="text" placeholder="Пошук..." />
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- Contact block -->
+    <div class="contacts-content">
+      <div style="
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-xl);
+        padding: 60px 80px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 24px;
+        max-width: 640px;
+        width: 100%;
+      ">
+        <!-- Icon -->
+        <div style="
+          width: 72px; height: 72px;
+          background: var(--accent-glow);
+          border-radius: 50%;
+          display: flex; align-items: center; justify-content: center;
+          font-size: 32px;
+        ">✉️</div>
+
+        <h2 style="font-family:var(--font-head); font-size:28px; font-weight:700; color:var(--text); text-align:center">
+          Звяжыцеся з намі
+        </h2>
+
+        <p style="font-size:15px; color:var(--text-muted); text-align:center; line-height:1.7">
+          Ёсць пытанні, прапановы або хочаце далучыцца да праекту?<br/>
+          Напішыце нам у Telegram-бот, і мы адкажам як мага хутчэй.
+        </p>
+
+        <p style="font-size:15px; color:var(--text); text-align:center; line-height:1.7">
+          Наш Telegram-бот:
+          <a
+            href="https://t.me/javar_bot"
+            target="_blank"
+            rel="noopener noreferrer"
+            style="color:var(--accent); font-weight:700; text-decoration:underline"
+          >
+            t.me/javar_bot
+          </a>
+        </p>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer__brand">
+      <span class="footer__logo">
+        <img src="JaVar_SVG.svg" alt="JAVAR" style="height:24px;width:auto;display:block" />
+      </span>
+      <span class="footer__copy">© 2024 САА «БЫВАЕ»</span>
+    </div>
+    <ul class="footer__nav">
+      <li><a href="index.html">Галоўная</a></li>
+      <li><a href="catalog.html">Каталог</a></li>
+      <li><a href="contacts.html">Кантакты</a></li>
+      <li><a href="faq.html">FAQ</a></li>
+    </ul>
+    <ul class="footer__legal">
+      <li><a href="#">Палітыка прыватнасці</a></li>
+      <li><a href="#">Умовы выкарыстання</a></li>
+    </ul>
+  </footer>
+
+</div>
+</body>
+</html>
