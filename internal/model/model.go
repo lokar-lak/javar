@@ -96,12 +96,14 @@ type CreateReviewRequest struct {
 }
 
 type GameFilter struct {
-	Search  string
-	GenreID int    // genre filter (ID)
-	Type         string // "manual" | "ai" | ""
-	Orthography  string // "academic" | "tarashkevitsa" | "lacinka" | ""
-	Page         int
-	Limit        int
+	Search      string
+	GenreID     int    // genre filter (ID)
+	Type        string // "manual" | "ai" | ""
+	Orthography string // "academic" | "tarashkevitsa" | "lacinka" | ""
+	SortBy      string // "created_at" | "steam_rating" | "best_rating"
+	SortOrder   string // "asc" | "desc"
+	Page        int
+	Limit       int
 }
 
 // ── Admin ─────────────────────────────────────────────────────

@@ -46,7 +46,17 @@ func (r *Repo) ListGames(f model.GameFilter) ([]model.Game, error) {
 	q := `SELECT DISTINCT g.id, g.title, g.slug, g.developer,
 		       COALESCE(g.publisher,''), COALESCE(g.release_date,''),
 		       COALESCE(g.description,''), COALESCE(g.cover_url,''), COALESCE(g.steamdb_url,''),
-		       g.steam_rating, g.created_at
+		       g.steam_rating, g.created_at,
+		       COALESCE(
+		         (SELECT MAX(avg_r) FROM (
+		           SELECT AVG(rv.rating) as avg_r
+		           FROM translations t2
+		           LEFT JOIN reviews rv ON rv.translation_id = t2.id
+		           WHERE t2.game_id = g.id
+		           GROUP BY t2.id
+		         )),
+		         0
+		       ) as best_rating
 		FROM games g
 		LEFT JOIN game_genres gg ON gg.game_id = g.id
 		LEFT JOIN translations t  ON t.game_id  = g.id
@@ -72,7 +82,19 @@ func (r *Repo) ListGames(f model.GameFilter) ([]model.Game, error) {
 		args = append(args, f.Orthography)
 	}
 
-	q += ` ORDER BY g.created_at DESC LIMIT ? OFFSET ?`
+	// ── Sorting ──────────────────────────────────────────────────────────
+	sortBy := "g.created_at"
+	sortOrder := "DESC"
+	switch f.SortBy {
+	case "steam_rating":
+		sortBy = "g.steam_rating"
+	case "best_rating":
+		sortBy = "best_rating"
+	}
+	if f.SortOrder == "asc" {
+		sortOrder = "ASC"
+	}
+	q += ` ORDER BY ` + sortBy + ` ` + sortOrder + ` NULLS LAST, g.id DESC LIMIT ? OFFSET ?`
 	args = append(args, f.Limit, f.Page*f.Limit)
 
 	rows, err := r.db.Query(q, args...)
@@ -86,7 +108,7 @@ func (r *Repo) ListGames(f model.GameFilter) ([]model.Game, error) {
 		var g model.Game
 		var rating sql.NullInt64
 		if err := rows.Scan(&g.ID, &g.Title, &g.Slug, &g.Developer, &g.Publisher,
-			&g.ReleaseDate, &g.Description, &g.CoverURL, &g.SteamDBURL, &rating, &g.CreatedAt); err != nil {
+			&g.ReleaseDate, &g.Description, &g.CoverURL, &g.SteamDBURL, &rating, &g.CreatedAt, &g.BestRating); err != nil {
 			return nil, err
 		}
 		if rating.Valid {
@@ -102,7 +124,6 @@ func (r *Repo) ListGames(f model.GameFilter) ([]model.Game, error) {
 	for i := range games {
 		games[i].Genres, _ = r.genresByGame(games[i].ID)
 		games[i].HasOnlyAI = r.hasOnlyAI(games[i].ID)
-		games[i].BestRating = r.bestRating(games[i].ID)
 	}
 	return games, nil
 }

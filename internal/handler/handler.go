@@ -53,7 +53,7 @@ func (h *Handler) ListGenres(w http.ResponseWriter, r *http.Request) {
 }
 
 // ── GET /api/games ────────────────────────────────────────────────────────
-// ?search=  &genre_id=  &type=manual|ai  &page=  &limit=
+// ?search=  &genre_id=  &type=manual|ai  &sort_by=created_at  &sort_order=desc  &page=  &limit=
 
 func (h *Handler) ListGames(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
@@ -67,6 +67,8 @@ func (h *Handler) ListGames(w http.ResponseWriter, r *http.Request) {
 		GenreID:     genreID,
 		Type:        q.Get("type"),
 		Orthography: q.Get("orthography"),
+		SortBy:      q.Get("sort_by"),
+		SortOrder:   q.Get("sort_order"),
 		Page:        page,
 		Limit:       limit,
 	})
