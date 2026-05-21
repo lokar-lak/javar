@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"fmt"
@@ -184,7 +185,7 @@ func (h *Handler) CreateTranslationSubmission(w http.ResponseWriter, r *http.Req
 	req.Description = strings.TrimSpace(req.Description)
 
 	if req.GameTitle == "" || len(req.Platforms) == 0 || req.Category == "" || len(req.LocalizationType) == 0 ||
-		req.Authors == "" || req.GameURL == "" || req.TranslationURL == "" {
+		req.Authors == "" || req.GameURL == "" {
 		writeError(w, 400, "all fields are required")
 		return
 	}
@@ -192,7 +193,7 @@ func (h *Handler) CreateTranslationSubmission(w http.ResponseWriter, r *http.Req
 		writeError(w, 400, "invalid category")
 		return
 	}
-	if !validHTTPURL(req.GameURL) || !validHTTPURL(req.TranslationURL) {
+	if !validHTTPURL(req.GameURL) || (req.TranslationURL != "" && !validHTTPURL(req.TranslationURL)) {
 		writeError(w, 400, "links must start with http:// or https://")
 		return
 	}
@@ -330,6 +331,24 @@ func (h *Handler) DeleteReview(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, 200, map[string]string{"status": "deleted"})
+}
+
+// ── GET /api/admin/steam-meta?url=... ─────────────────────────────────────
+
+func (h *Handler) GetSteamMeta(w http.ResponseWriter, r *http.Request) {
+	steamURL := strings.TrimSpace(r.URL.Query().Get("url"))
+	if steamURL == "" {
+		writeError(w, 400, "url required")
+		return
+	}
+	ctx, cancel := context.WithTimeout(r.Context(), 6*time.Second)
+	defer cancel()
+	meta, err := fetchSteamGameMeta(ctx, steamURL)
+	if err != nil {
+		writeError(w, 400, err.Error())
+		return
+	}
+	writeJSON(w, 200, meta)
 }
 
 // ── GET /api/admin/stats ──────────────────────────────────────────────────

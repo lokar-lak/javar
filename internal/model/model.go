@@ -172,3 +172,14 @@ type SimilarGame struct {
 	Title string `json:"title"`
 	Slug  string `json:"slug"`
 }
+
+type SteamGameMeta struct {
+	Title       string   `json:"title"`
+	Developer   string   `json:"developer"`
+	Publisher   string   `json:"publisher"`
+	ReleaseDate string   `json:"release_date"`
+	CoverURL    string   `json:"cover_url"`
+	SteamRating *int     `json:"steam_rating"`
+	Genres      []string `json:"genres"`
+	Platforms   []string `json:"platforms"`
+}

@@ -80,6 +80,94 @@ func fetchSteamHeaderImage(ctx context.Context, appID int) (string, error) {
 	return entry.Data.HeaderImage, nil
 }
 
+func fetchSteamGameMeta(ctx context.Context, appURL string) (*model.SteamGameMeta, error) {
+	appID, ok := steamAppIDFromURL(appURL)
+	if !ok {
+		return nil, fmt.Errorf("invalid steam app url")
+	}
+
+	var meta model.SteamGameMeta
+	url := fmt.Sprintf("https://store.steampowered.com/api/appdetails?appids=%d&l=english", appID)
+	req, _ := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var data map[string]struct {
+		Success bool `json:"success"`
+		Data    struct {
+			Name        string   `json:"name"`
+			Developers  []string `json:"developers"`
+			Publishers  []string `json:"publishers"`
+			HeaderImage string   `json:"header_image"`
+			ReleaseDate struct {
+				Date string `json:"date"`
+			} `json:"release_date"`
+			Genres []struct {
+				Description string `json:"description"`
+			} `json:"genres"`
+			Platforms struct {
+				Windows bool `json:"windows"`
+				Mac     bool `json:"mac"`
+				Linux   bool `json:"linux"`
+			} `json:"platforms"`
+		} `json:"data"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
+		return nil, err
+	}
+	entry, ok := data[strconv.Itoa(appID)]
+	if !ok || !entry.Success {
+		return nil, fmt.Errorf("app %d not found", appID)
+	}
+
+	meta.Title = entry.Data.Name
+	if len(entry.Data.Developers) > 0 {
+		meta.Developer = strings.Join(entry.Data.Developers, ", ")
+	}
+	if len(entry.Data.Publishers) > 0 {
+		meta.Publisher = strings.Join(entry.Data.Publishers, ", ")
+	}
+	meta.CoverURL = entry.Data.HeaderImage
+	meta.ReleaseDate = steamReleaseDateToISO(entry.Data.ReleaseDate.Date)
+	for _, g := range entry.Data.Genres {
+		if g.Description != "" {
+			meta.Genres = append(meta.Genres, g.Description)
+		}
+	}
+	if entry.Data.Platforms.Windows {
+		meta.Platforms = append(meta.Platforms, "ПК")
+	}
+	if entry.Data.Platforms.Mac {
+		meta.Platforms = append(meta.Platforms, "macOS")
+	}
+	if entry.Data.Platforms.Linux {
+		meta.Platforms = append(meta.Platforms, "Linux")
+	}
+	if rating, err := fetchSteamRating(ctx, appID); err == nil {
+		meta.SteamRating = rating
+	}
+	return &meta, nil
+}
+
+func steamReleaseDateToISO(date string) string {
+	date = strings.TrimSpace(date)
+	if date == "" {
+		return ""
+	}
+	for _, layout := range []string{"2 Jan, 2006", "Jan 2, 2006", "2 Jan 2006", "Jan 2006", "2006"} {
+		if t, err := time.Parse(layout, date); err == nil {
+			if layout == "Jan 2006" || layout == "2006" {
+				return t.Format("2006-01")
+			}
+			return t.Format("2006-01-02")
+		}
+	}
+	return ""
+}
+
 func fetchSteamRating(ctx context.Context, appID int) (*int, error) {
 	url := fmt.Sprintf(
 		"https://store.steampowered.com/appreviews/%d?json=1&language=all&purchase_type=all&num_per_page=0",

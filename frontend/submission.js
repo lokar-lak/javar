@@ -1,8 +1,7 @@
 (() => {
   const platforms = [
-    'macOS', 'iOS', 'Linux', 'PlayStation5', 'Android', 'Windows',
-    'Xbox360', 'XboxSeries', 'XboxOne', 'Switch', 'WiiU', '3DS',
-    'PlayStation4', 'Іншае'
+    'macOS', 'iOS', 'Linux', 'PlayStation', 'Android', 'Windows',
+    'Xbox', 'Nintendo Switch', 'Іншая'
   ];
 
   function optionPill(type, name, label) {
@@ -73,7 +72,7 @@
 
           <div class="submission-field">
             <label for="submission-translation-url">Спасылка на беларусізатар</label>
-            <input id="submission-translation-url" name="translation_url" type="url" required />
+            <input id="submission-translation-url" name="translation_url" type="url" />
           </div>
 
           <div class="submission-field">

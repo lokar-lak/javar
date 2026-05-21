@@ -87,6 +87,7 @@ func main() {
 		r.Delete("/reviews/{id}", h.DeleteReview)
 
 		r.Get("/stats", h.GetStats)
+		r.Get("/steam-meta", h.GetSteamMeta)
 		r.Get("/reviews", h.ListAllReviews)
 		r.Get("/translations", h.ListAllTranslations)
 		r.Get("/translation-submissions", h.ListAllTranslationSubmissions)

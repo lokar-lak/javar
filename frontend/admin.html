@@ -180,6 +180,8 @@
     }
     .modal h3{font-size:18px;font-weight:700;margin-bottom:20px}
     .modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)}
+    .modal-close{position:absolute;top:14px;right:16px;width:28px;height:28px;border-radius:50%;color:var(--text-muted);font-size:22px;line-height:1}
+    .modal-close:hover{background:var(--surface-2);color:var(--text)}
 
     /* ── Confirm ────────────────────────────────────────────── */
     .confirm-box{width:380px}
@@ -307,7 +309,7 @@
 
       <div class="tbl-wrap">
         <table>
-          <thead><tr><th>Гульня</th><th>Студыя</th><th>Тып</th><th>Правапіс / афіцыйнасць</th><th>Ахоп</th><th>Клікаў</th><th>Ацэнка</th><th></th></tr></thead>
+          <thead><tr><th>Гульня</th><th>Студыя</th><th>Тып</th><th>Правапіс / афіцыйнасць</th><th>Тып лакалізацыі</th><th>Клікаў</th><th>Ацэнка</th><th></th></tr></thead>
           <tbody id="translations-body"><tr><td colspan="8" class="empty">Загрузка...</td></tr></tbody>
         </table>
       </div>
@@ -402,10 +404,15 @@
 
 <!-- ══ MODAL — GAME ════════════════════════════════════════════ -->
 <div class="modal-overlay" id="modal-game">
-  <div class="modal">
+  <div class="modal" style="position:relative">
+    <button class="modal-close" type="button" aria-label="Закрыць" onclick="closeModal('modal-game')">×</button>
     <h3 id="modal-game-title">Новая гульня</h3>
     <input type="hidden" id="game-id"/>
     <div class="form-grid">
+      <div class="form-group span-2">
+        <label>SteamDB URL</label>
+        <input class="form-input" id="g-steam" placeholder="https://steamdb.info/app/... або https://store.steampowered.com/app/..."/>
+      </div>
       <div class="form-group">
         <label>Назва *</label>
         <input class="form-input" id="g-title" placeholder="Silent Hill 2"/>
@@ -425,10 +432,6 @@
       <div class="form-group">
         <label>Дата выхаду (YYYY-MM-DD)</label>
         <input class="form-input" id="g-date" placeholder="2024-10-08"/>
-      </div>
-      <div class="form-group">
-        <label>SteamDB URL</label>
-        <input class="form-input" id="g-steam" placeholder="https://store.steampowered.com/app/..."/>
       </div>
       <div class="form-group span-2">
         <label>Вокладка</label>
@@ -463,7 +466,6 @@
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('modal-game')">Скасаваць</button>
       <button class="btn btn-primary" onclick="saveGame()">Захаваць</button>
     </div>
   </div>
@@ -514,7 +516,7 @@
         <input class="form-input" id="tr-translators" placeholder="Іван Іваноў, Марыя Петрова"/>
       </div>
       <div class="form-group span-2">
-        <label>Ахоп перакладу (праз коску)</label>
+        <label>Тым лакалізацыі</label>
         <input class="form-input" id="tr-coverage" placeholder="Субтытры, Меню, Інвентар"/>
       </div>
       <div class="form-group span-2">
@@ -554,7 +556,7 @@ let _gamesMap = {};        // id → game object
 let _translationsMap = {}; // id → translation object
 let _submissionsMap = {};  // id → submission object
 let _pendingAcceptedSubmissionId = null;
-const GAME_PLATFORMS = ['ПК', 'Xbox', 'PlayStation', 'Nintendo Switch', 'macOS', 'Linux', 'iOS', 'Android'];
+const GAME_PLATFORMS = ['Windows', 'Xbox', 'PlayStation', 'Nintendo Switch', 'macOS', 'Linux', 'iOS', 'Android','Іншая'];
 
 // ── Auth ──────────────────────────────────────────────────────────────────
 async function doLogin() {
@@ -643,7 +645,9 @@ function openModal(id) { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
 document.querySelectorAll('.modal-overlay').forEach(m => {
-  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
+  m.addEventListener('click', e => {
+    if (e.target === m && m.id !== 'modal-game') m.classList.remove('open');
+  });
 });
 
 // ── Confirm ───────────────────────────────────────────────────────────────
@@ -962,18 +966,6 @@ function slugFromTitle(title) {
     .replace(/-+/g, '-');
 }
 
-function normalizeGamePlatforms(platforms) {
-  const out = new Set();
-  (platforms || []).forEach(p => {
-    if (p === 'Windows') out.add('ПК');
-    else if (p.startsWith('Xbox')) out.add('Xbox');
-    else if (p.startsWith('PlayStation')) out.add('PlayStation');
-    else if (p === 'Switch') out.add('Nintendo Switch');
-    else if (GAME_PLATFORMS.includes(p)) out.add(p);
-  });
-  return [...out];
-}
-
 function acceptSubmission(id) {
   const s = _submissionsMap[id];
   if (!s) return;
@@ -990,7 +982,7 @@ function acceptSubmission(id) {
     slug: slugFromTitle(s.game_title),
     developer: 'Невядома',
     steamdb_url: s.game_url,
-    platforms: normalizeGamePlatforms(s.platforms),
+    platforms: s.platforms,
     description: descriptionParts.join('\n')
   });
   _pendingAcceptedSubmissionId = id;
@@ -1158,6 +1150,60 @@ function clearCover() {
   document.getElementById('cover-img').src = '';
   document.getElementById('cover-preview').style.display = 'none';
 }
+
+// ── Steam metadata autofill ───────────────────────────────────────────────
+const STEAM_GENRE_SLUGS = {
+  action: 'action', adventure: 'adventure', rpg: 'rpg', strategy: 'strategy',
+  simulation: 'simulator', simulator: 'simulator', horror: 'horror'
+};
+
+let _lastSteamMetaURL = '';
+
+async function autofillFromSteam() {
+  const input = document.getElementById('g-steam');
+  const url = input.value.trim();
+  if (!url || url === _lastSteamMetaURL) return;
+  _lastSteamMetaURL = url;
+
+  try {
+    const meta = await apiReq('GET', `/api/admin/steam-meta?url=${encodeURIComponent(url)}`);
+    if (meta.title) {
+      document.getElementById('g-title').value = meta.title;
+      const slugField = document.getElementById('g-slug');
+      if (!slugField.dataset.manual) slugField.value = slugFromTitle(meta.title);
+    }
+    if (meta.developer) document.getElementById('g-dev').value = meta.developer;
+    if (meta.publisher) document.getElementById('g-pub').value = meta.publisher;
+    if (meta.release_date) document.getElementById('g-date').value = meta.release_date;
+    if (meta.steam_rating != null) document.getElementById('g-rating').value = meta.steam_rating;
+    if (meta.cover_url) {
+      document.getElementById('g-cover').value = meta.cover_url;
+      document.getElementById('cover-img').src = meta.cover_url;
+      document.getElementById('cover-preview').style.display = 'block';
+    }
+
+    const platformSet = new Set(meta.platforms || []);
+    document.querySelectorAll('#g-platforms-list input').forEach(input => {
+      input.checked = platformSet.has(input.value);
+      input.dispatchEvent(new Event('change'));
+    });
+
+    const genreSlugs = new Set((meta.genres || [])
+      .map(g => STEAM_GENRE_SLUGS[String(g).toLowerCase()])
+      .filter(Boolean));
+    document.querySelectorAll('#g-genres-list input').forEach(input => {
+      const genre = _genres.find(g => g.id === parseInt(input.value));
+      input.checked = genre ? genreSlugs.has(genre.slug) : false;
+      input.dispatchEvent(new Event('change'));
+    });
+    toast('Дадзеныя Steam загружаныя ✓');
+  } catch (e) {
+    toast('Не атрымалася атрымаць дадзеныя Steam: ' + e.message, 'err');
+  }
+}
+
+document.getElementById('g-steam').addEventListener('change', autofillFromSteam);
+document.getElementById('g-steam').addEventListener('blur', autofillFromSteam);
 
 // ── Auto-slug ─────────────────────────────────────────────────────────────
 document.getElementById('g-title').addEventListener('input', function() {
