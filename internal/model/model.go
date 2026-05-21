@@ -39,7 +39,7 @@ type Translation struct {
 	Type            string    `json:"type"` // "manual" | "ai"
 	Coverage        []string  `json:"coverage"`
 	ExternalURL     string    `json:"external_url"`
-	Orthography     string    `json:"orthography"`  // "academic" | "tarashkevitsa" | "lacinka"
+	Orthography     string    `json:"orthography"` // "academic" | "tarashkevitsa" | "lacinka"
 	ClickCount      int       `json:"click_count"`
 	CreatedAt       time.Time `json:"created_at"`
 	UpdatedAt       time.Time `json:"updated_at"`
@@ -130,23 +130,38 @@ type AdminStats struct {
 }
 
 type GameClicks struct {
-	Title      string `json:"title"`
-	Slug       string `json:"slug"`
-	Clicks     int    `json:"clicks"`
-	Reviews    int    `json:"reviews"`
+	Title   string `json:"title"`
+	Slug    string `json:"slug"`
+	Clicks  int    `json:"clicks"`
+	Reviews int    `json:"reviews"`
 }
 
 type AdminReview struct {
 	Review
-	GameTitle   string `json:"game_title"`
-	GameSlug    string `json:"game_slug"`
-	StudioName  string `json:"studio_name"`
+	GameTitle  string `json:"game_title"`
+	GameSlug   string `json:"game_slug"`
+	StudioName string `json:"studio_name"`
 }
 
 type AdminTranslation struct {
 	TranslationDetail
 	GameTitle string `json:"game_title"`
 	GameSlug  string `json:"game_slug"`
+}
+
+type AdminTranslationSubmission struct {
+	ID               int       `json:"id"`
+	GameTitle        string    `json:"game_title"`
+	Platforms        []string  `json:"platforms"`
+	Category         string    `json:"category"`
+	LocalizationType []string  `json:"localization_type"`
+	Authors          string    `json:"authors"`
+	GameURL          string    `json:"game_url"`
+	TranslationURL   string    `json:"translation_url"`
+	Description      string    `json:"description"`
+	Status           string    `json:"status"`
+	CreatedAt        time.Time `json:"created_at"`
+	UpdatedAt        time.Time `json:"updated_at"`
 }
 
 type SimilarGame struct {

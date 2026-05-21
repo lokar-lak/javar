@@ -371,6 +371,42 @@ func (h *Handler) ListAllTranslations(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, 200, tr)
 }
 
+// ── GET /api/admin/translation-submissions ───────────────────────────────
+
+func (h *Handler) ListAllTranslationSubmissions(w http.ResponseWriter, r *http.Request) {
+	submissions, err := h.repo.ListAllTranslationSubmissions()
+	if err != nil {
+		writeError(w, 500, "internal error")
+		return
+	}
+	if submissions == nil {
+		submissions = []model.AdminTranslationSubmission{}
+	}
+	writeJSON(w, 200, submissions)
+}
+
+// ── POST /api/admin/translation-submissions/{id}/accept ──────────────────
+
+func (h *Handler) AcceptTranslationSubmission(w http.ResponseWriter, r *http.Request) {
+	id, _ := strconv.Atoi(chi.URLParam(r, "id"))
+	if err := h.repo.AcceptTranslationSubmission(id); err != nil {
+		writeError(w, 500, err.Error())
+		return
+	}
+	writeJSON(w, 200, map[string]string{"status": "accepted"})
+}
+
+// ── DELETE /api/admin/translation-submissions/{id} ───────────────────────
+
+func (h *Handler) DeleteTranslationSubmission(w http.ResponseWriter, r *http.Request) {
+	id, _ := strconv.Atoi(chi.URLParam(r, "id"))
+	if err := h.repo.DeleteTranslationSubmission(id); err != nil {
+		writeError(w, 500, err.Error())
+		return
+	}
+	writeJSON(w, 200, map[string]string{"status": "deleted"})
+}
+
 // ── POST /api/admin/genres ────────────────────────────────────────────────
 
 func (h *Handler) CreateGenre(w http.ResponseWriter, r *http.Request) {

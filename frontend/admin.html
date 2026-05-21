@@ -227,6 +227,9 @@
       <div class="nav-item" data-section="translations" onclick="gotoSection('translations',this)">
         <span class="icon">📝</span> Пераклады
       </div>
+      <div class="nav-item" data-section="submissions" onclick="gotoSection('submissions',this)">
+        <span class="icon">📥</span> Прапановы
+      </div>
       <div class="nav-item" data-section="reviews" onclick="gotoSection('reviews',this)">
         <span class="icon">💬</span> Водгукі
       </div>
@@ -306,6 +309,21 @@
         <table>
           <thead><tr><th>Гульня</th><th>Студыя</th><th>Тып</th><th>Правапіс</th><th>Ахоп</th><th>Клікаў</th><th>Ацэнка</th><th></th></tr></thead>
           <tbody id="translations-body"><tr><td colspan="8" class="empty">Загрузка...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ SUBMISSIONS ══════════════════════════════════════════ -->
+    <div class="section" id="sec-submissions">
+      <div class="page-heading">
+        <div><h1>Прапановы беларусізатараў</h1><div class="page-heading__bar"></div></div>
+        <button class="btn btn-ghost btn-sm" onclick="loadSubmissions()">↻ Абнавіць</button>
+      </div>
+
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Гульня</th><th>Лакалізацыя</th><th>Спасылкі</th><th>Статус</th><th>Дата</th><th></th></tr></thead>
+          <tbody id="submissions-body"><tr><td colspan="6" class="empty">Загрузка...</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -523,6 +541,8 @@ let _genres = [];
 let _games  = [];
 let _gamesMap = {};        // id → game object
 let _translationsMap = {}; // id → translation object
+let _submissionsMap = {};  // id → submission object
+let _pendingAcceptedSubmissionId = null;
 
 // ── Auth ──────────────────────────────────────────────────────────────────
 async function doLogin() {
@@ -588,6 +608,12 @@ function toast(msg, type = 'ok') {
   setTimeout(() => el.className = '', 3000);
 }
 
+function esc(value) {
+  return String(value ?? '').replace(/[&<>'"]/g, ch => ({
+    '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;'
+  }[ch]));
+}
+
 // ── Navigation ────────────────────────────────────────────────────────────
 function gotoSection(id, el) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
@@ -595,7 +621,7 @@ function gotoSection(id, el) {
   document.getElementById('sec-' + id).classList.add('active');
   el.classList.add('active');
   const loaders = { dashboard:'loadDashboard', games:'loadGames',
-    translations:'loadTranslations', reviews:'loadReviews',
+    translations:'loadTranslations', submissions:'loadSubmissions', reviews:'loadReviews',
     genres:'loadGenres', export:null };
   if (loaders[id]) window[loaders[id]]();
 }
@@ -680,6 +706,7 @@ async function loadGames() {
 }
 
 function openGameModal(gameOrId) {
+  _pendingAcceptedSubmissionId = null;
   const game = (typeof gameOrId === 'number' || typeof gameOrId === 'string')
     ? _gamesMap[gameOrId]
     : gameOrId;
@@ -745,10 +772,15 @@ async function saveGame() {
       toast('Гульня абноўлена ✓');
     } else {
       await apiReq('POST', '/api/admin/games', body);
+      if (_pendingAcceptedSubmissionId) {
+        await apiReq('POST', `/api/admin/translation-submissions/${_pendingAcceptedSubmissionId}/accept`);
+        _pendingAcceptedSubmissionId = null;
+      }
       toast('Гульня дададзена ✓');
     }
     closeModal('modal-game');
     loadGames();
+    if (document.getElementById('sec-submissions').classList.contains('active')) loadSubmissions();
   } catch (e) { toast(e.message, 'err'); }
 }
 
@@ -847,6 +879,87 @@ function deleteTranslation(id, name) {
       await apiReq('DELETE', `/api/admin/translations/${id}`);
       toast('Пераклад выдалены');
       loadTranslations();
+    } catch (e) { toast(e.message, 'err'); }
+  });
+}
+
+// ══ SUBMISSIONS ═══════════════════════════════════════════════════════════
+
+const CATEGORY_LABELS = { official:'Афіцыйная', unofficial:'Неафіцыйная' };
+const STATUS_LABELS = { new:'Новая', accepted:'Прынята', rejected:'Адхілена' };
+
+async function loadSubmissions() {
+  try {
+    const list = await apiReq('GET', '/api/admin/translation-submissions');
+    _submissionsMap = Object.fromEntries((list||[]).map(s => [s.id, s]));
+    const tbody = document.getElementById('submissions-body');
+    if (!list.length) {
+      tbody.innerHTML = '<tr><td colspan="6" class="empty">Прапаноў няма</td></tr>'; return;
+    }
+    tbody.innerHTML = list.map(s => `
+      <tr>
+        <td>
+          <strong>${esc(s.game_title)}</strong><br/>
+          <span style="font-size:11px;color:var(--text-muted)">${(s.platforms||[]).map(esc).join(', ') || '—'}</span>
+        </td>
+        <td style="font-size:12px;color:var(--text-muted)">
+          <div><strong style="color:var(--text)">${CATEGORY_LABELS[s.category] || esc(s.category)}</strong></div>
+          <div>${(s.localization_type||[]).map(esc).join(', ') || '—'}</div>
+          <div>Аўтары: ${esc(s.authors)}</div>
+          ${s.description ? `<div style="margin-top:6px;max-width:260px">${esc(s.description)}</div>` : ''}
+        </td>
+        <td style="font-size:12px;line-height:1.8">
+          <a href="${esc(s.game_url)}" target="_blank" rel="noopener" style="color:var(--accent)">Гульня ↗</a><br/>
+          <a href="${esc(s.translation_url)}" target="_blank" rel="noopener" style="color:var(--accent)">Беларусізатар ↗</a>
+        </td>
+        <td><span class="badge ${s.status==='accepted'?'badge-manual':'badge-orth'}">${STATUS_LABELS[s.status] || esc(s.status)}</span></td>
+        <td style="font-size:12px;color:var(--text-muted);white-space:nowrap">${new Date(s.created_at).toLocaleDateString('be-BY')}</td>
+        <td>
+          <div class="td-actions">
+            <button class="btn btn-success btn-sm" onclick="acceptSubmission(${s.id})">Прыняць</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteSubmission(${s.id},'${esc(s.game_title).replace(/'/g,"\\'")}')">🗑</button>
+          </div>
+        </td>
+      </tr>`).join('');
+  } catch (e) { toast(e.message, 'err'); }
+}
+
+function slugFromTitle(title) {
+  return title.toLowerCase()
+    .replace(/[^a-zа-яёіўa-ząćęłńóśźż0-9\s-]/gi, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-');
+}
+
+function acceptSubmission(id) {
+  const s = _submissionsMap[id];
+  if (!s) return;
+  const descriptionParts = [
+    s.description || '',
+    `Аўтары лакалізацыі: ${s.authors}`,
+    `Спасылка на беларусізатар: ${s.translation_url}`,
+    `Платформы: ${(s.platforms||[]).join(', ')}`,
+    `Тып лакалізацыі: ${(s.localization_type||[]).join(', ')}`,
+    `Катэгорыя: ${CATEGORY_LABELS[s.category] || s.category}`
+  ].filter(Boolean);
+  openGameModal({
+    title: s.game_title,
+    slug: slugFromTitle(s.game_title),
+    developer: 'Невядома',
+    steamdb_url: s.game_url,
+    description: descriptionParts.join('\n')
+  });
+  _pendingAcceptedSubmissionId = id;
+  document.getElementById('g-slug').dataset.manual = '1';
+  toast('Форма гульні запоўнена з прапановы');
+}
+
+function deleteSubmission(id, title) {
+  confirm(`Выдаліць прапанову «${title}»?`, async () => {
+    try {
+      await apiReq('DELETE', `/api/admin/translation-submissions/${id}`);
+      toast('Прапанова выдалена');
+      loadSubmissions();
     } catch (e) { toast(e.message, 'err'); }
   });
 }

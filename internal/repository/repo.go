@@ -554,6 +554,46 @@ func (r *Repo) ListAllTranslations() ([]model.AdminTranslation, error) {
 	return out, nil
 }
 
+func (r *Repo) ListAllTranslationSubmissions() ([]model.AdminTranslationSubmission, error) {
+	rows, err := r.db.Query(`
+		SELECT id, game_title, platforms, category, localization_type, authors,
+		       game_url, translation_url, description, status, created_at, updated_at
+		FROM translation_submissions
+		ORDER BY created_at DESC`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var out []model.AdminTranslationSubmission
+	for rows.Next() {
+		var s model.AdminTranslationSubmission
+		var platformsJSON, typesJSON string
+		if err := rows.Scan(&s.ID, &s.GameTitle, &platformsJSON, &s.Category, &typesJSON,
+			&s.Authors, &s.GameURL, &s.TranslationURL, &s.Description, &s.Status,
+			&s.CreatedAt, &s.UpdatedAt); err != nil {
+			return nil, err
+		}
+		json.Unmarshal([]byte(platformsJSON), &s.Platforms)
+		json.Unmarshal([]byte(typesJSON), &s.LocalizationType)
+		out = append(out, s)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (r *Repo) AcceptTranslationSubmission(id int) error {
+	_, err := r.db.Exec(`UPDATE translation_submissions SET status='accepted', updated_at=? WHERE id=?`, time.Now(), id)
+	return err
+}
+
+func (r *Repo) DeleteTranslationSubmission(id int) error {
+	_, err := r.db.Exec(`DELETE FROM translation_submissions WHERE id=?`, id)
+	return err
+}
+
 func (r *Repo) CreateGenre(name, slug string) (int64, error) {
 	res, err := r.db.Exec(`INSERT INTO genres (name,slug) VALUES (?,?)`, name, slug)
 	if err != nil {
