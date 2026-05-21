@@ -99,6 +99,9 @@ func main() {
 	})
 
 	// ── Static frontend ────────────────────────────────────
+	r.Get("/admin", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "frontend/admin.html")
+	})
 	r.Handle("/*", http.FileServer(http.Dir("./frontend")))
 
 	log.Printf("▶  http://localhost:%s", port)
