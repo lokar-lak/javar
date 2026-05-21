@@ -811,6 +811,197 @@ img { display: block; max-width: 100%; }
 .review-textarea::placeholder { color: var(--text-muted); }
 .review-textarea:focus { border-color: var(--accent); }
 
+/* ============================================================
+   SUBMISSION MODAL
+   ============================================================ */
+.submission-lock { overflow: hidden; }
+
+.submission-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  background: rgba(8, 8, 14, 0.72);
+}
+.submission-modal.open { display: flex; }
+
+.submission-dialog {
+  position: relative;
+  width: min(560px, 100%);
+  max-height: min(92vh, 860px);
+  overflow-y: auto;
+  padding: 22px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--font-body);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.45);
+}
+.submission-dialog h2 {
+  margin-bottom: 16px;
+  font-size: 22px;
+  line-height: 1.2;
+  color: var(--text);
+}
+
+.submission-close {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  color: var(--text-muted);
+  font-size: 24px;
+  line-height: 1;
+}
+.submission-close:hover { background: var(--surface-2); color: var(--text); }
+
+.submission-form,
+.submission-field,
+.submission-checks {
+  display: flex;
+  flex-direction: column;
+}
+.submission-form { gap: 14px; }
+.submission-field { gap: 6px; }
+fieldset.submission-field { border: 0; padding: 0; }
+.submission-field label,
+.submission-field legend {
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.25;
+  color: var(--text);
+}
+.submission-field p {
+  margin: -2px 0 4px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.submission-field input[type="text"],
+.submission-field input[type="url"],
+.submission-field textarea {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--surface-2);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 14px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.submission-field input[type="text"],
+.submission-field input[type="url"] {
+  height: 38px;
+  padding: 0 12px;
+}
+.submission-field textarea {
+  min-height: 116px;
+  padding: 10px 12px;
+  resize: vertical;
+}
+.submission-field input:focus,
+.submission-field textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.submission-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+.submission-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.submission-checks { gap: 8px; align-items: flex-start; }
+
+.submission-pill {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  cursor: pointer;
+}
+.submission-pill input { position: absolute; opacity: 0; pointer-events: none; }
+.submission-pill span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 13px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 700;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+.submission-pill span::before {
+  content: '';
+  width: 12px;
+  height: 12px;
+  margin-right: 7px;
+  border: 1.5px solid var(--text-muted);
+  border-radius: 50%;
+  background: var(--surface);
+}
+.submission-pill input[type="checkbox"] + span::before { border-radius: 3px; }
+.submission-pill input:checked + span {
+  border-color: var(--accent);
+  background: var(--accent-glow);
+  color: var(--accent);
+}
+.submission-pill input:checked + span::before {
+  border-color: var(--accent);
+  background: radial-gradient(circle at center, var(--accent) 0 42%, transparent 48%);
+}
+.submission-pill input[type="checkbox"]:checked + span::before {
+  background: var(--accent);
+  box-shadow: inset 0 0 0 3px var(--surface);
+}
+
+.submission-error {
+  display: none;
+  border-radius: 8px;
+  padding: 9px 11px;
+  border: 1px solid rgba(255, 38, 38, 0.35);
+  background: var(--accent-glow);
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 700;
+}
+.submission-error.visible { display: block; }
+
+.submission-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 2px;
+}
+.submission-submit {
+  min-width: 120px;
+  height: 38px;
+  padding: 0 22px;
+  border-radius: 7px;
+  background: var(--accent);
+  color: #fff;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 800;
+}
+.submission-submit:hover { opacity: 0.9; }
+
+@media (max-width: 680px) {
+  .submission-grid { grid-template-columns: 1fr; }
+  .submission-dialog { padding: 18px; }
+}
+
 /* Review card */
 .review-card {
   background: var(--surface);
