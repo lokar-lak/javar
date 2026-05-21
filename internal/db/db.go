@@ -103,5 +103,80 @@ func migrate(db *sql.DB) error {
 		)`); err != nil {
 		return fmt.Errorf("create translation_submissions: %w", err)
 	}
+
+	if err := seedSteamTagGenres(db); err != nil {
+		return err
+	}
+	return nil
+}
+
+func seedSteamTagGenres(db *sql.DB) error {
+	genres := []struct {
+		name string
+		slug string
+	}{
+		{"Галаваломка", "puzzle"},
+		{"Экшн-прыгода", "action-adventure"},
+		{"Аркада", "arcade"},
+		{"Шутар", "shooter"},
+		{"Платформер", "platformer"},
+		{"Візуальная навела", "visual-novel"},
+		{"Роглайк", "roguelike"},
+		{"Пясочніца", "sandbox"},
+		{"Point-and-click", "point-and-click"},
+		{"Экшн-RPG", "action-rpg"},
+		{"Экшн-роглайк", "action-roguelike"},
+		{"Інтэрактыўная літаратура", "interactive-fiction"},
+		{"Пакрокавая стратэгія", "turn-based-strategy"},
+		{"Настольныя", "tabletop"},
+		{"Сімулятар хадзьбы", "walking-simulator"},
+		{"Сімулятар спатканняў", "dating-sim"},
+		{"Картачная гульня", "card-game"},
+		{"JRPG", "jrpg"},
+		{"Адукацыйная", "education"},
+		{"Сімулятар жыцця", "life-sim"},
+		{"Партыйная RPG", "party-based-rpg"},
+		{"Дызайн і ілюстрацыя", "design-and-illustration"},
+		{"Стратэгічная RPG", "strategy-rpg"},
+		{"Утыліты", "utilities"},
+		{"Настольная гульня", "board-game"},
+		{"Абарона вежаў", "tower-defense"},
+		{"RTS", "rts"},
+		{"Будаўніцтва горада", "city-builder"},
+		{"Beat 'em up", "beat-em-up"},
+		{"Аўтасімулятар", "automobile-sim"},
+		{"2D-файтэр", "2d-fighter"},
+		{"Рытм", "rhythm"},
+		{"Сімулятар фермерства", "farming-sim"},
+		{"Гульня са словамі", "word-game"},
+		{"3D-файтэр", "3d-fighter"},
+		{"Сімулятар калоніі", "colony-sim"},
+		{"Гульня для вечарынак", "party-game"},
+		{"Касмічны сімулятар", "space-sim"},
+		{"Глабальная стратэгія", "grand-strategy"},
+		{"Кіберспорт", "esports"},
+		{"Анімацыя і мадэляванне", "animation-and-modeling"},
+		{"MMORPG", "mmorpg"},
+		{"Каралеўская бітва", "battle-royale"},
+		{"Гульня ў бога", "god-game"},
+		{"Аўдыявытворчасць", "audio-production"},
+		{"Выжыванне і крафт у адкрытым свеце", "open-world-survival-craft"},
+		{"Відэавытворчасць", "video-production"},
+		{"4X", "4x"},
+		{"MOBA", "moba"},
+		{"Сімулятар працы", "job-simulator"},
+		{"Віктарына", "trivia"},
+		{"Рэдагаванне фота", "photo-editing"},
+		{"Пінбол", "pinball"},
+		{"Сацыяльная дэдукцыя", "social-deduction"},
+		{"Мусо", "musou"},
+		{"Сімулятар хобі", "hobby-sim"},
+	}
+
+	for _, g := range genres {
+		if _, err := db.Exec(`INSERT OR IGNORE INTO genres (name, slug) VALUES (?, ?)`, g.name, g.slug); err != nil {
+			return fmt.Errorf("seed genre %s: %w", g.slug, err)
+		}
+	}
 	return nil
 }
