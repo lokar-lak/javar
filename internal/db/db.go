@@ -59,6 +59,16 @@ func migrate(db *sql.DB) error {
 			return fmt.Errorf("add steamdb_url: %w", err)
 		}
 	}
+	if _, err := db.Exec(`ALTER TABLE games ADD COLUMN platforms TEXT NOT NULL DEFAULT '[]'`); err != nil {
+		if !strings.Contains(strings.ToLower(err.Error()), "duplicate column name") {
+			return fmt.Errorf("add games.platforms: %w", err)
+		}
+	}
+	if _, err := db.Exec(`ALTER TABLE translations ADD COLUMN official_status TEXT NOT NULL DEFAULT 'unofficial'`); err != nil {
+		if !strings.Contains(strings.ToLower(err.Error()), "duplicate column name") {
+			return fmt.Errorf("add translations.official_status: %w", err)
+		}
+	}
 
 	// Remove legacy page-specific cover column if present.
 	if _, err := db.Exec(`ALTER TABLE games DROP COLUMN page_cover_url`); err != nil {

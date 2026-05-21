@@ -329,6 +329,10 @@ function renderGame(game) {
               <span class="info-cell__label">Жанры</span>
               <div class="tag-list">${genreTags}</div>
             </div>
+            <div class="info-cell">
+              <span class="info-cell__label">Платформы</span>
+              <span class="info-cell__value">${(game.platforms || []).join(', ') || '—'}</span>
+            </div>
           </div>
         </div>
 
@@ -389,6 +393,7 @@ function renderGame(game) {
 
 
 const ORTH_LABELS = { academic: 'Акадэмічны', tarashkevitsa: 'Альтэрнатыўны', lacinka: 'Лацінка' };
+const OFFICIAL_LABELS = { official: 'Афіцыйны', unofficial: 'Неафіцыйны' };
 function renderTranslationCard(t, open = false) {
   const coverageHTML = (t.coverage || []).map(c =>
     `<span class="tag-sm tag-sm--neutral">${c}</span>`
@@ -403,6 +408,7 @@ function renderTranslationCard(t, open = false) {
           <div class="translation-card__studio">${t.studio_name}</div>
           <div class="translation-card__meta">
             ${badge(t.type)}
+            <span class="tag-sm" style="font-size:10px;padding:2px 7px;background:var(--surface-2);border:1px solid var(--border);color:var(--text-muted)">${OFFICIAL_LABELS[t.official_status] || 'Неафіцыйны'}</span>
             <span class="tag-sm" style="font-size:10px;padding:2px 7px;background:var(--surface-2);border:1px solid var(--border);color:var(--text-muted)">${ORTH_LABELS[t.orthography] || 'Акадэмічны'}</span>
             <span style="font-size:12px;color:var(--text-muted)">Пераходаў: ${t.click_count}</span>
           </div>

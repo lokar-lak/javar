@@ -18,6 +18,7 @@ type Game struct {
 	Description string    `json:"description,omitempty"`
 	CoverURL    string    `json:"cover_url,omitempty"`
 	SteamDBURL  string    `json:"steamdb_url,omitempty"`
+	Platforms   []string  `json:"platforms,omitempty"`
 	SteamRating *int      `json:"steam_rating,omitempty"`
 	CreatedAt   time.Time `json:"created_at"`
 	Genres      []Genre   `json:"genres,omitempty"`
@@ -36,7 +37,8 @@ type Translation struct {
 	GameID          int       `json:"game_id"`
 	StudioName      string    `json:"studio_name"`
 	TranslatorNames []string  `json:"translator_names"`
-	Type            string    `json:"type"` // "manual" | "ai"
+	Type            string    `json:"type"`            // "manual" | "ai"
+	OfficialStatus  string    `json:"official_status"` // "official" | "unofficial"
 	Coverage        []string  `json:"coverage"`
 	ExternalURL     string    `json:"external_url"`
 	Orthography     string    `json:"orthography"` // "academic" | "tarashkevitsa" | "lacinka"
@@ -66,16 +68,17 @@ type Review struct {
 // ── Requests ─────────────────────────────────────────────────
 
 type CreateGameRequest struct {
-	Title       string `json:"title"`
-	Slug        string `json:"slug"`
-	Developer   string `json:"developer"`
-	Publisher   string `json:"publisher"`
-	ReleaseDate string `json:"release_date"`
-	Description string `json:"description"`
-	CoverURL    string `json:"cover_url"`
-	SteamDBURL  string `json:"steamdb_url"`
-	SteamRating *int   `json:"steam_rating"`
-	GenreIDs    []int  `json:"genre_ids"`
+	Title       string   `json:"title"`
+	Slug        string   `json:"slug"`
+	Developer   string   `json:"developer"`
+	Publisher   string   `json:"publisher"`
+	ReleaseDate string   `json:"release_date"`
+	Description string   `json:"description"`
+	CoverURL    string   `json:"cover_url"`
+	SteamDBURL  string   `json:"steamdb_url"`
+	Platforms   []string `json:"platforms"`
+	SteamRating *int     `json:"steam_rating"`
+	GenreIDs    []int    `json:"genre_ids"`
 }
 
 type CreateTranslationRequest struct {
@@ -83,6 +86,7 @@ type CreateTranslationRequest struct {
 	StudioName      string   `json:"studio_name"`
 	TranslatorNames []string `json:"translator_names"`
 	Type            string   `json:"type"`
+	OfficialStatus  string   `json:"official_status"`
 	Coverage        []string `json:"coverage"`
 	ExternalURL     string   `json:"external_url"`
 	Orthography     string   `json:"orthography"`

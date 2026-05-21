@@ -46,7 +46,7 @@ func (r *Repo) ListGames(f model.GameFilter) ([]model.Game, error) {
 	q := `SELECT DISTINCT g.id, g.title, g.slug, g.developer,
 		       COALESCE(g.publisher,''), COALESCE(g.release_date,''),
 		       COALESCE(g.description,''), COALESCE(g.cover_url,''), COALESCE(g.steamdb_url,''),
-		       g.steam_rating, g.created_at,
+		       COALESCE(g.platforms,'[]'), g.steam_rating, g.created_at,
 		       COALESCE(
 		         (SELECT MAX(avg_r) FROM (
 		           SELECT AVG(rv.rating) as avg_r
@@ -107,10 +107,12 @@ func (r *Repo) ListGames(f model.GameFilter) ([]model.Game, error) {
 	for rows.Next() {
 		var g model.Game
 		var rating sql.NullInt64
+		var platformsJSON string
 		if err := rows.Scan(&g.ID, &g.Title, &g.Slug, &g.Developer, &g.Publisher,
-			&g.ReleaseDate, &g.Description, &g.CoverURL, &g.SteamDBURL, &rating, &g.CreatedAt, &g.BestRating); err != nil {
+			&g.ReleaseDate, &g.Description, &g.CoverURL, &g.SteamDBURL, &platformsJSON, &rating, &g.CreatedAt, &g.BestRating); err != nil {
 			return nil, err
 		}
+		json.Unmarshal([]byte(platformsJSON), &g.Platforms)
 		if rating.Valid {
 			v := int(rating.Int64)
 			g.SteamRating = &v
@@ -131,15 +133,16 @@ func (r *Repo) ListGames(f model.GameFilter) ([]model.Game, error) {
 func (r *Repo) GetGameBySlug(slug string) (*model.GameDetail, error) {
 	var g model.Game
 	var rating sql.NullInt64
+	var platformsJSON string
 	err := r.db.QueryRow(`
 		SELECT id, title, slug, developer,
 		       COALESCE(publisher,''), COALESCE(release_date,''),
 		       COALESCE(description,''), COALESCE(cover_url,''),
-		       COALESCE(steamdb_url,''), steam_rating, created_at
+		       COALESCE(steamdb_url,''), COALESCE(platforms,'[]'), steam_rating, created_at
 		FROM games WHERE slug = ?`, slug).Scan(
 		&g.ID, &g.Title, &g.Slug, &g.Developer, &g.Publisher,
 		&g.ReleaseDate, &g.Description, &g.CoverURL, &g.SteamDBURL,
-		&rating, &g.CreatedAt)
+		&platformsJSON, &rating, &g.CreatedAt)
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}
@@ -150,6 +153,7 @@ func (r *Repo) GetGameBySlug(slug string) (*model.GameDetail, error) {
 		v := int(rating.Int64)
 		g.SteamRating = &v
 	}
+	json.Unmarshal([]byte(platformsJSON), &g.Platforms)
 	g.Genres, _ = r.genresByGame(g.ID)
 	g.HasOnlyAI = r.hasOnlyAI(g.ID)
 
@@ -161,11 +165,15 @@ func (r *Repo) GetGameBySlug(slug string) (*model.GameDetail, error) {
 }
 
 func (r *Repo) CreateGame(req model.CreateGameRequest) (int64, error) {
+	if req.Platforms == nil {
+		req.Platforms = []string{}
+	}
+	platformsJSON, _ := json.Marshal(req.Platforms)
 	res, err := r.db.Exec(`
-		INSERT INTO games (title,slug,developer,publisher,release_date,description,cover_url,steamdb_url,steam_rating)
-		VALUES (?,?,?,?,?,?,?,?,?)`,
+		INSERT INTO games (title,slug,developer,publisher,release_date,description,cover_url,steamdb_url,platforms,steam_rating)
+		VALUES (?,?,?,?,?,?,?,?,?,?)`,
 		req.Title, req.Slug, req.Developer, req.Publisher,
-		req.ReleaseDate, req.Description, req.CoverURL, req.SteamDBURL, req.SteamRating)
+		req.ReleaseDate, req.Description, req.CoverURL, req.SteamDBURL, string(platformsJSON), req.SteamRating)
 	if err != nil {
 		return 0, err
 	}
@@ -177,12 +185,16 @@ func (r *Repo) CreateGame(req model.CreateGameRequest) (int64, error) {
 }
 
 func (r *Repo) UpdateGame(id int, req model.CreateGameRequest) error {
+	if req.Platforms == nil {
+		req.Platforms = []string{}
+	}
+	platformsJSON, _ := json.Marshal(req.Platforms)
 	_, err := r.db.Exec(`
 		UPDATE games SET title=?,slug=?,developer=?,publisher=?,
-		  release_date=?,description=?,cover_url=?,steamdb_url=?,steam_rating=?
+		  release_date=?,description=?,cover_url=?,steamdb_url=?,platforms=?,steam_rating=?
 		WHERE id=?`,
 		req.Title, req.Slug, req.Developer, req.Publisher,
-		req.ReleaseDate, req.Description, req.CoverURL, req.SteamDBURL, req.SteamRating, id)
+		req.ReleaseDate, req.Description, req.CoverURL, req.SteamDBURL, string(platformsJSON), req.SteamRating, id)
 	if err != nil {
 		return err
 	}
@@ -251,7 +263,7 @@ func (r *Repo) genresByGame(gameID int) ([]model.Genre, error) {
 func (r *Repo) translationsByGame(gameID int) ([]model.TranslationDetail, error) {
 	rows, err := r.db.Query(`
 		SELECT id, game_id, studio_name, translator_names, type,
-		       COALESCE(orthography,'academic'),
+		       COALESCE(official_status,'unofficial'), COALESCE(orthography,'academic'),
 		       coverage, external_url, click_count, created_at, updated_at
 		FROM translations WHERE game_id=? ORDER BY created_at DESC`, gameID)
 	if err != nil {
@@ -264,7 +276,7 @@ func (r *Repo) translationsByGame(gameID int) ([]model.TranslationDetail, error)
 		var t model.Translation
 		var namesJSON, coverageJSON string
 		if err := rows.Scan(&t.ID, &t.GameID, &t.StudioName, &namesJSON, &t.Type,
-			&t.Orthography, &coverageJSON, &t.ExternalURL,
+			&t.OfficialStatus, &t.Orthography, &coverageJSON, &t.ExternalURL,
 			&t.ClickCount, &t.CreatedAt, &t.UpdatedAt); err != nil {
 			return nil, err
 		}
@@ -303,13 +315,16 @@ func (r *Repo) CreateTranslation(req model.CreateTranslationRequest) (int64, err
 	if req.Orthography == "" {
 		req.Orthography = "academic"
 	}
+	if req.OfficialStatus != "official" && req.OfficialStatus != "unofficial" {
+		req.OfficialStatus = "unofficial"
+	}
 	namesJSON, _ := json.Marshal(req.TranslatorNames)
 	coverageJSON, _ := json.Marshal(req.Coverage)
 	res, err := r.db.Exec(`
-		INSERT INTO translations (game_id,studio_name,translator_names,type,orthography,coverage,external_url)
-		VALUES (?,?,?,?,?,?,?)`,
+		INSERT INTO translations (game_id,studio_name,translator_names,type,official_status,orthography,coverage,external_url)
+		VALUES (?,?,?,?,?,?,?,?)`,
 		req.GameID, req.StudioName, string(namesJSON),
-		req.Type, req.Orthography, string(coverageJSON), req.ExternalURL)
+		req.Type, req.OfficialStatus, req.Orthography, string(coverageJSON), req.ExternalURL)
 	if err != nil {
 		return 0, err
 	}
@@ -320,12 +335,15 @@ func (r *Repo) UpdateTranslation(id int, req model.CreateTranslationRequest) err
 	if req.Orthography == "" {
 		req.Orthography = "academic"
 	}
+	if req.OfficialStatus != "official" && req.OfficialStatus != "unofficial" {
+		req.OfficialStatus = "unofficial"
+	}
 	namesJSON, _ := json.Marshal(req.TranslatorNames)
 	coverageJSON, _ := json.Marshal(req.Coverage)
 	_, err := r.db.Exec(`
-		UPDATE translations SET studio_name=?,translator_names=?,type=?,orthography=?,
+		UPDATE translations SET studio_name=?,translator_names=?,type=?,official_status=?,orthography=?,
 		  coverage=?,external_url=?,updated_at=? WHERE id=?`,
-		req.StudioName, string(namesJSON), req.Type, req.Orthography,
+		req.StudioName, string(namesJSON), req.Type, req.OfficialStatus, req.Orthography,
 		string(coverageJSON), req.ExternalURL, time.Now(), id)
 	return err
 }
@@ -495,7 +513,7 @@ func (r *Repo) ListAllReviews() ([]model.AdminReview, error) {
 func (r *Repo) ListAllTranslations() ([]model.AdminTranslation, error) {
 	rows, err := r.db.Query(`
 		SELECT t.id, t.game_id, t.studio_name, t.translator_names, t.type,
-		       COALESCE(t.orthography,'academic'), t.coverage, t.external_url,
+		       COALESCE(t.official_status,'unofficial'), COALESCE(t.orthography,'academic'), t.coverage, t.external_url,
 		       t.click_count, t.created_at, t.updated_at,
 		       g.title, g.slug
 		FROM translations t
@@ -520,7 +538,7 @@ func (r *Repo) ListAllTranslations() ([]model.AdminTranslation, error) {
 			gSlug     string
 		}
 		if err := rows.Scan(&x.t.ID, &x.t.GameID, &x.t.StudioName, &x.namesJSON, &x.t.Type,
-			&x.t.Orthography, &x.covJSON, &x.t.ExternalURL,
+			&x.t.OfficialStatus, &x.t.Orthography, &x.covJSON, &x.t.ExternalURL,
 			&x.t.ClickCount, &x.t.CreatedAt, &x.t.UpdatedAt,
 			&x.gTitle, &x.gSlug); err != nil {
 			rows.Close()
@@ -612,11 +630,11 @@ func (r *Repo) GetTranslationByID(id int) (*model.Translation, error) {
 	var namesJSON, covJSON string
 	err := r.db.QueryRow(`
 		SELECT id, game_id, studio_name, translator_names, type,
-		       COALESCE(orthography,'academic'), coverage, external_url,
+		       COALESCE(official_status,'unofficial'), COALESCE(orthography,'academic'), coverage, external_url,
 		       click_count, created_at, updated_at
 		FROM translations WHERE id=?`, id).
 		Scan(&t.ID, &t.GameID, &t.StudioName, &namesJSON, &t.Type,
-			&t.Orthography, &covJSON, &t.ExternalURL,
+			&t.OfficialStatus, &t.Orthography, &covJSON, &t.ExternalURL,
 			&t.ClickCount, &t.CreatedAt, &t.UpdatedAt)
 	if err == sql.ErrNoRows {
 		return nil, nil

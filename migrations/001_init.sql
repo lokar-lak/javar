@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS games (
     description  TEXT,
     cover_url    TEXT,
     steamdb_url  TEXT,
+    platforms    TEXT    NOT NULL DEFAULT '[]',
     steam_rating INTEGER,                          -- percentage, e.g. 83
     created_at   DATETIME DEFAULT CURRENT_TIMESTAMP
 );
@@ -43,6 +44,7 @@ CREATE TABLE IF NOT EXISTS translations (
     studio_name      TEXT    NOT NULL,
     translator_names TEXT    NOT NULL DEFAULT '[]',  -- JSON: ["Ivan K.","Maria P."]
     type             TEXT    NOT NULL CHECK(type IN ('manual','ai')),
+    official_status  TEXT    NOT NULL DEFAULT 'unofficial' CHECK(official_status IN ('official','unofficial')),
     coverage         TEXT    NOT NULL DEFAULT '[]',  -- JSON: ["subtitles","menu",...]
     external_url     TEXT    NOT NULL,
     click_count      INTEGER NOT NULL DEFAULT 0,
