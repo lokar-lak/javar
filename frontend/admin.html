@@ -292,6 +292,10 @@
         <button class="btn btn-primary btn-sm" onclick="openGameModal(null)">+ Дадаць гульню</button>
       </div>
 
+      <div class="form-card" style="padding:14px;margin-bottom:16px">
+        <input class="form-input" id="games-search" placeholder="Пошук па назве гульні..." oninput="renderGamesTable()"/>
+      </div>
+
       <div class="tbl-wrap">
         <table>
           <thead><tr><th>Назва</th><th>Распрацоўшчык</th><th>Steam</th><th>Жанры / платформы</th><th>Дата</th><th></th></tr></thead>
@@ -305,6 +309,10 @@
       <div class="page-heading">
         <div><h1>Пераклады</h1><div class="page-heading__bar"></div></div>
         <button class="btn btn-primary btn-sm" onclick="openTranslationModal(null)">+ Дадаць пераклад</button>
+      </div>
+
+      <div class="form-card" style="padding:14px;margin-bottom:16px">
+        <input class="form-input" id="translations-search" placeholder="Пошук па назве гульні..." oninput="renderTranslationsTable()"/>
       </div>
 
       <div class="tbl-wrap">
@@ -473,7 +481,8 @@
 
 <!-- ══ MODAL — TRANSLATION ════════════════════════════════════ -->
 <div class="modal-overlay" id="modal-translation">
-  <div class="modal">
+  <div class="modal" style="position:relative">
+    <button class="modal-close" type="button" aria-label="Закрыць" onclick="closeModal('modal-translation')">×</button>
     <h3 id="modal-tr-title">Новы пераклад</h3>
     <input type="hidden" id="tr-id"/>
     <div class="form-grid">
@@ -517,7 +526,6 @@
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('modal-translation')">Скасаваць</button>
       <button class="btn btn-primary" onclick="saveTranslation()">Захаваць</button>
     </div>
   </div>
@@ -546,6 +554,7 @@ let _genres = [];
 let _games  = [];
 let _gamesMap = {};        // id → game object
 let _translationsMap = {}; // id → translation object
+let _translations = [];
 let _submissionsMap = {};  // id → submission object
 let _pendingAcceptedSubmissionId = null;
 const GAME_PLATFORMS = ['Windows', 'Xbox', 'PlayStation', 'Nintendo Switch', 'macOS', 'Linux', 'iOS', 'Android','Іншая'];
@@ -638,7 +647,7 @@ function closeModal(id) { document.getElementById(id).classList.remove('open'); 
 
 document.querySelectorAll('.modal-overlay').forEach(m => {
   m.addEventListener('click', e => {
-    if (e.target === m && m.id !== 'modal-game') m.classList.remove('open');
+    if (e.target === m && m.id !== 'modal-game' && m.id !== 'modal-translation') m.classList.remove('open');
   });
 });
 
@@ -692,11 +701,20 @@ async function loadGames() {
   try {
     _games = await apiReq('GET', '/api/games?limit=50');
     _gamesMap = Object.fromEntries(_games.map(g => [g.id, g]));
+    renderGamesTable();
+  } catch (e) { toast(e.message, 'err'); }
+}
+
+function renderGamesTable() {
+  const query = (document.getElementById('games-search')?.value || '').trim().toLowerCase();
+  const list = query
+    ? _games.filter(g => (g.title || '').toLowerCase().includes(query))
+    : _games;
     const tbody = document.getElementById('games-body');
-    if (!_games.length) {
+    if (!list.length) {
       tbody.innerHTML = '<tr><td colspan="6" class="empty">Гульняў няма</td></tr>'; return;
     }
-    tbody.innerHTML = _games.map(g => `
+    tbody.innerHTML = list.map(g => `
       <tr>
         <td><strong>${g.title}</strong><br/><span style="font-size:11px;color:var(--text-muted)">${g.slug}</span></td>
         <td>${g.developer}</td>
@@ -710,7 +728,6 @@ async function loadGames() {
           </div>
         </td>
       </tr>`).join('');
-  } catch (e) { toast(e.message, 'err'); }
 }
 
 function openGameModal(gameOrId) {
@@ -827,8 +844,17 @@ function translationName(t) {
 
 async function loadTranslations() {
   try {
-    const list = await apiReq('GET', '/api/admin/translations');
-    _translationsMap = Object.fromEntries((list||[]).map(t => [t.id, t]));
+    _translations = await apiReq('GET', '/api/admin/translations');
+    _translationsMap = Object.fromEntries((_translations||[]).map(t => [t.id, t]));
+    renderTranslationsTable();
+  } catch (e) { toast(e.message, 'err'); }
+}
+
+function renderTranslationsTable() {
+    const query = (document.getElementById('translations-search')?.value || '').trim().toLowerCase();
+    const list = query
+      ? (_translations || []).filter(t => (t.game_title || '').toLowerCase().includes(query))
+      : (_translations || []);
     const tbody = document.getElementById('translations-body');
     if (!list.length) {
       tbody.innerHTML = '<tr><td colspan="8" class="empty">Перакладаў няма</td></tr>'; return;
@@ -849,7 +875,6 @@ async function loadTranslations() {
           </div>
         </td>
       </tr>`).join('');
-  } catch (e) { toast(e.message, 'err'); }
 }
 
 function openTranslationModal(tOrId) {
