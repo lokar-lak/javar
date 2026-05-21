@@ -81,9 +81,6 @@ func (h *Handler) ListGames(w http.ResponseWriter, r *http.Request) {
 	if games == nil {
 		games = []model.Game{}
 	}
-	for i := range games {
-		enrichGameFromSteam(r.Context(), &games[i])
-	}
 	writeJSON(w, 200, games)
 }
 

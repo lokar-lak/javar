@@ -220,6 +220,15 @@ img { display: block; max-width: 100%; }
   aspect-ratio: 16/9;
   background: var(--surface-2) center/cover no-repeat;
   position: relative;
+  overflow: hidden;
+}
+
+.cover-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
 }
 
 .game-card__cover--placeholder {
@@ -375,12 +384,21 @@ img { display: block; max-width: 100%; }
   flex-direction: column;
 }
 
-/* Выява: фіксаваны 16:9, нічога не абразаецца */
+/* Выява: фіксаваны 16:9, абразаецца па межах блока */
 .featured__image {
   width: 100%;
   aspect-ratio: 16 / 9;
   background: var(--surface-2) center/cover no-repeat;
   flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.featured__image > .cover-img,
+.game-card__cover > .cover-img,
+.game-cover > .cover-img {
+  position: absolute;
+  inset: 0;
 }
 
 /* Калі выявы няма — паказваем плейсхолдар меншай вышыні */

@@ -35,6 +35,13 @@ function coverStyle(game, idx = 0) {
   return `background:${PLACEHOLDER_GRADIENTS[idx % PLACEHOLDER_GRADIENTS.length]}`;
 }
 
+function coverImageHTML(game, idx = 0, options = {}) {
+  const loading = options.loading || (idx < 3 ? 'eager' : 'lazy');
+  const priority = options.priority || (idx === 0 ? 'high' : 'auto');
+  if (!game.cover_url) return '';
+  return `<img class="cover-img" src="${game.cover_url}" alt="${game.title || ''}" loading="${loading}" decoding="async" fetchpriority="${priority}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;display:block"/>`;
+}
+
 // Whether there are only AI translations (no manual ones)
 // Backend computes has_only_ai in ListGames
 function hasOnlyAI(game) {
@@ -54,7 +61,8 @@ function renderGameCard(game, idx = 0) {
 
   return `
     <div class="game-card" onclick="location.href='game.html?slug=${game.slug}'" style="cursor:pointer">
-      <div class="game-card__cover game-card__cover--placeholder" style="${coverStyle(game, idx)}">
+      <div class="game-card__cover game-card__cover--placeholder" style="${!game.cover_url ? coverStyle(game, idx) : ''}">
+        ${coverImageHTML(game, idx)}
         ${!game.cover_url ? `<span style="font-size:40px;opacity:.2">🎮</span>` : ''}
         ${aiOnly ? `<div class="game-card__ai-badge">ШІ-ПЕРАКЛАД</div>` : ''}
       </div>

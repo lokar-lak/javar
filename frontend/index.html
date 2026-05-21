@@ -7,6 +7,8 @@
   <!-- Fonts: async, non-blocking for rendering -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://shared.akamai.steamstatic.com" />
+  <link rel="preconnect" href="https://cdn.akamai.steamstatic.com" />
   <link rel="preload" as="style"
     href="https://fonts.googleapis.com/css2?family=Jaro&family=Manrope:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap"
     onload="this.onload=null;this.rel='stylesheet'" />
@@ -16,7 +18,7 @@
   
   
   
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css?v=2" />
   <style>
     .skeleton {
       background: linear-gradient(90deg, var(--surface) 25%, var(--surface-2) 50%, var(--surface) 75%);
@@ -126,7 +128,7 @@
   </footer>
 
 </div>
-<script src="shared.js"></script>
+<script src="shared.js?v=2"></script>
 <script src="submission.js"></script>
 <script>
 // Navbar search -> redirect to catalog with query param
@@ -150,7 +152,8 @@ function renderFeatured(game) {
   return `
     <div class="featured" onclick="location.href='game.html?slug=${game.slug}'" style="cursor:pointer">
       <div class="featured__image ${hasImg ? '' : 'featured__image--placeholder'}"
-           style="${coverStyle(game, 0)}">
+           style="${hasImg ? '' : coverStyle(game, 0)}">
+        ${coverImageHTML(game, 0, { loading: 'eager', priority: 'high' })}
       </div>
       <div class="featured__content">
         <div style="display:flex;align-items:center;gap:16px;margin-bottom:12px;flex-wrap:wrap">

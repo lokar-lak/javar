@@ -103,10 +103,21 @@ func main() {
 	r.Get("/admin", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "frontend/admin.html")
 	})
-	r.Handle("/*", http.FileServer(http.Dir("./frontend")))
+	r.Handle("/*", cacheStatic(http.FileServer(http.Dir("./frontend"))))
 
 	log.Printf("▶  http://localhost:%s", port)
 	log.Fatal(http.ListenAndServe(":"+port, r))
+}
+
+func cacheStatic(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasSuffix(r.URL.Path, ".css") || strings.HasSuffix(r.URL.Path, ".js") {
+			w.Header().Set("Cache-Control", "no-cache")
+		} else if strings.HasPrefix(r.URL.Path, "/uploads/") || strings.HasSuffix(r.URL.Path, ".svg") {
+			w.Header().Set("Cache-Control", "public, max-age=604800")
+		}
+		next.ServeHTTP(w, r)
+	})
 }
 
 func cors(next http.Handler) http.Handler {

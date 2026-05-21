@@ -7,6 +7,8 @@
   <!-- Fonts: async, non-blocking for rendering -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://shared.akamai.steamstatic.com" />
+  <link rel="preconnect" href="https://cdn.akamai.steamstatic.com" />
   <link rel="preload" as="style"
     href="https://fonts.googleapis.com/css2?family=Jaro&family=Manrope:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap"
     onload="this.onload=null;this.rel='stylesheet'" />
@@ -16,7 +18,7 @@
   
   
   
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css?v=2" />
   <style>
     /* ── Translation Cards ─────────────────────────── */
     .translation-cards { display: flex; flex-direction: column; gap: 16px; }
@@ -281,7 +283,7 @@ function renderGame(game) {
         <div class="stat-card__sub">станоўчых водгукаў</div>
       </div>
       <div class="stat-card" style="flex:1;min-width:140px">
-        <div class="stat-card__label">Наш рэйтынг</div>
+        <div class="stat-card__label">Рэйтынг перакладу</div>
         <div class="stat-card__value" style="color:var(--accent)">${bestAvgRating}</div>
         <div class="stat-card__sub">сярэдняя ацэнка</div>
       </div>
@@ -302,8 +304,9 @@ function renderGame(game) {
       <!-- Cover -->
       <div class="game-cover-col">
         <div class="game-cover" style="${game.cover_url
-          ? `background-image:url('${game.cover_url}')`
+          ? ''
           : `background:linear-gradient(160deg,#0a0a14,#1a0505)`}">
+          ${game.cover_url ? `<img class="cover-img" src="${game.cover_url}" alt="${game.title}" loading="eager" decoding="async" fetchpriority="high" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;display:block"/>` : ''}
           ${!game.cover_url ? `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:80px;opacity:.1">👻</div>` : ''}
         </div>
       </div>
