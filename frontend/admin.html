@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>JAVAR — Адмін</title>
+  <title>JAVAR — Адміністратар</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link rel="preload" as="style"
@@ -199,7 +199,7 @@
   <div class="login-box">
     <div>
       <div style="font-family:'Jaro','Arial Black',sans-serif;font-size:32px;color:var(--accent);letter-spacing:2px">JAVAR</div>
-      <h2 style="margin-top:8px">Адмін панэль</h2>
+      <h2 style="margin-top:8px">Панэль адміністратара</h2>
       <p style="margin-top:6px">Увядзіце токен для доступу</p>
     </div>
     <div class="form-group">
@@ -219,7 +219,7 @@
     <div class="sidebar__logo">JAVAR <span>Адміністрацыя</span></div>
     <nav class="sidebar__nav">
       <div class="nav-item active" data-section="dashboard" onclick="gotoSection('dashboard',this)">
-        <span class="icon">📊</span> Дашборд
+        <span class="icon">📊</span> Панэль кіравання
       </div>
       <div class="nav-item" data-section="games" onclick="gotoSection('games',this)">
         <span class="icon">🎮</span> Гульні
@@ -228,7 +228,7 @@
         <span class="icon">📝</span> Пераклады
       </div>
       <div class="nav-item" data-section="submissions" onclick="gotoSection('submissions',this)">
-        <span class="icon">📥</span> Прапановы
+        <span class="icon">🧩</span> Прапановы
       </div>
       <div class="nav-item" data-section="reviews" onclick="gotoSection('reviews',this)">
         <span class="icon">💬</span> Водгукі
@@ -241,7 +241,7 @@
       </div>
     </nav>
     <div class="sidebar__footer">
-      <div style="margin-bottom:6px">Вы ўвайшлі як адмін</div>
+      <div style="margin-bottom:6px">Вы ўвайшлі як адміністратар</div>
       <button onclick="doLogout()">Выйсці →</button>
     </div>
   </aside>
@@ -252,7 +252,7 @@
     <!-- ══ DASHBOARD ══════════════════════════════════════════ -->
     <div class="section active" id="sec-dashboard">
       <div class="page-heading">
-        <div><h1>Дашборд</h1><div class="page-heading__bar"></div></div>
+        <div><h1>Панэль кіравання</h1><div class="page-heading__bar"></div></div>
         <button class="btn btn-ghost btn-sm" onclick="loadDashboard()">↻ Абнавіць</button>
       </div>
 
@@ -292,7 +292,7 @@
 
       <div class="tbl-wrap">
         <table>
-          <thead><tr><th>Назва</th><th>Распрацоўшчык</th><th>Steam</th><th>Жанры</th><th>Дата</th><th></th></tr></thead>
+          <thead><tr><th>Назва</th><th>Распрацоўшчык</th><th>Steam</th><th>Жанры / платформы</th><th>Дата</th><th></th></tr></thead>
           <tbody id="games-body"><tr><td colspan="6" class="empty">Загрузка...</td></tr></tbody>
         </table>
       </div>
@@ -307,7 +307,7 @@
 
       <div class="tbl-wrap">
         <table>
-          <thead><tr><th>Гульня</th><th>Студыя</th><th>Тып</th><th>Правапіс</th><th>Ахоп</th><th>Клікаў</th><th>Ацэнка</th><th></th></tr></thead>
+          <thead><tr><th>Гульня</th><th>Студыя</th><th>Тып</th><th>Правапіс / афіцыйнасць</th><th>Ахоп</th><th>Клікаў</th><th>Ацэнка</th><th></th></tr></thead>
           <tbody id="translations-body"><tr><td colspan="8" class="empty">Загрузка...</td></tr></tbody>
         </table>
       </div>
@@ -457,9 +457,13 @@
         <label>Жанры</label>
         <div id="g-genres-list" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px"></div>
       </div>
+      <div class="form-group span-2">
+        <label>Платформы</label>
+        <div id="g-platforms-list" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px"></div>
+      </div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('modal-game')">Адмяніць</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-game')">Скасаваць</button>
       <button class="btn btn-primary" onclick="saveGame()">Захаваць</button>
     </div>
   </div>
@@ -495,6 +499,13 @@
         </select>
       </div>
       <div class="form-group">
+        <label>Афіцыйнасць</label>
+        <select class="form-input" id="tr-official">
+          <option value="unofficial">Неафіцыйны</option>
+          <option value="official">Афіцыйны</option>
+        </select>
+      </div>
+      <div class="form-group">
         <label>Версія</label>
         <input class="form-input" id="tr-version" placeholder="1.0.0"/>
       </div>
@@ -512,7 +523,7 @@
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('modal-translation')">Адмяніць</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-translation')">Скасаваць</button>
       <button class="btn btn-primary" onclick="saveTranslation()">Захаваць</button>
     </div>
   </div>
@@ -523,9 +534,9 @@
   <div class="modal confirm-box">
     <h3>Пацвердзіць выдаленне</h3>
     <p id="confirm-text">Вы ўпэўнены?</p>
-    <p style="color:var(--accent);font-size:12px;margin-top:4px">Гэта дзеянне нельга адмяніць.</p>
+    <p style="color:var(--accent);font-size:12px;margin-top:4px">Гэта дзеянне нельга скасаваць.</p>
     <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('modal-confirm')">Адмяніць</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-confirm')">Скасаваць</button>
       <button class="btn btn-danger" id="confirm-ok">Выдаліць</button>
     </div>
   </div>
@@ -543,6 +554,7 @@ let _gamesMap = {};        // id → game object
 let _translationsMap = {}; // id → translation object
 let _submissionsMap = {};  // id → submission object
 let _pendingAcceptedSubmissionId = null;
+const GAME_PLATFORMS = ['ПК', 'Xbox', 'PlayStation', 'Nintendo Switch', 'macOS', 'Linux', 'iOS', 'Android'];
 
 // ── Auth ──────────────────────────────────────────────────────────────────
 async function doLogin() {
@@ -693,7 +705,7 @@ async function loadGames() {
         <td><strong>${g.title}</strong><br/><span style="font-size:11px;color:var(--text-muted)">${g.slug}</span></td>
         <td>${g.developer}</td>
         <td>${g.steam_rating != null ? `<span style="color:var(--green);font-family:var(--mono)">${g.steam_rating}%</span>` : '—'}</td>
-        <td>${(g.genres||[]).map(x => `<span class="badge badge-genre" style="font-size:10px">${x.name}</span>`).join(' ')}</td>
+        <td>${(g.genres||[]).map(x => `<span class="badge badge-genre" style="font-size:10px">${x.name}</span>`).join(' ')}<br/><span style="font-size:11px;color:var(--text-muted)">${(g.platforms||[]).join(', ')||'—'}</span></td>
         <td style="color:var(--text-muted);font-size:12px">${g.release_date||'—'}</td>
         <td>
           <div class="td-actions">
@@ -744,12 +756,25 @@ function openGameModal(gameOrId) {
       ${g.name}
     </label>`).join('');
 
+  const selectedPlatforms = game?.platforms || [];
+  document.getElementById('g-platforms-list').innerHTML = GAME_PLATFORMS.map(p => `
+    <label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;
+      background:var(--surface-2);border:1px solid ${selectedPlatforms.includes(p)?'var(--accent)':'var(--border)'};
+      border-radius:6px;padding:4px 10px;font-size:12px;font-weight:600;color:${selectedPlatforms.includes(p)?'var(--accent)':'var(--text-muted)'};
+      transition:all .15s">
+      <input type="checkbox" value="${p}" ${selectedPlatforms.includes(p)?'checked':''} style="display:none"
+        onchange="this.parentElement.style.borderColor=this.checked?'var(--accent)':'var(--border)';
+                  this.parentElement.style.color=this.checked?'var(--accent)':'var(--text-muted)'">
+      ${p}
+    </label>`).join('');
+
   openModal('modal-game');
 }
 
 async function saveGame() {
   const id = document.getElementById('game-id').value;
   const genreIDs = [...document.querySelectorAll('#g-genres-list input:checked')].map(i => parseInt(i.value));
+  const platforms = [...document.querySelectorAll('#g-platforms-list input:checked')].map(i => i.value);
   const rating = document.getElementById('g-rating').value;
   const body = {
     title:       document.getElementById('g-title').value.trim(),
@@ -759,6 +784,7 @@ async function saveGame() {
     release_date:document.getElementById('g-date').value.trim(),
     steamdb_url: document.getElementById('g-steam').value.trim(),
     cover_url:   document.getElementById('g-cover').value.trim(),
+    platforms:   platforms,
     steam_rating:rating ? parseInt(rating) : null,
     description: document.getElementById('g-desc').value.trim(),
     genre_ids:   genreIDs,
@@ -797,6 +823,7 @@ function deleteGame(id, title) {
 // ══ TRANSLATIONS ══════════════════════════════════════════════════════════
 
 const ORTH = { academic:'Академічны', tarashkevitsa:'Альтэрнатыўны', lacinka:'Лацінка' };
+const OFFICIAL = { official:'Афіцыйны', unofficial:'Неафіцыйны' };
 
 async function loadTranslations() {
   try {
@@ -811,7 +838,7 @@ async function loadTranslations() {
         <td><a href="game.html?slug=${t.game_slug}" target="_blank" style="color:var(--accent)">${t.game_title}</a></td>
         <td>${t.studio_name}</td>
         <td><span class="badge badge-${t.type}">${t.type==='manual'?'Ручны':'ШІ'}</span></td>
-        <td><span class="badge badge-orth">${ORTH[t.orthography]||t.orthography}</span></td>
+        <td><span class="badge badge-orth">${ORTH[t.orthography]||t.orthography}</span><br/><span class="badge badge-orth" style="margin-top:4px">${OFFICIAL[t.official_status]||t.official_status}</span></td>
         <td style="font-size:12px;color:var(--text-muted)">${(t.coverage||[]).join(', ')||'—'}</td>
         <td style="font-family:var(--mono)">${t.click_count}</td>
         <td class="rating-num">${t.avg_rating ? t.avg_rating.toFixed(1) : '—'}</td>
@@ -839,6 +866,7 @@ function openTranslationModal(tOrId) {
   document.getElementById('tr-studio').value      = t?.studio_name || '';
   document.getElementById('tr-type').value        = t?.type || 'manual';
   document.getElementById('tr-orth').value        = t?.orthography || 'academic';
+  document.getElementById('tr-official').value    = t?.official_status || 'unofficial';
   document.getElementById('tr-version').value     = t?.version || '';
   document.getElementById('tr-translators').value = (t?.translator_names||[]).join(', ');
   document.getElementById('tr-coverage').value    = (t?.coverage||[]).join(', ');
@@ -852,6 +880,7 @@ async function saveTranslation() {
     game_id:          parseInt(document.getElementById('tr-game').value),
     studio_name:      document.getElementById('tr-studio').value.trim(),
     type:             document.getElementById('tr-type').value,
+    official_status:  document.getElementById('tr-official').value,
     orthography:      document.getElementById('tr-orth').value,
     external_url:     document.getElementById('tr-url').value.trim(),
     translator_names: document.getElementById('tr-translators').value.split(',').map(s=>s.trim()).filter(Boolean),
@@ -916,7 +945,9 @@ async function loadSubmissions() {
         <td style="font-size:12px;color:var(--text-muted);white-space:nowrap">${new Date(s.created_at).toLocaleDateString('be-BY')}</td>
         <td>
           <div class="td-actions">
-            <button class="btn btn-success btn-sm" onclick="acceptSubmission(${s.id})">Прыняць</button>
+            ${s.status === 'accepted'
+              ? '<button class="btn btn-ghost btn-sm" disabled>Прынята</button>'
+              : `<button class="btn btn-success btn-sm" onclick="acceptSubmission(${s.id})">Прыняць</button>`}
             <button class="btn btn-danger btn-sm" onclick="deleteSubmission(${s.id},'${esc(s.game_title).replace(/'/g,"\\'")}')">🗑</button>
           </div>
         </td>
@@ -929,6 +960,18 @@ function slugFromTitle(title) {
     .replace(/[^a-zа-яёіўa-ząćęłńóśźż0-9\s-]/gi, '')
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-');
+}
+
+function normalizeGamePlatforms(platforms) {
+  const out = new Set();
+  (platforms || []).forEach(p => {
+    if (p === 'Windows') out.add('ПК');
+    else if (p.startsWith('Xbox')) out.add('Xbox');
+    else if (p.startsWith('PlayStation')) out.add('PlayStation');
+    else if (p === 'Switch') out.add('Nintendo Switch');
+    else if (GAME_PLATFORMS.includes(p)) out.add(p);
+  });
+  return [...out];
 }
 
 function acceptSubmission(id) {
@@ -947,6 +990,7 @@ function acceptSubmission(id) {
     slug: slugFromTitle(s.game_title),
     developer: 'Невядома',
     steamdb_url: s.game_url,
+    platforms: normalizeGamePlatforms(s.platforms),
     description: descriptionParts.join('\n')
   });
   _pendingAcceptedSubmissionId = id;
