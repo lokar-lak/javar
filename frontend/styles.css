@@ -99,6 +99,8 @@ img { display: block; max-width: 100%; }
   display: flex;
   justify-content: center;
   flex: 1;
+  min-width: 190px;
+  padding: 0 16px;
 }
 
 .navbar__submit {
@@ -106,7 +108,7 @@ img { display: block; max-width: 100%; }
   align-items: center;
   justify-content: center;
   min-height: 34px;
-  padding: 0 14px;
+  padding: 0 clamp(10px, 1.2vw, 14px);
   border-radius: var(--radius-md);
   background: var(--accent);
   color: #fff !important;
