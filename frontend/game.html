@@ -396,6 +396,9 @@ function renderGame(game) {
 
 const ORTH_LABELS = { academic: 'Акадэмічны', tarashkevitsa: 'Альтэрнатыўны', lacinka: 'Лацінка' };
 const OFFICIAL_LABELS = { official: 'Афіцыйны', unofficial: 'Неафіцыйны' };
+function translationName(t) {
+  return (t?.translator_names || []).join(', ') || 'Беларусізатар';
+}
 function renderTranslationCard(t, open = false) {
   const coverageHTML = (t.coverage || []).map(c =>
     `<span class="tag-sm tag-sm--neutral">${c}</span>`
@@ -407,7 +410,7 @@ function renderTranslationCard(t, open = false) {
     <div class="translation-card ${open ? 'active' : ''}" data-tid="${t.id}">
       <div class="translation-card__head">
         <div class="translation-card__left">
-          <div class="translation-card__studio">${t.studio_name}</div>
+          <div class="translation-card__studio">${translationName(t)}</div>
           <div class="translation-card__meta">
             ${badge(t.type)}
             <span class="tag-sm" style="font-size:10px;padding:2px 7px;background:var(--surface-2);border:1px solid var(--border);color:var(--text-muted)">${OFFICIAL_LABELS[t.official_status] || 'Неафіцыйны'}</span>
@@ -446,7 +449,7 @@ function renderTranslationCard(t, open = false) {
 function renderReviewsSection(t) {
   return `
     <div class="section" style="margin-top:52px" id="reviews-section">
-      <h3 class="section-h2" id="reviews-title">Водгукі — ${t.studio_name}</h3>
+      <h3 class="section-h2" id="reviews-title">Водгукі — ${translationName(t)}</h3>
 
       <!-- Rating summary -->
       <div id="rating-summary"></div>
@@ -500,7 +503,7 @@ function loadReviews(tid) {
 
   // Find translation in cached game data
   const translation = (_gameData?.translations || []).find(t => t.id === tid);
-  const studioName = translation?.studio_name || '';
+  const studioName = translationName(translation);
 
   // Update section title
   const titleEl = document.getElementById('reviews-title');

@@ -23,10 +23,9 @@ INSERT INTO games (title, slug, developer, publisher, release_date, description,
 INSERT INTO game_genres (game_id, genre_id) VALUES (1, 1), (1, 2);
 
 -- Two different translations for one game
-INSERT INTO translations (game_id, studio_name, translator_names, type, coverage, external_url) VALUES
+INSERT INTO translations (game_id, translator_names, type, coverage, external_url) VALUES
 (
     1,
-    'Студыя АБВ',
     '["Аляксей Краўчанка", "Марына Петрова", "Іван Сідараў"]',
     'manual',
     '["Субтытры", "Меню", "Інвентар", "Дакументы"]',
@@ -34,7 +33,6 @@ INSERT INTO translations (game_id, studio_name, translator_names, type, coverage
 ),
 (
     1,
-    'Аўтаперакладчык 9000',
     '["GPT-4o"]',
     'ai',
     '["Субтытры"]',

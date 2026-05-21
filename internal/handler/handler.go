@@ -478,8 +478,12 @@ func (h *Handler) ExportCSV(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "\n# Водгукі\n")
 	fmt.Fprintf(w, "Гульня,Пераклад,Аўтар,Рэйтынг,Тэкст,Дата\n")
 	for _, rv := range reviews {
+		translationName := strings.Join(rv.TranslatorNames, ", ")
+		if translationName == "" {
+			translationName = "Беларусізатар"
+		}
 		fmt.Fprintf(w, "%q,%q,%q,%d,%q,%s\n",
-			rv.GameTitle, rv.StudioName, rv.AuthorName,
+			rv.GameTitle, translationName, rv.AuthorName,
 			rv.Rating, rv.Body, rv.CreatedAt.Format("2006-01-02"))
 	}
 }

@@ -309,7 +309,7 @@
 
       <div class="tbl-wrap">
         <table>
-          <thead><tr><th>Гульня</th><th>Студыя</th><th>Тып</th><th>Правапіс / афіцыйнасць</th><th>Тып лакалізацыі</th><th>Клікаў</th><th>Ацэнка</th><th></th></tr></thead>
+          <thead><tr><th>Гульня</th><th>Аўтары</th><th>Тып</th><th>Правапіс / афіцыйнасць</th><th>Тып лакалізацыі</th><th>Клікаў</th><th>Ацэнка</th><th></th></tr></thead>
           <tbody id="translations-body"><tr><td colspan="8" class="empty">Загрузка...</td></tr></tbody>
         </table>
       </div>
@@ -482,10 +482,6 @@
         <select class="form-input" id="tr-game"></select>
       </div>
       <div class="form-group">
-        <label>Студыя *</label>
-        <input class="form-input" id="tr-studio" placeholder="Студыя АБВ"/>
-      </div>
-      <div class="form-group">
         <label>Тып *</label>
         <select class="form-input" id="tr-type">
           <option value="manual">Ручны</option>
@@ -506,10 +502,6 @@
           <option value="unofficial">Неафіцыйны</option>
           <option value="official">Афіцыйны</option>
         </select>
-      </div>
-      <div class="form-group">
-        <label>Версія</label>
-        <input class="form-input" id="tr-version" placeholder="1.0.0"/>
       </div>
       <div class="form-group span-2">
         <label>Перакладчыкі (праз коску)</label>
@@ -829,6 +821,10 @@ function deleteGame(id, title) {
 const ORTH = { academic:'Академічны', tarashkevitsa:'Альтэрнатыўны', lacinka:'Лацінка' };
 const OFFICIAL = { official:'Афіцыйны', unofficial:'Неафіцыйны' };
 
+function translationName(t) {
+  return (t?.translator_names || []).join(', ') || 'Беларусізатар';
+}
+
 async function loadTranslations() {
   try {
     const list = await apiReq('GET', '/api/admin/translations');
@@ -840,7 +836,7 @@ async function loadTranslations() {
     tbody.innerHTML = list.map(t => `
       <tr>
         <td><a href="game.html?slug=${t.game_slug}" target="_blank" style="color:var(--accent)">${t.game_title}</a></td>
-        <td>${t.studio_name}</td>
+        <td>${translationName(t)}</td>
         <td><span class="badge badge-${t.type}">${t.type==='manual'?'Ручны':'ШІ'}</span></td>
         <td><span class="badge badge-orth">${ORTH[t.orthography]||t.orthography}</span><br/><span class="badge badge-orth" style="margin-top:4px">${OFFICIAL[t.official_status]||t.official_status}</span></td>
         <td style="font-size:12px;color:var(--text-muted)">${(t.coverage||[]).join(', ')||'—'}</td>
@@ -849,7 +845,7 @@ async function loadTranslations() {
         <td>
           <div class="td-actions">
             <button class="btn btn-ghost btn-sm" onclick="openTranslationModal(${t.id})">✏️</button>
-            <button class="btn btn-danger btn-sm" onclick="deleteTranslation(${t.id},'${t.studio_name.replace(/'/g,"\\'")}')">🗑</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteTranslation(${t.id},'${translationName(t).replace(/'/g,"\\'")}')">🗑</button>
           </div>
         </td>
       </tr>`).join('');
@@ -867,11 +863,9 @@ function openTranslationModal(tOrId) {
   const sel = document.getElementById('tr-game');
   sel.innerHTML = _games.map(g => `<option value="${g.id}" ${t?.game_id===g.id?'selected':''}>${g.title}</option>`).join('');
 
-  document.getElementById('tr-studio').value      = t?.studio_name || '';
   document.getElementById('tr-type').value        = t?.type || 'manual';
   document.getElementById('tr-orth').value        = t?.orthography || 'academic';
   document.getElementById('tr-official').value    = t?.official_status || 'unofficial';
-  document.getElementById('tr-version').value     = t?.version || '';
   document.getElementById('tr-translators').value = (t?.translator_names||[]).join(', ');
   document.getElementById('tr-coverage').value    = (t?.coverage||[]).join(', ');
   document.getElementById('tr-url').value         = t?.external_url || '';
@@ -882,7 +876,6 @@ async function saveTranslation() {
   const id = document.getElementById('tr-id').value;
   const body = {
     game_id:          parseInt(document.getElementById('tr-game').value),
-    studio_name:      document.getElementById('tr-studio').value.trim(),
     type:             document.getElementById('tr-type').value,
     official_status:  document.getElementById('tr-official').value,
     orthography:      document.getElementById('tr-orth').value,
@@ -890,8 +883,8 @@ async function saveTranslation() {
     translator_names: document.getElementById('tr-translators').value.split(',').map(s=>s.trim()).filter(Boolean),
     coverage:         document.getElementById('tr-coverage').value.split(',').map(s=>s.trim()).filter(Boolean),
   };
-  if (!body.studio_name || !body.external_url) {
-    toast('Студыя і спасылка — абавязковыя', 'err'); return;
+  if (!body.external_url) {
+    toast('Спасылка — абавязковая', 'err'); return;
   }
   try {
     if (id) {
@@ -1015,7 +1008,7 @@ async function loadReviews() {
     tbody.innerHTML = list.map(rv => `
       <tr>
         <td><a href="game.html?slug=${rv.game_slug}" target="_blank" style="color:var(--accent);font-size:12px">${rv.game_title}</a></td>
-        <td style="font-size:12px;color:var(--text-muted)">${rv.studio_name}</td>
+        <td style="font-size:12px;color:var(--text-muted)">${translationName(rv)}</td>
         <td><strong>${rv.author_name}</strong></td>
         <td><span class="stars" style="font-size:12px">${starsStr(rv.rating)}</span></td>
         <td style="max-width:260px;font-size:13px">${rv.body.length > 80 ? rv.body.slice(0,80)+'…' : rv.body}</td>

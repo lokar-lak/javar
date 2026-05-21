@@ -86,6 +86,14 @@ func migrate(db *sql.DB) error {
 		}
 	}
 
+	// Remove legacy studio name from translations; authors are stored in translator_names.
+	if _, err := db.Exec(`ALTER TABLE translations DROP COLUMN studio_name`); err != nil {
+		errMsg := strings.ToLower(err.Error())
+		if !strings.Contains(errMsg, "no such column") && !strings.Contains(errMsg, "syntax error") {
+			return fmt.Errorf("drop translations.studio_name: %w", err)
+		}
+	}
+
 	if _, err := db.Exec(`
 		CREATE TABLE IF NOT EXISTS translation_submissions (
 			id                INTEGER PRIMARY KEY AUTOINCREMENT,
