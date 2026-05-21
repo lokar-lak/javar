@@ -15,6 +15,8 @@ function stars(n, total = 5) {
 
 function releaseYear(dateStr) {
   if (!dateStr) return '';
+  const localized = String(dateStr).match(/^(\d{2})-(\d{2})-(\d{4})$/);
+  if (localized) return localized[3];
   return new Date(dateStr).getFullYear();
 }
 

@@ -160,9 +160,9 @@ func steamReleaseDateToISO(date string) string {
 	for _, layout := range []string{"2 Jan, 2006", "Jan 2, 2006", "2 Jan 2006", "Jan 2006", "2006"} {
 		if t, err := time.Parse(layout, date); err == nil {
 			if layout == "Jan 2006" || layout == "2006" {
-				return t.Format("2006-01")
+				return t.Format("01-2006")
 			}
-			return t.Format("2006-01-02")
+			return t.Format("02-01-2006")
 		}
 	}
 	return ""
