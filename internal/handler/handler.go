@@ -184,7 +184,7 @@ func (h *Handler) CreateTranslationSubmission(w http.ResponseWriter, r *http.Req
 	req.Description = strings.TrimSpace(req.Description)
 
 	if req.GameTitle == "" || len(req.Platforms) == 0 || req.Category == "" || len(req.LocalizationType) == 0 ||
-		req.Authors == "" || req.GameURL == "" || req.TranslationURL == "" || req.Description == "" {
+		req.Authors == "" || req.GameURL == "" || req.TranslationURL == "" {
 		writeError(w, 400, "all fields are required")
 		return
 	}

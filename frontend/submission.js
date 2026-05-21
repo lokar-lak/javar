@@ -78,7 +78,7 @@
 
           <div class="submission-field">
             <label for="submission-description">Апісанне лакалізацыі</label>
-            <textarea id="submission-description" name="description" required></textarea>
+            <textarea id="submission-description" name="description"></textarea>
           </div>
 
           <div class="submission-error" id="submission-error" role="alert"></div>
@@ -131,13 +131,9 @@
       openModal();
       return;
     }
-    if (event.target.closest('[data-close-submission]') || event.target.id === 'submission-modal') {
+    if (event.target.closest('[data-close-submission]')) {
       closeModal();
     }
-  });
-
-  document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape') closeModal();
   });
 
   document.addEventListener('submit', async (event) => {

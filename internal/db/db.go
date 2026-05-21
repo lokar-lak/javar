@@ -86,7 +86,7 @@ func migrate(db *sql.DB) error {
 			authors           TEXT    NOT NULL,
 			game_url          TEXT    NOT NULL,
 			translation_url   TEXT    NOT NULL,
-			description       TEXT    NOT NULL,
+			description       TEXT    NOT NULL DEFAULT '',
 			status            TEXT    NOT NULL DEFAULT 'new' CHECK(status IN ('new','accepted','rejected')),
 			created_at        DATETIME DEFAULT CURRENT_TIMESTAMP,
 			updated_at        DATETIME DEFAULT CURRENT_TIMESTAMP
