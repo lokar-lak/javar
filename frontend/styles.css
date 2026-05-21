@@ -78,8 +78,8 @@ img { display: block; max-width: 100%; }
 
 .navbar__links {
   display: flex;
+  align-items: center;
   gap: 36px;
-  flex: 1;
   list-style: none;
 }
 
@@ -94,6 +94,35 @@ img { display: block; max-width: 100%; }
 }
 .navbar__links a:hover,
 .navbar__links a.active { color: var(--text); }
+
+.navbar__submit-item {
+  display: flex;
+  justify-content: center;
+  flex: 1;
+}
+
+.navbar__submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  padding: 0 14px;
+  border-radius: var(--radius-md);
+  background: var(--accent);
+  color: #fff !important;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  text-transform: none;
+  white-space: nowrap;
+  box-shadow: 0 0 0 1px rgba(255, 38, 38, 0.2), 0 8px 20px var(--accent-glow);
+  transition: opacity 0.2s, transform 0.2s;
+}
+.navbar__submit:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
 
 .navbar__search {
   display: flex;
