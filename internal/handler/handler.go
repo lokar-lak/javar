@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -166,6 +167,60 @@ func (h *Handler) CreateReview(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, 201, map[string]int64{"id": id})
+}
+
+// ── POST /api/translation-submissions ─────────────────────────────────────
+
+func (h *Handler) CreateTranslationSubmission(w http.ResponseWriter, r *http.Request) {
+	var req model.CreateTranslationSubmissionRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeError(w, 400, "invalid body")
+		return
+	}
+	req.GameTitle = strings.TrimSpace(req.GameTitle)
+	req.Authors = strings.TrimSpace(req.Authors)
+	req.GameURL = strings.TrimSpace(req.GameURL)
+	req.TranslationURL = strings.TrimSpace(req.TranslationURL)
+	req.Description = strings.TrimSpace(req.Description)
+
+	if req.GameTitle == "" || len(req.Platforms) == 0 || req.Category == "" || len(req.LocalizationType) == 0 ||
+		req.Authors == "" || req.GameURL == "" || req.TranslationURL == "" || req.Description == "" {
+		writeError(w, 400, "all fields are required")
+		return
+	}
+	if req.Category != "official" && req.Category != "unofficial" {
+		writeError(w, 400, "invalid category")
+		return
+	}
+	if !validHTTPURL(req.GameURL) || !validHTTPURL(req.TranslationURL) {
+		writeError(w, 400, "links must start with http:// or https://")
+		return
+	}
+
+	similar, err := h.repo.FindSimilarGames(req.GameTitle)
+	if err != nil {
+		writeError(w, 500, "internal error")
+		return
+	}
+	if len(similar) > 0 {
+		writeJSON(w, 409, map[string]any{
+			"error":         "similar game exists",
+			"similar_games": similar,
+		})
+		return
+	}
+
+	id, err := h.repo.CreateTranslationSubmission(req)
+	if err != nil {
+		writeError(w, 500, err.Error())
+		return
+	}
+	writeJSON(w, 201, map[string]int64{"id": id})
+}
+
+func validHTTPURL(raw string) bool {
+	u, err := url.ParseRequestURI(raw)
+	return err == nil && (u.Scheme == "http" || u.Scheme == "https") && u.Host != ""
 }
 
 // ── ADMIN ─────────────────────────────────────────────────────────────────

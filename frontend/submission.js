@@ -41,8 +41,14 @@
             <fieldset class="submission-field">
               <legend>Катэгорыя лакалізацыі</legend>
               <div class="submission-checks">
-                ${optionPill('radio', 'category', 'Афіцыйная')}
-                ${optionPill('radio', 'category', 'Неафіцыйная')}
+                <label class="submission-pill">
+                  <input type="radio" name="category" value="official" required />
+                  <span>Афіцыйная</span>
+                </label>
+                <label class="submission-pill">
+                  <input type="radio" name="category" value="unofficial" required />
+                  <span>Неафіцыйная</span>
+                </label>
               </div>
             </fieldset>
 
@@ -88,6 +94,10 @@
     return document.querySelectorAll(`#submission-form input[name="${name}"]:checked`).length;
   }
 
+  function selectedValues(name) {
+    return [...document.querySelectorAll(`#submission-form input[name="${name}"]:checked`)].map(input => input.value);
+  }
+
   function showError(message) {
     const error = document.getElementById('submission-error');
     if (!error) return;
@@ -108,6 +118,13 @@
     showError('');
   }
 
+  function setSubmitting(isSubmitting) {
+    const button = document.querySelector('#submission-form .submission-submit');
+    if (!button) return;
+    button.disabled = isSubmitting;
+    button.textContent = isSubmitting ? 'Адпраўляю...' : 'Адправіць';
+  }
+
   document.addEventListener('click', (event) => {
     if (event.target.closest('[data-open-submission]')) {
       event.preventDefault();
@@ -123,9 +140,10 @@
     if (event.key === 'Escape') closeModal();
   });
 
-  document.addEventListener('submit', (event) => {
+  document.addEventListener('submit', async (event) => {
     if (event.target.id !== 'submission-form') return;
     event.preventDefault();
+    showError('');
     if (selectedCount('platforms') === 0) {
       showError('Абярыце хаця б адну платформу.');
       return;
@@ -134,6 +152,43 @@
       showError('Абярыце хаця б адзін тып лакалізацыі.');
       return;
     }
-    showError('Захаванне прапановы будзе падключана на наступным этапе.');
+    const form = event.target;
+    const data = new FormData(form);
+    const body = {
+      game_title: data.get('game_title')?.trim() || '',
+      platforms: selectedValues('platforms'),
+      category: data.get('category') || '',
+      localization_type: selectedValues('localization_type'),
+      authors: data.get('authors')?.trim() || '',
+      game_url: data.get('game_url')?.trim() || '',
+      translation_url: data.get('translation_url')?.trim() || '',
+      description: data.get('description')?.trim() || ''
+    };
+
+    setSubmitting(true);
+    try {
+      const res = await fetch('/api/translation-submissions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      const payload = await res.json().catch(() => ({}));
+      if (res.status === 409) {
+        const names = (payload.similar_games || []).map(g => `«${g.title}»`).join(', ');
+        showError(`Падобная гульня ўжо ёсць у каталогу${names ? ': ' + names : '.'}`);
+        return;
+      }
+      if (!res.ok) {
+        showError(payload.error || 'Не атрымалася адправіць прапанову.');
+        return;
+      }
+      form.reset();
+      closeModal();
+      alert('Дзякуй! Прапанова адпраўлена на мадэрацыю.');
+    } catch {
+      showError('Памылка сеткі. Паспрабуйце яшчэ раз.');
+    } finally {
+      setSubmitting(false);
+    }
   });
 })();

@@ -378,6 +378,50 @@ func (r *Repo) CreateReview(req model.CreateReviewRequest) (int64, error) {
 	return res.LastInsertId()
 }
 
+func (r *Repo) FindSimilarGames(title string) ([]model.SimilarGame, error) {
+	title = strings.TrimSpace(title)
+	if len([]rune(title)) < 3 {
+		return nil, nil
+	}
+	rows, err := r.db.Query(`
+		SELECT title, slug FROM games
+		WHERE LOWER(title) LIKE LOWER(?) OR LOWER(?) LIKE '%' || LOWER(title) || '%'
+		ORDER BY title LIMIT 5`, "%"+title+"%", title)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var out []model.SimilarGame
+	for rows.Next() {
+		var g model.SimilarGame
+		if err := rows.Scan(&g.Title, &g.Slug); err != nil {
+			return nil, err
+		}
+		out = append(out, g)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (r *Repo) CreateTranslationSubmission(req model.CreateTranslationSubmissionRequest) (int64, error) {
+	platformsJSON, _ := json.Marshal(req.Platforms)
+	typesJSON, _ := json.Marshal(req.LocalizationType)
+	res, err := r.db.Exec(`
+		INSERT INTO translation_submissions
+		(game_title, platforms, category, localization_type, authors, game_url, translation_url, description)
+		VALUES (?,?,?,?,?,?,?,?)`,
+		strings.TrimSpace(req.GameTitle), string(platformsJSON), req.Category, string(typesJSON),
+		strings.TrimSpace(req.Authors), strings.TrimSpace(req.GameURL),
+		strings.TrimSpace(req.TranslationURL), strings.TrimSpace(req.Description))
+	if err != nil {
+		return 0, err
+	}
+	return res.LastInsertId()
+}
+
 func (r *Repo) DeleteReview(id int) error {
 	_, err := r.db.Exec(`DELETE FROM reviews WHERE id=?`, id)
 	return err

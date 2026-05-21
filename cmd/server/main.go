@@ -68,6 +68,8 @@ func main() {
 
 		r.Get("/reviews", h.ListReviews)
 		r.Post("/reviews", h.CreateReview)
+
+		r.Post("/translation-submissions", h.CreateTranslationSubmission)
 	})
 
 	// ── Admin API (token-protected) ───────────────────────

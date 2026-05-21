@@ -95,6 +95,17 @@ type CreateReviewRequest struct {
 	Body          string `json:"body"`
 }
 
+type CreateTranslationSubmissionRequest struct {
+	GameTitle        string   `json:"game_title"`
+	Platforms        []string `json:"platforms"`
+	Category         string   `json:"category"` // "official" | "unofficial"
+	LocalizationType []string `json:"localization_type"`
+	Authors          string   `json:"authors"`
+	GameURL          string   `json:"game_url"`
+	TranslationURL   string   `json:"translation_url"`
+	Description      string   `json:"description"`
+}
+
 type GameFilter struct {
 	Search      string
 	GenreID     int    // genre filter (ID)
@@ -136,4 +147,9 @@ type AdminTranslation struct {
 	TranslationDetail
 	GameTitle string `json:"game_title"`
 	GameSlug  string `json:"game_slug"`
+}
+
+type SimilarGame struct {
+	Title string `json:"title"`
+	Slug  string `json:"slug"`
 }

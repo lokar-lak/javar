@@ -996,6 +996,7 @@ fieldset.submission-field { border: 0; padding: 0; }
   font-weight: 800;
 }
 .submission-submit:hover { opacity: 0.9; }
+.submission-submit:disabled { opacity: 0.65; cursor: wait; }
 
 @media (max-width: 680px) {
   .submission-grid { grid-template-columns: 1fr; }

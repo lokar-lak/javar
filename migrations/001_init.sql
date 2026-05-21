@@ -60,3 +60,19 @@ CREATE TABLE IF NOT EXISTS reviews (
     created_at     DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
+-- ── User-submitted Belarusian localization proposals ─────────
+CREATE TABLE IF NOT EXISTS translation_submissions (
+    id               INTEGER PRIMARY KEY AUTOINCREMENT,
+    game_title       TEXT    NOT NULL,
+    platforms        TEXT    NOT NULL DEFAULT '[]',
+    category         TEXT    NOT NULL CHECK(category IN ('official','unofficial')),
+    localization_type TEXT   NOT NULL DEFAULT '[]',
+    authors          TEXT    NOT NULL,
+    game_url         TEXT    NOT NULL,
+    translation_url  TEXT    NOT NULL,
+    description      TEXT    NOT NULL,
+    status           TEXT    NOT NULL DEFAULT 'new' CHECK(status IN ('new','accepted','rejected')),
+    created_at       DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at       DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+

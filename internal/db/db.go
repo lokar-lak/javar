@@ -75,5 +75,23 @@ func migrate(db *sql.DB) error {
 			return fmt.Errorf("drop translations.version: %w", err)
 		}
 	}
+
+	if _, err := db.Exec(`
+		CREATE TABLE IF NOT EXISTS translation_submissions (
+			id                INTEGER PRIMARY KEY AUTOINCREMENT,
+			game_title        TEXT    NOT NULL,
+			platforms         TEXT    NOT NULL DEFAULT '[]',
+			category          TEXT    NOT NULL CHECK(category IN ('official','unofficial')),
+			localization_type TEXT    NOT NULL DEFAULT '[]',
+			authors           TEXT    NOT NULL,
+			game_url          TEXT    NOT NULL,
+			translation_url   TEXT    NOT NULL,
+			description       TEXT    NOT NULL,
+			status            TEXT    NOT NULL DEFAULT 'new' CHECK(status IN ('new','accepted','rejected')),
+			created_at        DATETIME DEFAULT CURRENT_TIMESTAMP,
+			updated_at        DATETIME DEFAULT CURRENT_TIMESTAMP
+		)`); err != nil {
+		return fmt.Errorf("create translation_submissions: %w", err)
+	}
 	return nil
 }
