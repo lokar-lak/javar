@@ -977,7 +977,7 @@ async function loadSubmissions() {
         </td>
         <td style="font-size:12px;line-height:1.8">
           <a href="${esc(s.game_url)}" target="_blank" rel="noopener" style="color:var(--accent)">Гульня ↗</a><br/>
-          <a href="${esc(s.translation_url)}" target="_blank" rel="noopener" style="color:var(--accent)">Беларусізатар ↗</a>
+          ${s.translation_url ? `<a href="${esc(s.translation_url)}" target="_blank" rel="noopener" style="color:var(--accent)">Беларусізатар ↗</a>` : ''}
         </td>
         <td><span class="badge ${s.status==='accepted'?'badge-manual':'badge-orth'}">${STATUS_LABELS[s.status] || esc(s.status)}</span></td>
         <td style="font-size:12px;color:var(--text-muted);white-space:nowrap">${new Date(s.created_at).toLocaleDateString('be-BY')}</td>
@@ -1003,21 +1003,13 @@ function slugFromTitle(title) {
 function acceptSubmission(id) {
   const s = _submissionsMap[id];
   if (!s) return;
-  const descriptionParts = [
-    s.description || '',
-    `Аўтары лакалізацыі: ${s.authors}`,
-    `Спасылка на беларусізатар: ${s.translation_url}`,
-    `Платформы: ${(s.platforms||[]).join(', ')}`,
-    `Тып лакалізацыі: ${(s.localization_type||[]).join(', ')}`,
-    `Катэгорыя: ${CATEGORY_LABELS[s.category] || s.category}`
-  ].filter(Boolean);
   openGameModal({
     title: s.game_title,
     slug: slugFromTitle(s.game_title),
     developer: 'Невядома',
     steamdb_url: s.game_url,
     platforms: s.platforms,
-    description: descriptionParts.join('\n')
+    description: s.description || ''
   });
   _pendingAcceptedSubmissionId = id;
   document.getElementById('g-slug').dataset.manual = '1';
