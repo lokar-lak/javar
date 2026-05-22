@@ -60,9 +60,9 @@
             </fieldset>
           </div>
 
-          <div class="submission-field">
+          <div class="submission-field submission-unofficial-field" hidden>
             <label for="submission-authors">Аўтары лакалізацыі</label>
-            <input id="submission-authors" name="authors" type="text" required />
+            <input id="submission-authors" name="authors" type="text" />
           </div>
 
           <div class="submission-field">
@@ -70,7 +70,7 @@
             <input id="submission-game-url" name="game_url" type="url" required />
           </div>
 
-          <div class="submission-field">
+          <div class="submission-field submission-unofficial-field" hidden>
             <label for="submission-translation-url">Спасылка на беларусізатар</label>
             <input id="submission-translation-url" name="translation_url" type="url" />
           </div>
@@ -106,6 +106,7 @@
 
   function openModal() {
     createModal();
+    updateUnofficialFields();
     document.getElementById('submission-modal').classList.add('open');
     document.body.classList.add('submission-lock');
     setTimeout(() => document.getElementById('submission-game-title')?.focus(), 0);
@@ -124,6 +125,17 @@
     button.textContent = isSubmitting ? 'Адпраўляю...' : 'Адправіць';
   }
 
+  function updateUnofficialFields() {
+    const isUnofficial = document.querySelector('#submission-form input[name="category"]:checked')?.value === 'unofficial';
+    document.querySelectorAll('.submission-unofficial-field').forEach(field => {
+      field.hidden = !isUnofficial;
+      field.querySelectorAll('input, textarea, select').forEach(input => {
+        if (input.id === 'submission-authors') input.required = isUnofficial;
+        if (!isUnofficial) input.value = '';
+      });
+    });
+  }
+
   document.addEventListener('click', (event) => {
     if (event.target.closest('[data-open-submission]')) {
       event.preventDefault();
@@ -132,6 +144,12 @@
     }
     if (event.target.closest('[data-close-submission]')) {
       closeModal();
+    }
+  });
+
+  document.addEventListener('change', (event) => {
+    if (event.target.closest('#submission-form input[name="category"]')) {
+      updateUnofficialFields();
     }
   });
 
@@ -149,14 +167,15 @@
     }
     const form = event.target;
     const data = new FormData(form);
+    const category = data.get('category') || '';
     const body = {
       game_title: data.get('game_title')?.trim() || '',
       platforms: selectedValues('platforms'),
-      category: data.get('category') || '',
+      category: category,
       localization_type: selectedValues('localization_type'),
-      authors: data.get('authors')?.trim() || '',
+      authors: category === 'unofficial' ? (data.get('authors')?.trim() || '') : '',
       game_url: data.get('game_url')?.trim() || '',
-      translation_url: data.get('translation_url')?.trim() || '',
+      translation_url: category === 'unofficial' ? (data.get('translation_url')?.trim() || '') : '',
       description: data.get('description')?.trim() || ''
     };
 
@@ -178,6 +197,7 @@
         return;
       }
       form.reset();
+      updateUnofficialFields();
       closeModal();
       alert('Дзякуй! Прапанова адпраўлена на мадэрацыю.');
     } catch {

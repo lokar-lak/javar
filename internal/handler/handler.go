@@ -183,14 +183,21 @@ func (h *Handler) CreateTranslationSubmission(w http.ResponseWriter, r *http.Req
 	req.TranslationURL = strings.TrimSpace(req.TranslationURL)
 	req.Description = strings.TrimSpace(req.Description)
 
-	if req.GameTitle == "" || len(req.Platforms) == 0 || req.Category == "" || len(req.LocalizationType) == 0 ||
-		req.Authors == "" || req.GameURL == "" {
+	if req.GameTitle == "" || len(req.Platforms) == 0 || req.Category == "" || len(req.LocalizationType) == 0 || req.GameURL == "" {
 		writeError(w, 400, "all fields are required")
 		return
 	}
 	if req.Category != "official" && req.Category != "unofficial" {
 		writeError(w, 400, "invalid category")
 		return
+	}
+	if req.Category == "unofficial" && req.Authors == "" {
+		writeError(w, 400, "authors required")
+		return
+	}
+	if req.Category == "official" {
+		req.Authors = ""
+		req.TranslationURL = ""
 	}
 	if !validHTTPURL(req.GameURL) || (req.TranslationURL != "" && !validHTTPURL(req.TranslationURL)) {
 		writeError(w, 400, "links must start with http:// or https://")

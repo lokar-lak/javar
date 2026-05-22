@@ -72,6 +72,9 @@
       top: calc(100% + 6px);
       left: 0;
       min-width: 200px;
+      max-height: 320px;
+      overflow-y: auto;
+      overscroll-behavior: contain;
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius-md);
@@ -79,6 +82,10 @@
       z-index: 200;
       box-shadow: 0 8px 24px rgba(0,0,0,.4);
     }
+    .dropdown__menu::-webkit-scrollbar { width: 8px; }
+    .dropdown__menu::-webkit-scrollbar-track { background: var(--surface-2); border-radius: 999px; }
+    .dropdown__menu::-webkit-scrollbar-thumb { background: var(--border); border-radius: 999px; }
+    .dropdown__menu::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
     .dropdown.open .dropdown__menu { display: block; }
 
     .dropdown__item {
@@ -387,7 +394,7 @@
 </div>
 
 <script src="shared.js?v=2"></script>
-<script src="submission.js"></script>
+<script src="submission.js?v=2"></script>
 <script>
 const PAGE_SIZE = 9;
 

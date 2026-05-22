@@ -885,6 +885,7 @@ img { display: block; max-width: 100%; }
   display: flex;
   flex-direction: column;
 }
+.submission-field[hidden] { display: none !important; }
 .submission-form { gap: 14px; }
 .submission-field { gap: 6px; }
 fieldset.submission-field { border: 0; padding: 0; }

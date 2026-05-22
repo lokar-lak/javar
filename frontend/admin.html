@@ -474,6 +474,7 @@
       </div>
     </div>
     <div class="modal-footer">
+      <button class="btn btn-primary" onclick="saveGame(true)">Захаваць і дадаць беларусізатар</button>
       <button class="btn btn-primary" onclick="saveGame()">Захаваць</button>
     </div>
   </div>
@@ -784,7 +785,7 @@ function openGameModal(gameOrId) {
   openModal('modal-game');
 }
 
-async function saveGame() {
+async function saveGame(openTranslationAfter = false) {
   const id = document.getElementById('game-id').value;
   const genreIDs = [...document.querySelectorAll('#g-genres-list input:checked')].map(i => parseInt(i.value));
   const platforms = [...document.querySelectorAll('#g-platforms-list input:checked')].map(i => i.value);
@@ -806,11 +807,13 @@ async function saveGame() {
     toast('Назва, slug і распрацоўшчык — абавязковыя', 'err'); return;
   }
   try {
+    let savedGameID = id ? parseInt(id) : 0;
     if (id) {
       await apiReq('PUT', `/api/admin/games/${id}`, body);
       toast('Гульня абноўлена ✓');
     } else {
-      await apiReq('POST', '/api/admin/games', body);
+      const created = await apiReq('POST', '/api/admin/games', body);
+      savedGameID = created.id;
       if (_pendingAcceptedSubmissionId) {
         await apiReq('POST', `/api/admin/translation-submissions/${_pendingAcceptedSubmissionId}/accept`);
         _pendingAcceptedSubmissionId = null;
@@ -818,8 +821,9 @@ async function saveGame() {
       toast('Гульня дададзена ✓');
     }
     closeModal('modal-game');
-    loadGames();
+    await loadGames();
     if (document.getElementById('sec-submissions').classList.contains('active')) loadSubmissions();
+    if (openTranslationAfter && savedGameID) openTranslationModal({ game_id: savedGameID });
   } catch (e) { toast(e.message, 'err'); }
 }
 
