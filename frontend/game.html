@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>JAVAR — Гульня</title>
+  <link rel="icon" type="image/svg+xml" href="JaVar_icon.svg" />
   <!-- Fonts: async, non-blocking for rendering -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -257,17 +258,20 @@ function esc(value) {
 
 function platformStoreURL(platform, game) {
   const name = String(platform || '').toLowerCase();
+  const plainTitle = game.title || '';
+  const encodedTitle = encodeURIComponent(plainTitle);
+  if (name === 'xbox') return `https://www.xbox.com/search?q=${encodedTitle}`;
+  if (name === 'playstation') return `https://store.playstation.com/search/${encodedTitle}`;
+  if (name === 'nintendo switch') return `https://www.nintendo.com/search/#q=${encodedTitle}&p=1&cat=gme`;
+  if (name === 'ios') return `https://www.apple.com/search/${encodedTitle}?src=serp`;
+  if (name === 'android') return `https://play.google.com/store/search?q=${encodedTitle}&c=apps`;
+
   const title = game.title ? `"${game.title}"` : '';
   const developer = game.developer ? `"${game.developer}"` : '';
   const stores = {
     windows: 'Steam GOG Epic Games Microsoft Store',
     macos: 'Steam GOG Epic Games Mac App Store',
-    linux: 'Steam GOG itch.io',
-    xbox: 'Xbox Store Microsoft Store',
-    playstation: 'PlayStation Store',
-    'nintendo switch': 'Nintendo eShop',
-    ios: 'App Store',
-    android: 'Google Play'
+    linux: 'Steam GOG itch.io'
   };
   const query = `${title} ${developer} game ${platform} official store buy ${stores[name] || 'store'}`.trim();
   return `https://search.brave.com/search?q=${encodeURIComponent(query)}`;
