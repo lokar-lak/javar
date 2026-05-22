@@ -81,11 +81,17 @@ func (r *Repo) ListGames(f model.GameFilter) ([]model.Game, error) {
 		q += ` AND t.orthography = ?`
 		args = append(args, f.Orthography)
 	}
+	if f.Official != "" {
+		q += ` AND t.official_status = ?`
+		args = append(args, f.Official)
+	}
 
 	// ── Sorting ──────────────────────────────────────────────────────────
 	sortBy := "g.created_at"
 	sortOrder := "DESC"
 	switch f.SortBy {
+	case "release_date":
+		sortBy = "g.release_date"
 	case "steam_rating":
 		sortBy = "g.steam_rating"
 	case "best_rating":

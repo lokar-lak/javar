@@ -294,6 +294,25 @@
           </div>
         </div>
 
+        <!-- Official status -->
+        <div class="dropdown" id="dd-official">
+          <div class="dropdown__trigger" id="dd-official-trigger">
+            Афіцыйнасць <span class="dropdown__arrow">▾</span>
+          </div>
+          <div class="dropdown__menu">
+            <div class="dropdown__item selected" data-value="">
+              <span class="check">✓</span> Любы статус
+            </div>
+            <div class="dropdown__divider"></div>
+            <div class="dropdown__item" data-value="official">
+              <span class="check"></span> Афіцыйны
+            </div>
+            <div class="dropdown__item" data-value="unofficial">
+              <span class="check"></span> Неафіцыйны
+            </div>
+          </div>
+        </div>
+
         <!-- Sort -->
         <div class="dropdown" id="dd-sort">
           <div class="dropdown__trigger" id="dd-sort-trigger">
@@ -305,6 +324,13 @@
             </div>
             <div class="dropdown__item" data-value="created_at,asc">
               <span class="check"></span> Па даце (старыя)
+            </div>
+            <div class="dropdown__divider"></div>
+            <div class="dropdown__item" data-value="release_date,desc">
+              <span class="check"></span> Па даце выхаду (новыя)
+            </div>
+            <div class="dropdown__item" data-value="release_date,asc">
+              <span class="check"></span> Па даце выхаду (старыя)
             </div>
             <div class="dropdown__divider"></div>
             <div class="dropdown__item" data-value="steam_rating,desc">
@@ -372,6 +398,7 @@ const state = {
   genreName:   '',
   type:        '',
   orthography: '',
+  official:    '',
   sortBy:      'created_at',
   sortOrder:   'desc',
   page:        0,
@@ -452,6 +479,13 @@ initDropdown('dd-orth', (value, label) => {
   loadGames();
 });
 
+initDropdown('dd-official', (value, label) => {
+  state.official = value;
+  state.page = 0;
+  updateChips();
+  loadGames();
+});
+
 initDropdown('dd-sort', (value, label) => {
   const [sortBy, sortOrder] = value.split(',');
   state.sortBy    = sortBy || 'created_at';
@@ -492,6 +526,7 @@ searchInput.addEventListener('input', () => {
 // ── Active filter chips ───────────────────────────────────────────────────
 const ORTH_LABELS = { academic: 'Акадэмічны', tarashkevitsa: 'Альтэрнатыўны', lacinka: 'Лацінка' };
 const TYPE_LABELS = { manual: 'Ручны пераклад', ai: 'ШІ-пераклад' };
+const OFFICIAL_LABELS = { official: 'Афіцыйны', unofficial: 'Неафіцыйны' };
 
 function updateChips() {
   const cont = document.getElementById('active-filters');
@@ -508,6 +543,8 @@ function updateChips() {
     chips.push({ label: TYPE_LABELS[state.type], clear: () => { state.type = ''; resetDropdown('dd-type'); } });
   if (state.orthography)
     chips.push({ label: ORTH_LABELS[state.orthography], clear: () => { state.orthography = ''; resetDropdown('dd-orth'); } });
+  if (state.official)
+    chips.push({ label: OFFICIAL_LABELS[state.official], clear: () => { state.official = ''; resetDropdown('dd-official'); } });
 
   cont.innerHTML = chips.map((c, i) =>
     `<div class="chip">${c.label}<span class="chip__remove" data-idx="${i}">✕</span></div>`
@@ -555,6 +592,7 @@ async function loadGames() {
   if (state.genreId)     params.set('genre_id',    state.genreId);
   if (state.type)        params.set('type',         state.type);
   if (state.orthography) params.set('orthography',  state.orthography);
+  if (state.official)    params.set('official_status', state.official);
   if (state.sortBy)      params.set('sort_by',     state.sortBy);
   if (state.sortOrder)   params.set('sort_order',  state.sortOrder);
   params.set('page',  state.page);

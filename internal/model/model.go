@@ -113,7 +113,8 @@ type GameFilter struct {
 	GenreID     int    // genre filter (ID)
 	Type        string // "manual" | "ai" | ""
 	Orthography string // "academic" | "tarashkevitsa" | "lacinka" | ""
-	SortBy      string // "created_at" | "steam_rating" | "best_rating"
+	Official    string // "official" | "unofficial" | ""
+	SortBy      string // "created_at" | "release_date" | "steam_rating" | "best_rating"
 	SortOrder   string // "asc" | "desc"
 	Page        int
 	Limit       int
