@@ -104,6 +104,18 @@
     error.classList.toggle('visible', !!message);
   }
 
+  function showSuccess(message) {
+    const toast = document.createElement('div');
+    toast.className = 'submission-toast';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    requestAnimationFrame(() => toast.classList.add('show'));
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => toast.remove(), 250);
+    }, 3200);
+  }
+
   function openModal() {
     createModal();
     updateUnofficialFields();
@@ -199,7 +211,7 @@
       form.reset();
       updateUnofficialFields();
       closeModal();
-      alert('Дзякуй! Прапанова адпраўлена на мадэрацыю.');
+      showSuccess('Дзякуй! Прапанова адпраўлена на мадэрацыю.');
     } catch {
       showError('Памылка сеткі. Паспрабуйце яшчэ раз.');
     } finally {

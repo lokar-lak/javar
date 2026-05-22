@@ -518,8 +518,19 @@
         <input class="form-input" id="tr-translators" placeholder="Іван Іваноў, Марыя Петрова"/>
       </div>
       <div class="form-group span-2">
-        <label>Тым лакалізацыі</label>
-        <input class="form-input" id="tr-coverage" placeholder="Субтытры, Меню, Інвентар"/>
+        <label>Тып лакалізацыі</label>
+        <div id="tr-coverage" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px">
+          <label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:12px;font-weight:600;color:var(--text-muted);transition:all .15s">
+            <input type="checkbox" value="Тэкст" style="display:none"
+              onchange="this.parentElement.style.borderColor=this.checked?'var(--accent)':'var(--border)';this.parentElement.style.color=this.checked?'var(--accent)':'var(--text-muted)'">
+            Тэкст
+          </label>
+          <label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:12px;font-weight:600;color:var(--text-muted);transition:all .15s">
+            <input type="checkbox" value="Агучка" style="display:none"
+              onchange="this.parentElement.style.borderColor=this.checked?'var(--accent)':'var(--border)';this.parentElement.style.color=this.checked?'var(--accent)':'var(--text-muted)'">
+            Агучка
+          </label>
+        </div>
       </div>
       <div class="form-group span-2">
         <label>Спасылка *</label>
@@ -896,7 +907,11 @@ function openTranslationModal(tOrId) {
   document.getElementById('tr-orth').value        = t?.orthography || 'academic';
   document.getElementById('tr-official').value    = t?.official_status || 'unofficial';
   document.getElementById('tr-translators').value = (t?.translator_names||[]).join(', ');
-  document.getElementById('tr-coverage').value    = (t?.coverage||[]).join(', ');
+  const selectedCoverage = t?.coverage || [];
+  document.querySelectorAll('#tr-coverage input').forEach(input => {
+    input.checked = selectedCoverage.includes(input.value);
+    input.dispatchEvent(new Event('change'));
+  });
   document.getElementById('tr-url').value         = t?.external_url || '';
   openModal('modal-translation');
 }
@@ -910,7 +925,7 @@ async function saveTranslation() {
     orthography:      document.getElementById('tr-orth').value,
     external_url:     document.getElementById('tr-url').value.trim(),
     translator_names: document.getElementById('tr-translators').value.split(',').map(s=>s.trim()).filter(Boolean),
-    coverage:         document.getElementById('tr-coverage').value.split(',').map(s=>s.trim()).filter(Boolean),
+    coverage:         [...document.querySelectorAll('#tr-coverage input:checked')].map(i => i.value),
   };
   if (!body.external_url) {
     toast('Спасылка — абавязковая', 'err'); return;

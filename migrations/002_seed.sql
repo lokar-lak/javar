@@ -28,14 +28,14 @@ INSERT INTO translations (game_id, translator_names, type, coverage, external_ur
     1,
     '["Аляксей Краўчанка", "Марына Петрова", "Іван Сідараў"]',
     'manual',
-    '["Субтытры", "Меню", "Інвентар", "Дакументы"]',
+    '["Тэкст"]',
     'https://www.nexusmods.com/silenthill2/mods/1'
 ),
 (
     1,
     '["GPT-4o"]',
     'ai',
-    '["Субтытры"]',
+    '["Тэкст"]',
     'https://www.nexusmods.com/silenthill2/mods/2'
 );
 

@@ -998,6 +998,30 @@ fieldset.submission-field { border: 0; padding: 0; }
 }
 .submission-error.visible { display: block; }
 
+.submission-toast {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 1200;
+  max-width: 360px;
+  padding: 14px 18px;
+  border: 1px solid var(--green);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  color: var(--green);
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 700;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.25s, transform 0.25s;
+}
+.submission-toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 .submission-actions {
   display: flex;
   justify-content: flex-end;

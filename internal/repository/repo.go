@@ -325,6 +325,7 @@ func (r *Repo) CreateTranslation(req model.CreateTranslationRequest) (int64, err
 		req.OfficialStatus = "unofficial"
 	}
 	namesJSON, _ := json.Marshal(req.TranslatorNames)
+	req.Coverage = normalizeCoverageValues(req.Coverage)
 	coverageJSON, _ := json.Marshal(req.Coverage)
 	res, err := r.db.Exec(`
 		INSERT INTO translations (game_id,translator_names,type,official_status,orthography,coverage,external_url)
@@ -345,6 +346,7 @@ func (r *Repo) UpdateTranslation(id int, req model.CreateTranslationRequest) err
 		req.OfficialStatus = "unofficial"
 	}
 	namesJSON, _ := json.Marshal(req.TranslatorNames)
+	req.Coverage = normalizeCoverageValues(req.Coverage)
 	coverageJSON, _ := json.Marshal(req.Coverage)
 	_, err := r.db.Exec(`
 		UPDATE translations SET translator_names=?,type=?,official_status=?,orthography=?,
@@ -357,6 +359,31 @@ func (r *Repo) UpdateTranslation(id int, req model.CreateTranslationRequest) err
 func (r *Repo) DeleteTranslation(id int) error {
 	_, err := r.db.Exec(`DELETE FROM translations WHERE id=?`, id)
 	return err
+}
+
+func normalizeCoverageValues(values []string) []string {
+	hasText := false
+	hasVoice := false
+	for _, value := range values {
+		v := strings.ToLower(strings.TrimSpace(value))
+		if v == "" {
+			continue
+		}
+		if strings.Contains(v, "агуч") || strings.Contains(v, "озвуч") || strings.Contains(v, "voice") || strings.Contains(v, "audio") {
+			hasVoice = true
+			continue
+		}
+		hasText = true
+	}
+
+	var out []string
+	if hasText {
+		out = append(out, "Тэкст")
+	}
+	if hasVoice {
+		out = append(out, "Агучка")
+	}
+	return out
 }
 
 func (r *Repo) IncrementClick(id int) (string, error) {

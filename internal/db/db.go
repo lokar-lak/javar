@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
@@ -115,7 +116,73 @@ func migrate(db *sql.DB) error {
 	if err := seedSteamTagGenres(db); err != nil {
 		return err
 	}
+	if err := normalizeTranslationCoverage(db); err != nil {
+		return err
+	}
 	return nil
+}
+
+func normalizeTranslationCoverage(db *sql.DB) error {
+	rows, err := db.Query(`SELECT id, coverage FROM translations`)
+	if err != nil {
+		return fmt.Errorf("list translation coverage: %w", err)
+	}
+	defer rows.Close()
+
+	type item struct {
+		id       int
+		coverage string
+	}
+	var items []item
+	for rows.Next() {
+		var it item
+		if err := rows.Scan(&it.id, &it.coverage); err != nil {
+			return fmt.Errorf("scan translation coverage: %w", err)
+		}
+		items = append(items, it)
+	}
+	if err := rows.Err(); err != nil {
+		return fmt.Errorf("iterate translation coverage: %w", err)
+	}
+
+	for _, it := range items {
+		var values []string
+		json.Unmarshal([]byte(it.coverage), &values)
+		normalized := normalizeCoverageValues(values)
+		data, _ := json.Marshal(normalized)
+		if string(data) == it.coverage {
+			continue
+		}
+		if _, err := db.Exec(`UPDATE translations SET coverage=? WHERE id=?`, string(data), it.id); err != nil {
+			return fmt.Errorf("update translation coverage %d: %w", it.id, err)
+		}
+	}
+	return nil
+}
+
+func normalizeCoverageValues(values []string) []string {
+	hasText := false
+	hasVoice := false
+	for _, value := range values {
+		v := strings.ToLower(strings.TrimSpace(value))
+		if v == "" {
+			continue
+		}
+		if strings.Contains(v, "агуч") || strings.Contains(v, "озвуч") || strings.Contains(v, "voice") || strings.Contains(v, "audio") {
+			hasVoice = true
+			continue
+		}
+		hasText = true
+	}
+
+	var out []string
+	if hasText {
+		out = append(out, "Тэкст")
+	}
+	if hasVoice {
+		out = append(out, "Агучка")
+	}
+	return out
 }
 
 func seedSteamTagGenres(db *sql.DB) error {
