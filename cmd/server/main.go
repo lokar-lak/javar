@@ -42,7 +42,8 @@ func main() {
 	if port == "" {
 		port = "8082"
 	}
-	adminToken := os.Getenv("ADMIN_TOKEN") // optional
+	adminPasswordHash := os.Getenv("ADMIN_PASSWORD_HASH")
+	sessionSecret := os.Getenv("SESSION_SECRET")
 
 	database, err := db.Open("javar.db")
 	if err != nil {
@@ -72,31 +73,36 @@ func main() {
 		r.Post("/translation-submissions", h.CreateTranslationSubmission)
 	})
 
-	// ── Admin API (token-protected) ───────────────────────
+	// ── Admin API ─────────────────────────────────────────
 	r.Route("/api/admin", func(r chi.Router) {
-		r.Use(h.AdminMiddleware(adminToken))
+		r.Post("/login", h.AdminLogin(adminPasswordHash, sessionSecret))
+		r.Post("/logout", h.AdminLogout)
 
-		r.Post("/games", h.CreateGame)
-		r.Put("/games/{id}", h.UpdateGame)
-		r.Delete("/games/{id}", h.DeleteGame)
+		r.Group(func(r chi.Router) {
+			r.Use(h.AdminMiddleware(sessionSecret))
 
-		r.Post("/translations", h.CreateTranslation)
-		r.Put("/translations/{id}", h.UpdateTranslation)
-		r.Delete("/translations/{id}", h.DeleteTranslation)
+			r.Post("/games", h.CreateGame)
+			r.Put("/games/{id}", h.UpdateGame)
+			r.Delete("/games/{id}", h.DeleteGame)
 
-		r.Delete("/reviews/{id}", h.DeleteReview)
+			r.Post("/translations", h.CreateTranslation)
+			r.Put("/translations/{id}", h.UpdateTranslation)
+			r.Delete("/translations/{id}", h.DeleteTranslation)
 
-		r.Get("/stats", h.GetStats)
-		r.Get("/steam-meta", h.GetSteamMeta)
-		r.Get("/reviews", h.ListAllReviews)
-		r.Get("/translations", h.ListAllTranslations)
-		r.Get("/translation-submissions", h.ListAllTranslationSubmissions)
-		r.Post("/translation-submissions/{id}/accept", h.AcceptTranslationSubmission)
-		r.Delete("/translation-submissions/{id}", h.DeleteTranslationSubmission)
-		r.Post("/genres", h.CreateGenre)
-		r.Delete("/genres/{id}", h.DeleteGenre)
-		r.Get("/export/csv", h.ExportCSV)
-		r.Post("/upload", h.UploadImage)
+			r.Delete("/reviews/{id}", h.DeleteReview)
+
+			r.Get("/stats", h.GetStats)
+			r.Get("/steam-meta", h.GetSteamMeta)
+			r.Get("/reviews", h.ListAllReviews)
+			r.Get("/translations", h.ListAllTranslations)
+			r.Get("/translation-submissions", h.ListAllTranslationSubmissions)
+			r.Post("/translation-submissions/{id}/accept", h.AcceptTranslationSubmission)
+			r.Delete("/translation-submissions/{id}", h.DeleteTranslationSubmission)
+			r.Post("/genres", h.CreateGenre)
+			r.Delete("/genres/{id}", h.DeleteGenre)
+			r.Get("/export/csv", h.ExportCSV)
+			r.Post("/upload", h.UploadImage)
+		})
 	})
 
 	// ── Static frontend ────────────────────────────────────
@@ -124,7 +130,7 @@ func cors(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, X-Admin-Token")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 		if r.Method == http.MethodOptions {
 			w.WriteHeader(http.StatusNoContent)
 			return

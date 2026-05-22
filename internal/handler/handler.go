@@ -2,7 +2,10 @@ package handler
 
 import (
 	"context"
+	"crypto/hmac"
+	"crypto/sha256"
 	"database/sql"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -15,10 +18,13 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
+	"golang.org/x/crypto/bcrypt"
 
 	"javar/internal/model"
 	"javar/internal/repository"
 )
+
+const adminSessionCookie = "javar_admin_session"
 
 type Handler struct {
 	repo *repository.Repo
@@ -231,18 +237,95 @@ func validHTTPURL(raw string) bool {
 }
 
 // ── ADMIN ─────────────────────────────────────────────────────────────────
-// Simple protection: X-Admin-Token header is matched against ADMIN_TOKEN env var
 
-func (h *Handler) AdminMiddleware(adminToken string) func(http.Handler) http.Handler {
+func (h *Handler) AdminLogin(passwordHash, sessionSecret string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if passwordHash == "" || sessionSecret == "" {
+			writeError(w, 503, "admin auth is not configured")
+			return
+		}
+
+		var req struct {
+			Password string `json:"password"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil || req.Password == "" {
+			writeError(w, 400, "password required")
+			return
+		}
+
+		if err := bcrypt.CompareHashAndPassword([]byte(passwordHash), []byte(req.Password)); err != nil {
+			writeError(w, 401, "unauthorized")
+			return
+		}
+
+		setAdminSessionCookie(w, r, sessionSecret, time.Now().Add(8*time.Hour))
+		writeJSON(w, 200, map[string]string{"status": "ok"})
+	}
+}
+
+func (h *Handler) AdminLogout(w http.ResponseWriter, r *http.Request) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     adminSessionCookie,
+		Value:    "",
+		Path:     "/",
+		MaxAge:   -1,
+		HttpOnly: true,
+		SameSite: http.SameSiteStrictMode,
+		Secure:   adminCookieSecure(r),
+	})
+	writeJSON(w, 200, map[string]string{"status": "ok"})
+}
+
+func (h *Handler) AdminMiddleware(sessionSecret string) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if adminToken == "" || r.Header.Get("X-Admin-Token") != adminToken {
+			if sessionSecret == "" || !validAdminSession(r, sessionSecret) {
 				writeError(w, 401, "unauthorized")
 				return
 			}
 			next.ServeHTTP(w, r)
 		})
 	}
+}
+
+func setAdminSessionCookie(w http.ResponseWriter, r *http.Request, secret string, expires time.Time) {
+	exp := strconv.FormatInt(expires.Unix(), 10)
+	http.SetCookie(w, &http.Cookie{
+		Name:     adminSessionCookie,
+		Value:    exp + "." + signAdminSession(exp, secret),
+		Path:     "/",
+		Expires:  expires,
+		MaxAge:   int(time.Until(expires).Seconds()),
+		HttpOnly: true,
+		SameSite: http.SameSiteStrictMode,
+		Secure:   adminCookieSecure(r),
+	})
+}
+
+func validAdminSession(r *http.Request, secret string) bool {
+	cookie, err := r.Cookie(adminSessionCookie)
+	if err != nil {
+		return false
+	}
+	parts := strings.SplitN(cookie.Value, ".", 2)
+	if len(parts) != 2 {
+		return false
+	}
+	expires, err := strconv.ParseInt(parts[0], 10, 64)
+	if err != nil || time.Now().Unix() > expires {
+		return false
+	}
+	return hmac.Equal([]byte(parts[1]), []byte(signAdminSession(parts[0], secret)))
+}
+
+func signAdminSession(value, secret string) string {
+	mac := hmac.New(sha256.New, []byte(secret))
+	mac.Write([]byte(value))
+	return base64.RawURLEncoding.EncodeToString(mac.Sum(nil))
+}
+
+func adminCookieSecure(r *http.Request) bool {
+	return r.TLS != nil || r.Header.Get("X-Forwarded-Proto") == "https"
 }
 
 // POST /api/admin/games
