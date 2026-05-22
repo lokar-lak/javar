@@ -138,7 +138,7 @@ func fetchSteamGameMeta(ctx context.Context, appURL string) (*model.SteamGameMet
 		}
 	}
 	if entry.Data.Platforms.Windows {
-		meta.Platforms = append(meta.Platforms, "ПК")
+		meta.Platforms = append(meta.Platforms, "Windows")
 	}
 	if entry.Data.Platforms.Mac {
 		meta.Platforms = append(meta.Platforms, "macOS")
