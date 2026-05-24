@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"javar/internal/model"
@@ -166,6 +167,52 @@ func steamReleaseDateToISO(date string) string {
 		}
 	}
 	return ""
+}
+
+// enrichGamesFromSteam fills cover_url for games missing it, using concurrent Steam API calls.
+func enrichGamesFromSteam(ctx context.Context, games []model.Game) {
+	type task struct {
+		idx   int
+		appID int
+	}
+	var tasks []task
+	for i, g := range games {
+		if g.SteamDBURL == "" || g.CoverURL != "" {
+			continue
+		}
+		id, ok := steamAppIDFromURL(g.SteamDBURL)
+		if !ok {
+			continue
+		}
+		tasks = append(tasks, task{idx: i, appID: id})
+	}
+	if len(tasks) == 0 {
+		return
+	}
+
+	var mu sync.Mutex
+	var wg sync.WaitGroup
+	sem := make(chan struct{}, 5) // max 5 concurrent requests
+
+	for _, t := range tasks {
+		wg.Add(1)
+		go func(t task) {
+			defer wg.Done()
+			sem <- struct{}{}
+			defer func() { <-sem }()
+
+			reqCtx, cancel := context.WithTimeout(ctx, 4*time.Second)
+			defer cancel()
+
+			img, err := fetchSteamHeaderImage(reqCtx, t.appID)
+			if err == nil && img != "" {
+				mu.Lock()
+				games[t.idx].CoverURL = img
+				mu.Unlock()
+			}
+		}(t)
+	}
+	wg.Wait()
 }
 
 func fetchSteamRating(ctx context.Context, appID int) (*int, error) {

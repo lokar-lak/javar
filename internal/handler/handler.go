@@ -90,6 +90,7 @@ func (h *Handler) ListGames(w http.ResponseWriter, r *http.Request) {
 	if games == nil {
 		games = []model.Game{}
 	}
+	enrichGamesFromSteam(r.Context(), games)
 	writeJSON(w, 200, games)
 }
 
