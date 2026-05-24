@@ -672,7 +672,8 @@ function confirm(text, cb) {
 async function initApp() {
   try {
     _genres = await fetch(API + '/api/genres').then(r => r.json());
-    _games  = await apiReq('GET', '/api/admin/games');
+    const res = await fetch(API + '/api/games?limit=500');
+    _games  = await res.json();
     _gamesMap = Object.fromEntries(_games.map(g => [g.id, g]));
   } catch {}
   loadDashboard();
@@ -708,34 +709,41 @@ async function loadDashboard() {
 // ══ GAMES ═════════════════════════════════════════════════════════════════
 
 async function loadGames() {
-  await renderGamesTable();
+  try {
+    const res = await fetch(API + '/api/games?limit=500');
+    _games  = await res.json();
+    _gamesMap = Object.fromEntries(_games.map(g => [g.id, g]));
+  } catch (e) { toast(e.message, 'err'); }
+  renderGamesTable();
 }
 
 async function renderGamesTable() {
   const query = (document.getElementById('games-search')?.value || '').trim();
-  let list;
-  try {
-    const params = query ? '?search=' + encodeURIComponent(query) : '';
-    list = await apiReq('GET', '/api/admin/games' + params);
-  } catch (e) { toast(e.message, 'err'); return; }
+  let list = _games;
+  if (query) {
+    try {
+      const res = await fetch(API + '/api/games?limit=100&search=' + encodeURIComponent(query));
+      list = await res.json();
+    } catch (e) { toast(e.message, 'err'); return; }
+  }
   const tbody = document.getElementById('games-body');
-    if (!list.length) {
-      tbody.innerHTML = '<tr><td colspan="6" class="empty">Гульняў няма</td></tr>'; return;
-    }
-    tbody.innerHTML = list.map(g => `
-      <tr>
-        <td><strong>${g.title}</strong><br/><span style="font-size:11px;color:var(--text-muted)">${g.slug}</span></td>
-        <td>${g.developer}</td>
-        <td>${g.steam_rating != null ? `<span style="color:var(--green);font-family:var(--mono)">${g.steam_rating}%</span>` : '—'}</td>
-        <td>${(g.genres||[]).map(x => `<span class="badge badge-genre" style="font-size:10px">${x.name}</span>`).join(' ')}<br/><span style="font-size:11px;color:var(--text-muted)">${(g.platforms||[]).join(', ')||'—'}</span></td>
-        <td style="color:var(--text-muted);font-size:12px">${g.release_date||'—'}</td>
-        <td>
-          <div class="td-actions">
-            <button class="btn btn-ghost btn-sm" onclick="openGameModal(${g.id})">✏️</button>
-            <button class="btn btn-danger btn-sm" onclick="deleteGame(${g.id},'${g.title.replace(/'/g,"\\'")}')">🗑</button>
-          </div>
-        </td>
-      </tr>`).join('');
+  if (!list || !list.length) {
+    tbody.innerHTML = '<tr><td colspan="6" class="empty">Гульняў няма</td></tr>'; return;
+  }
+  tbody.innerHTML = list.map(g => `
+    <tr>
+      <td><strong>${g.title}</strong><br/><span style="font-size:11px;color:var(--text-muted)">${g.slug}</span></td>
+      <td>${g.developer}</td>
+      <td>${g.steam_rating != null ? `<span style="color:var(--green);font-family:var(--mono)">${g.steam_rating}%</span>` : '—'}</td>
+      <td>${(g.genres||[]).map(x => `<span class="badge badge-genre" style="font-size:10px">${x.name}</span>`).join(' ')}<br/><span style="font-size:11px;color:var(--text-muted)">${(g.platforms||[]).join(', ')||'—'}</span></td>
+      <td style="color:var(--text-muted);font-size:12px">${g.release_date||'—'}</td>
+      <td>
+        <div class="td-actions">
+          <button class="btn btn-ghost btn-sm" onclick="openGameModal(${g.id})">✏️</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteGame(${g.id},'${g.title.replace(/'/g,"\\'")}')">🗑</button>
+        </div>
+      </td>
+    </tr>`).join('');
 }
 
 function openGameModal(gameOrId) {

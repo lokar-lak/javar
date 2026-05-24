@@ -39,7 +39,7 @@ func (r *Repo) ListGenres() ([]model.Genre, error) {
 // ═══ GAMES ═══════════════════════════════════════════════════════════════
 
 func (r *Repo) ListGames(f model.GameFilter) ([]model.Game, error) {
-	if f.Limit <= 0 || f.Limit > 50 {
+	if f.Limit <= 0 || f.Limit > 500 {
 		f.Limit = 20
 	}
 
