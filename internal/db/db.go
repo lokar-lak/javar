@@ -113,6 +113,21 @@ func migrate(db *sql.DB) error {
 		return fmt.Errorf("create translation_submissions: %w", err)
 	}
 
+	if _, err := db.Exec(`
+		CREATE TABLE IF NOT EXISTS click_events (
+			id             INTEGER PRIMARY KEY AUTOINCREMENT,
+			translation_id INTEGER NOT NULL REFERENCES translations(id) ON DELETE CASCADE,
+			ip             TEXT    NOT NULL,
+			created_at     DATETIME DEFAULT CURRENT_TIMESTAMP
+		)`); err != nil {
+		return fmt.Errorf("create click_events: %w", err)
+	}
+	if _, err := db.Exec(`
+		CREATE INDEX IF NOT EXISTS idx_click_events_lookup
+		ON click_events(translation_id, ip, created_at)`); err != nil {
+		return fmt.Errorf("create click_events index: %w", err)
+	}
+
 	if err := seedSteamTagGenres(db); err != nil {
 		return err
 	}

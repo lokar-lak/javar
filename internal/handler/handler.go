@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"net/url"
 	"os"
@@ -118,7 +119,16 @@ func (h *Handler) TrackClick(w http.ResponseWriter, r *http.Request) {
 		writeError(w, 400, "invalid id")
 		return
 	}
-	url, err := h.repo.IncrementClick(id)
+	ip := r.RemoteAddr
+	if host, _, err := net.SplitHostPort(ip); err == nil {
+		ip = host
+	}
+	if forwarded := r.Header.Get("X-Forwarded-For"); forwarded != "" {
+		if parts := strings.SplitN(forwarded, ",", 2); len(parts) > 0 {
+			ip = strings.TrimSpace(parts[0])
+		}
+	}
+	url, err := h.repo.IncrementClick(id, ip)
 	if err != nil {
 		writeError(w, 404, "translation not found")
 		return

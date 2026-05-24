@@ -386,12 +386,17 @@ func normalizeCoverageValues(values []string) []string {
 	return out
 }
 
-func (r *Repo) IncrementClick(id int) (string, error) {
+func (r *Repo) IncrementClick(id int, ip string) (string, error) {
 	var url string
 	if err := r.db.QueryRow(`SELECT external_url FROM translations WHERE id=?`, id).Scan(&url); err != nil {
 		return "", fmt.Errorf("not found")
 	}
-	r.db.Exec(`UPDATE translations SET click_count=click_count+1 WHERE id=?`, id)
+	var exists int
+	err := r.db.QueryRow(`SELECT 1 FROM click_events WHERE translation_id=? AND ip=? AND created_at > datetime('now', '-24 hours')`, id, ip).Scan(&exists)
+	if err == sql.ErrNoRows {
+		r.db.Exec(`INSERT INTO click_events(translation_id, ip) VALUES(?,?)`, id, ip)
+		r.db.Exec(`UPDATE translations SET click_count=click_count+1 WHERE id=?`, id)
+	}
 	return url, nil
 }
 
