@@ -672,7 +672,7 @@ function confirm(text, cb) {
 async function initApp() {
   try {
     _genres = await fetch(API + '/api/genres').then(r => r.json());
-    _games  = await fetch(API + '/api/games?limit=50').then(r => r.json());
+    _games  = await apiReq('GET', '/api/admin/games');
     _gamesMap = Object.fromEntries(_games.map(g => [g.id, g]));
   } catch {}
   loadDashboard();
@@ -708,19 +708,17 @@ async function loadDashboard() {
 // ══ GAMES ═════════════════════════════════════════════════════════════════
 
 async function loadGames() {
-  try {
-    _games = await apiReq('GET', '/api/games?limit=50');
-    _gamesMap = Object.fromEntries(_games.map(g => [g.id, g]));
-    renderGamesTable();
-  } catch (e) { toast(e.message, 'err'); }
+  await renderGamesTable();
 }
 
-function renderGamesTable() {
-  const query = (document.getElementById('games-search')?.value || '').trim().toLowerCase();
-  const list = query
-    ? _games.filter(g => (g.title || '').toLowerCase().includes(query))
-    : _games;
-    const tbody = document.getElementById('games-body');
+async function renderGamesTable() {
+  const query = (document.getElementById('games-search')?.value || '').trim();
+  let list;
+  try {
+    const params = query ? '?search=' + encodeURIComponent(query) : '';
+    list = await apiReq('GET', '/api/admin/games' + params);
+  } catch (e) { toast(e.message, 'err'); return; }
+  const tbody = document.getElementById('games-body');
     if (!list.length) {
       tbody.innerHTML = '<tr><td colspan="6" class="empty">Гульняў няма</td></tr>'; return;
     }

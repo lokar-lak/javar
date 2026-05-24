@@ -81,6 +81,7 @@ func main() {
 		r.Group(func(r chi.Router) {
 			r.Use(h.AdminMiddleware(sessionSecret))
 
+			r.Get("/games", h.ListAllGames)
 			r.Post("/games", h.CreateGame)
 			r.Put("/games/{id}", h.UpdateGame)
 			r.Delete("/games/{id}", h.DeleteGame)

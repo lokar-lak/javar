@@ -395,6 +395,52 @@ func (r *Repo) IncrementClick(id int) (string, error) {
 	return url, nil
 }
 
+func (r *Repo) ListAllGames(search string) ([]model.Game, error) {
+	q := `SELECT id, title, slug, developer,
+	       COALESCE(publisher,''), COALESCE(release_date,''),
+	       COALESCE(description,''), COALESCE(cover_url,''), COALESCE(steamdb_url,''),
+	       COALESCE(platforms,'[]'), steam_rating, created_at
+	FROM games`
+	var args []any
+	if search != "" {
+		q += ` WHERE LOWER(title) LIKE LOWER(?) OR LOWER(developer) LIKE LOWER(?)`
+		like := "%" + search + "%"
+		args = append(args, like, like)
+	}
+	q += ` ORDER BY title`
+	rows, err := r.db.Query(q, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var games []model.Game
+	for rows.Next() {
+		var g model.Game
+		var rating sql.NullInt64
+		var platformsJSON string
+		if err := rows.Scan(&g.ID, &g.Title, &g.Slug, &g.Developer, &g.Publisher,
+			&g.ReleaseDate, &g.Description, &g.CoverURL, &g.SteamDBURL, &platformsJSON, &rating, &g.CreatedAt); err != nil {
+			return nil, err
+		}
+		json.Unmarshal([]byte(platformsJSON), &g.Platforms)
+		if rating.Valid {
+			v := int(rating.Int64)
+			g.SteamRating = &v
+		}
+		games = append(games, g)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	for i := range games {
+		games[i].Genres, _ = r.genresByGame(games[i].ID)
+		games[i].HasOnlyAI = r.hasOnlyAI(games[i].ID)
+	}
+	return games, nil
+}
+
 // ═══ REVIEWS ═════════════════════════════════════════════════════════════
 
 func (r *Repo) ReviewsByTranslation(id int) ([]model.Review, error) {

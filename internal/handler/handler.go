@@ -236,6 +236,19 @@ func validHTTPURL(raw string) bool {
 	return err == nil && (u.Scheme == "http" || u.Scheme == "https") && u.Host != ""
 }
 
+func (h *Handler) ListAllGames(w http.ResponseWriter, r *http.Request) {
+	search := r.URL.Query().Get("search")
+	games, err := h.repo.ListAllGames(search)
+	if err != nil {
+		writeError(w, 500, "internal error")
+		return
+	}
+	if games == nil {
+		games = []model.Game{}
+	}
+	writeJSON(w, 200, games)
+}
+
 // ── ADMIN ─────────────────────────────────────────────────────────────────
 
 func (h *Handler) AdminLogin(passwordHash, sessionSecret string) http.HandlerFunc {
