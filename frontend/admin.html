@@ -843,12 +843,31 @@ async function saveGame(openTranslationAfter = false) {
 }
 
 function deleteGame(id, title) {
-  confirm(`Выдаліць гульню «${title}»? Усе пераклады і водгукі таксама будуць выдаленыя.`, async () => {
-    try {
-      await apiReq('DELETE', `/api/admin/games/${id}`);
-      toast('Гульня выдалена');
-      loadGames();
-    } catch (e) { toast(e.message, 'err'); }
+  apiReq('GET', `/api/admin/games/${id}/relations`).then(data => {
+    const tc = data.translations || 0;
+    const rc = data.reviews || 0;
+    let msg = `Выдаліць гульню «${title}»?`;
+    if (tc > 0 || rc > 0) {
+      const parts = [];
+      if (tc > 0) parts.push(`${tc} перакладаў`);
+      if (rc > 0) parts.push(`${rc} водгукаў`);
+      msg += ` Разам з ёй будуць выдалены ${parts.join(' і ')}.`;
+    }
+    confirm(msg, async () => {
+      try {
+        await apiReq('DELETE', `/api/admin/games/${id}`);
+        toast('Гульня выдалена');
+        loadGames();
+      } catch (e) { toast(e.message, 'err'); }
+    });
+  }).catch(() => {
+    confirm(`Выдаліць гульню «${title}»?`, async () => {
+      try {
+        await apiReq('DELETE', `/api/admin/games/${id}`);
+        toast('Гульня выдалена');
+        loadGames();
+      } catch (e) { toast(e.message, 'err'); }
+    });
   });
 }
 
@@ -948,12 +967,25 @@ async function saveTranslation() {
 }
 
 function deleteTranslation(id, name) {
-  confirm(`Выдаліць пераклад «${name}»?`, async () => {
-    try {
-      await apiReq('DELETE', `/api/admin/translations/${id}`);
-      toast('Пераклад выдалены');
-      loadTranslations();
-    } catch (e) { toast(e.message, 'err'); }
+  apiReq('GET', `/api/admin/translations/${id}/relations`).then(data => {
+    const rc = data.reviews || 0;
+    let msg = `Выдаліць пераклад «${name}»?`;
+    if (rc > 0) msg += ` Разам з ім будзе выдалена ${rc} водгукаў.`;
+    confirm(msg, async () => {
+      try {
+        await apiReq('DELETE', `/api/admin/translations/${id}`);
+        toast('Пераклад выдалены');
+        loadTranslations();
+      } catch (e) { toast(e.message, 'err'); }
+    });
+  }).catch(() => {
+    confirm(`Выдаліць пераклад «${name}»?`, async () => {
+      try {
+        await apiReq('DELETE', `/api/admin/translations/${id}`);
+        toast('Пераклад выдалены');
+        loadTranslations();
+      } catch (e) { toast(e.message, 'err'); }
+    });
   });
 }
 

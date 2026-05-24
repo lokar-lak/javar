@@ -396,6 +396,13 @@ func (h *Handler) DeleteGame(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, 200, map[string]string{"status": "deleted"})
 }
 
+// GET /api/admin/games/{id}/relations
+func (h *Handler) GameRelations(w http.ResponseWriter, r *http.Request) {
+	id, _ := strconv.Atoi(chi.URLParam(r, "id"))
+	translations, reviews := h.repo.GameRelationsCount(id)
+	writeJSON(w, 200, map[string]int{"translations": translations, "reviews": reviews})
+}
+
 // POST /api/admin/translations
 func (h *Handler) CreateTranslation(w http.ResponseWriter, r *http.Request) {
 	var req model.CreateTranslationRequest
@@ -434,6 +441,13 @@ func (h *Handler) DeleteTranslation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, 200, map[string]string{"status": "deleted"})
+}
+
+// GET /api/admin/translations/{id}/relations
+func (h *Handler) TranslationRelations(w http.ResponseWriter, r *http.Request) {
+	id, _ := strconv.Atoi(chi.URLParam(r, "id"))
+	reviews := h.repo.TranslationRelationsCount(id)
+	writeJSON(w, 200, map[string]int{"reviews": reviews})
 }
 
 // DELETE /api/admin/reviews/{id}

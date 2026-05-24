@@ -216,6 +216,12 @@ func (r *Repo) DeleteGame(id int) error {
 	return err
 }
 
+func (r *Repo) GameRelationsCount(id int) (translations, reviews int) {
+	r.db.QueryRow(`SELECT COUNT(*) FROM translations WHERE game_id=?`, id).Scan(&translations)
+	r.db.QueryRow(`SELECT COUNT(*) FROM reviews WHERE translation_id IN (SELECT id FROM translations WHERE game_id=?)`, id).Scan(&reviews)
+	return
+}
+
 func (r *Repo) hasOnlyAI(gameID int) bool {
 	var total, manual int
 	r.db.QueryRow(`SELECT COUNT(*) FROM translations WHERE game_id=?`, gameID).Scan(&total)
@@ -359,6 +365,11 @@ func (r *Repo) UpdateTranslation(id int, req model.CreateTranslationRequest) err
 func (r *Repo) DeleteTranslation(id int) error {
 	_, err := r.db.Exec(`DELETE FROM translations WHERE id=?`, id)
 	return err
+}
+
+func (r *Repo) TranslationRelationsCount(id int) (reviews int) {
+	r.db.QueryRow(`SELECT COUNT(*) FROM reviews WHERE translation_id=?`, id).Scan(&reviews)
+	return
 }
 
 func normalizeCoverageValues(values []string) []string {

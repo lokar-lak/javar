@@ -85,10 +85,12 @@ func main() {
 			r.Post("/games", h.CreateGame)
 			r.Put("/games/{id}", h.UpdateGame)
 			r.Delete("/games/{id}", h.DeleteGame)
+			r.Get("/games/{id}/relations", h.GameRelations)
 
 			r.Post("/translations", h.CreateTranslation)
 			r.Put("/translations/{id}", h.UpdateTranslation)
 			r.Delete("/translations/{id}", h.DeleteTranslation)
+			r.Get("/translations/{id}/relations", h.TranslationRelations)
 
 			r.Delete("/reviews/{id}", h.DeleteReview)
 
