@@ -276,7 +276,7 @@
           <div class="stat-box__value" id="s-manual" style="color:var(--green)">—</div>
         </div>
         <div class="stat-box">
-          <div class="stat-box__label">ШІ-перакладаў</div>
+          <div class="stat-box__label">Машынны-перакладаў</div>
           <div class="stat-box__value" id="s-ai" style="color:var(--text-muted)">—</div>
         </div>
       </div>
@@ -322,7 +322,7 @@
 
       <div class="tbl-wrap">
         <table>
-          <thead><tr><th>Гульня</th><th>Аўтары</th><th>Тып</th><th>Правапіс / афіцыйнасць</th><th>Тып лакалізацыі</th><th>Клікаў</th><th>Ацэнка</th><th></th></tr></thead>
+          <thead><tr><th>Гульня</th><th>Аўтары</th><th>Тып</th><th>Правапіс / статус</th><th>Тып лакалізацыі</th><th>Клікаў</th><th>Ацэнка</th><th></th></tr></thead>
           <tbody id="translations-body"><tr><td colspan="8" class="empty">Загрузка...</td></tr></tbody>
         </table>
       </div>
@@ -500,7 +500,7 @@
         <label>Тып *</label>
         <select class="form-input" id="tr-type">
           <option value="manual">Ручны</option>
-          <option value="ai">ШІ</option>
+          <option value="ai">Машынны</option>
         </select>
       </div>
       <div class="form-group">
@@ -512,7 +512,7 @@
         </div>
       </div>
       <div class="form-group">
-        <label>Афіцыйнасць</label>
+        <label>Статус</label>
         <select class="form-input" id="tr-official">
           <option value="unofficial">Неафіцыйны</option>
           <option value="official">Афіцыйны</option>
@@ -905,7 +905,7 @@ function renderTranslationsTable() {
       <tr>
         <td><a href="game.html?slug=${t.game_slug}" target="_blank" style="color:var(--accent)">${t.game_title}</a></td>
         <td>${translationName(t)}</td>
-        <td><span class="badge badge-${t.type}">${t.type==='manual'?'Ручны':'ШІ'}</span></td>
+        <td><span class="badge badge-${t.type}">${t.type==='manual'?'Ручны':'Машынны'}</span></td>
         <td>${(t.orthography||[]).map(o => `<span class="badge badge-orth">${ORTH[o]||o}</span>`).join('')}<br/><span class="badge badge-orth" style="margin-top:4px">${OFFICIAL[t.official_status]||t.official_status}</span></td>
         <td style="font-size:12px;color:var(--text-muted)">${(t.coverage||[]).join(', ')||'—'}</td>
         <td style="font-family:var(--mono)">${t.click_count}</td>

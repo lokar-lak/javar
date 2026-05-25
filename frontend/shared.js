@@ -58,13 +58,15 @@ function renderGameCard(game, idx = 0) {
   const year  = releaseYear(game.release_date);
   const rating = bestRating(game);
   const aiOnly = hasOnlyAI(game);
+  const off = game.has_official;
 
   return `
     <div class="game-card" onclick="location.href='game.html?slug=${game.slug}'" style="cursor:pointer">
       <div class="game-card__cover game-card__cover--placeholder" style="${!game.cover_url ? coverStyle(game, idx) : ''}">
         ${coverImageHTML(game, idx)}
         ${!game.cover_url ? `<span style="font-size:40px;opacity:.2">🎮</span>` : ''}
-        ${aiOnly ? `<div class="game-card__ai-badge">ШІ-ПЕРАКЛАД</div>` : ''}
+        ${aiOnly ? `<div class="game-card__ai-badge">Машынны ПЕРАКЛАД</div>` : ''}
+        ${off ? `<div class="game-card__official-badge">АФІЦЫЙНЫ</div>` : ''}
       </div>
       <div class="game-card__body">
         <div class="game-card__meta">

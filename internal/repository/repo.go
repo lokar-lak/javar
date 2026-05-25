@@ -134,6 +134,7 @@ func (r *Repo) ListGames(f model.GameFilter) ([]model.Game, error) {
 	for i := range games {
 		games[i].Genres, _ = r.genresByGame(games[i].ID)
 		games[i].HasOnlyAI = r.hasOnlyAI(games[i].ID)
+		games[i].HasOfficial = r.hasOfficial(games[i].ID)
 	}
 	return games, nil
 }
@@ -164,6 +165,7 @@ func (r *Repo) GetGameBySlug(slug string) (*model.GameDetail, error) {
 	json.Unmarshal([]byte(platformsJSON), &g.Platforms)
 	g.Genres, _ = r.genresByGame(g.ID)
 	g.HasOnlyAI = r.hasOnlyAI(g.ID)
+	g.HasOfficial = r.hasOfficial(g.ID)
 
 	translations, err := r.translationsByGame(g.ID)
 	if err != nil {
@@ -229,6 +231,12 @@ func (r *Repo) hasOnlyAI(gameID int) bool {
 	r.db.QueryRow(`SELECT COUNT(*) FROM translations WHERE game_id=?`, gameID).Scan(&total)
 	r.db.QueryRow(`SELECT COUNT(*) FROM translations WHERE game_id=? AND type='manual'`, gameID).Scan(&manual)
 	return total > 0 && manual == 0
+}
+
+func (r *Repo) hasOfficial(gameID int) bool {
+	var cnt int
+	r.db.QueryRow(`SELECT COUNT(*) FROM translations WHERE game_id=? AND official_status='official'`, gameID).Scan(&cnt)
+	return cnt > 0
 }
 
 func (r *Repo) bestRating(gameID int) float64 {
@@ -460,6 +468,7 @@ func (r *Repo) ListAllGames(search string) ([]model.Game, error) {
 	for i := range games {
 		games[i].Genres, _ = r.genresByGame(games[i].ID)
 		games[i].HasOnlyAI = r.hasOnlyAI(games[i].ID)
+		games[i].HasOfficial = r.hasOfficial(games[i].ID)
 	}
 	return games, nil
 }

@@ -23,6 +23,7 @@ type Game struct {
 	CreatedAt   time.Time `json:"created_at"`
 	Genres      []Genre   `json:"genres,omitempty"`
 	HasOnlyAI         bool      `json:"has_only_ai,omitempty"`
+	HasOfficial       bool      `json:"has_official,omitempty"`
 	BestRating        float64   `json:"best_rating"`
 	TranslationCount  int       `json:"translation_count,omitempty"`
 }
