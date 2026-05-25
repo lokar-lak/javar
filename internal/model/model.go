@@ -40,7 +40,7 @@ type Translation struct {
 	OfficialStatus  string    `json:"official_status"` // "official" | "unofficial"
 	Coverage        []string  `json:"coverage"`
 	ExternalURL     string    `json:"external_url"`
-	Orthography     string    `json:"orthography"` // "academic" | "tarashkevitsa" | "lacinka"
+	Orthography     []string  `json:"orthography"` // ["academic","tarashkevitsa","lacinka"]
 	ClickCount      int       `json:"click_count"`
 	CreatedAt       time.Time `json:"created_at"`
 	UpdatedAt       time.Time `json:"updated_at"`
@@ -87,7 +87,7 @@ type CreateTranslationRequest struct {
 	OfficialStatus  string   `json:"official_status"`
 	Coverage        []string `json:"coverage"`
 	ExternalURL     string   `json:"external_url"`
-	Orthography     string   `json:"orthography"`
+	Orthography     []string `json:"orthography"`
 }
 
 type CreateReviewRequest struct {

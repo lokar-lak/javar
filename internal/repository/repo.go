@@ -78,7 +78,7 @@ func (r *Repo) ListGames(f model.GameFilter) ([]model.Game, error) {
 		args = append(args, f.Type)
 	}
 	if f.Orthography != "" {
-		q += ` AND t.orthography = ?`
+		q += ` AND t.orthography LIKE '%"' || ? || '"%'`
 		args = append(args, f.Orthography)
 	}
 	if f.Official != "" {
@@ -275,7 +275,7 @@ func (r *Repo) genresByGame(gameID int) ([]model.Genre, error) {
 func (r *Repo) translationsByGame(gameID int) ([]model.TranslationDetail, error) {
 	rows, err := r.db.Query(`
 		SELECT id, game_id, translator_names, type,
-		       COALESCE(official_status,'unofficial'), COALESCE(orthography,'academic'),
+		       COALESCE(official_status,'unofficial'), COALESCE(orthography,'[]'),
 		       coverage, external_url, click_count, created_at, updated_at
 		FROM translations WHERE game_id=? ORDER BY created_at DESC`, gameID)
 	if err != nil {
@@ -286,14 +286,15 @@ func (r *Repo) translationsByGame(gameID int) ([]model.TranslationDetail, error)
 	var out []model.TranslationDetail
 	for rows.Next() {
 		var t model.Translation
-		var namesJSON, coverageJSON string
+		var namesJSON, orthJSON, coverageJSON string
 		if err := rows.Scan(&t.ID, &t.GameID, &namesJSON, &t.Type,
-			&t.OfficialStatus, &t.Orthography, &coverageJSON, &t.ExternalURL,
+			&t.OfficialStatus, &orthJSON, &coverageJSON, &t.ExternalURL,
 			&t.ClickCount, &t.CreatedAt, &t.UpdatedAt); err != nil {
 			return nil, err
 		}
 		json.Unmarshal([]byte(namesJSON), &t.TranslatorNames)
 		json.Unmarshal([]byte(coverageJSON), &t.Coverage)
+		json.Unmarshal([]byte(orthJSON), &t.Orthography)
 
 		out = append(out, model.TranslationDetail{Translation: t})
 	}
@@ -324,20 +325,21 @@ func (r *Repo) translationsByGame(gameID int) ([]model.TranslationDetail, error)
 }
 
 func (r *Repo) CreateTranslation(req model.CreateTranslationRequest) (int64, error) {
-	if req.Orthography == "" {
-		req.Orthography = "academic"
-	}
 	if req.OfficialStatus != "official" && req.OfficialStatus != "unofficial" {
 		req.OfficialStatus = "unofficial"
+	}
+	if len(req.Orthography) == 0 {
+		req.Orthography = []string{"academic"}
 	}
 	namesJSON, _ := json.Marshal(req.TranslatorNames)
 	req.Coverage = normalizeCoverageValues(req.Coverage)
 	coverageJSON, _ := json.Marshal(req.Coverage)
+	orthJSON, _ := json.Marshal(req.Orthography)
 	res, err := r.db.Exec(`
 		INSERT INTO translations (game_id,translator_names,type,official_status,orthography,coverage,external_url)
 		VALUES (?,?,?,?,?,?,?)`,
 		req.GameID, string(namesJSON),
-		req.Type, req.OfficialStatus, req.Orthography, string(coverageJSON), req.ExternalURL)
+		req.Type, req.OfficialStatus, string(orthJSON), string(coverageJSON), req.ExternalURL)
 	if err != nil {
 		return 0, err
 	}
@@ -345,8 +347,8 @@ func (r *Repo) CreateTranslation(req model.CreateTranslationRequest) (int64, err
 }
 
 func (r *Repo) UpdateTranslation(id int, req model.CreateTranslationRequest) error {
-	if req.Orthography == "" {
-		req.Orthography = "academic"
+	if len(req.Orthography) == 0 {
+		req.Orthography = []string{"academic"}
 	}
 	if req.OfficialStatus != "official" && req.OfficialStatus != "unofficial" {
 		req.OfficialStatus = "unofficial"
@@ -354,10 +356,11 @@ func (r *Repo) UpdateTranslation(id int, req model.CreateTranslationRequest) err
 	namesJSON, _ := json.Marshal(req.TranslatorNames)
 	req.Coverage = normalizeCoverageValues(req.Coverage)
 	coverageJSON, _ := json.Marshal(req.Coverage)
+	orthJSON, _ := json.Marshal(req.Orthography)
 	_, err := r.db.Exec(`
 		UPDATE translations SET translator_names=?,type=?,official_status=?,orthography=?,
 		  coverage=?,external_url=?,updated_at=? WHERE id=?`,
-		string(namesJSON), req.Type, req.OfficialStatus, req.Orthography,
+		string(namesJSON), req.Type, req.OfficialStatus, string(orthJSON),
 		string(coverageJSON), req.ExternalURL, time.Now(), id)
 	return err
 }
@@ -610,7 +613,7 @@ func (r *Repo) ListAllReviews() ([]model.AdminReview, error) {
 func (r *Repo) ListAllTranslations() ([]model.AdminTranslation, error) {
 	rows, err := r.db.Query(`
 		SELECT t.id, t.game_id, t.translator_names, t.type,
-		       COALESCE(t.official_status,'unofficial'), COALESCE(t.orthography,'academic'), t.coverage, t.external_url,
+		       COALESCE(t.official_status,'unofficial'), COALESCE(t.orthography,'[]'), t.coverage, t.external_url,
 		       t.click_count, t.created_at, t.updated_at,
 		       g.title, g.slug
 		FROM translations t
@@ -622,6 +625,7 @@ func (r *Repo) ListAllTranslations() ([]model.AdminTranslation, error) {
 	var raw []struct {
 		t         model.Translation
 		namesJSON string
+		orthJSON  string
 		covJSON   string
 		gTitle    string
 		gSlug     string
@@ -630,12 +634,13 @@ func (r *Repo) ListAllTranslations() ([]model.AdminTranslation, error) {
 		var x struct {
 			t         model.Translation
 			namesJSON string
+			orthJSON  string
 			covJSON   string
 			gTitle    string
 			gSlug     string
 		}
 		if err := rows.Scan(&x.t.ID, &x.t.GameID, &x.namesJSON, &x.t.Type,
-			&x.t.OfficialStatus, &x.t.Orthography, &x.covJSON, &x.t.ExternalURL,
+			&x.t.OfficialStatus, &x.orthJSON, &x.covJSON, &x.t.ExternalURL,
 			&x.t.ClickCount, &x.t.CreatedAt, &x.t.UpdatedAt,
 			&x.gTitle, &x.gSlug); err != nil {
 			rows.Close()
@@ -652,6 +657,7 @@ func (r *Repo) ListAllTranslations() ([]model.AdminTranslation, error) {
 	var out []model.AdminTranslation
 	for _, x := range raw {
 		json.Unmarshal([]byte(x.namesJSON), &x.t.TranslatorNames)
+		json.Unmarshal([]byte(x.orthJSON), &x.t.Orthography)
 		json.Unmarshal([]byte(x.covJSON), &x.t.Coverage)
 		at := model.AdminTranslation{
 			TranslationDetail: model.TranslationDetail{Translation: x.t},
@@ -724,14 +730,14 @@ func (r *Repo) DeleteGenre(id int) error {
 
 func (r *Repo) GetTranslationByID(id int) (*model.Translation, error) {
 	var t model.Translation
-	var namesJSON, covJSON string
+	var namesJSON, orthJSON, covJSON string
 	err := r.db.QueryRow(`
 		SELECT id, game_id, translator_names, type,
-		       COALESCE(official_status,'unofficial'), COALESCE(orthography,'academic'), coverage, external_url,
+		       COALESCE(official_status,'unofficial'), COALESCE(orthography,'[]'), coverage, external_url,
 		       click_count, created_at, updated_at
 		FROM translations WHERE id=?`, id).
 		Scan(&t.ID, &t.GameID, &namesJSON, &t.Type,
-			&t.OfficialStatus, &t.Orthography, &covJSON, &t.ExternalURL,
+			&t.OfficialStatus, &orthJSON, &covJSON, &t.ExternalURL,
 			&t.ClickCount, &t.CreatedAt, &t.UpdatedAt)
 	if err == sql.ErrNoRows {
 		return nil, nil
@@ -740,6 +746,7 @@ func (r *Repo) GetTranslationByID(id int) (*model.Translation, error) {
 		return nil, err
 	}
 	json.Unmarshal([]byte(namesJSON), &t.TranslatorNames)
+	json.Unmarshal([]byte(orthJSON), &t.Orthography)
 	json.Unmarshal([]byte(covJSON), &t.Coverage)
 	return &t, nil
 }

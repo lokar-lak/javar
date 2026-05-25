@@ -125,6 +125,8 @@
     .form-grid.cols-1{grid-template-columns:1fr}
     .form-group{display:flex;flex-direction:column;gap:6px}
     .form-group.span-2{grid-column:1/-1}
+    .checkbox-label{display:flex;align-items:center;gap:4px;font-size:13px;cursor:pointer}
+    .checkbox-label input[type=checkbox]{accent-color:var(--accent)}
     label{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--text-muted)}
     .form-input{
       height:40px;background:var(--surface-2);border:1px solid var(--border);
@@ -501,11 +503,11 @@
       </div>
       <div class="form-group">
         <label>Правапіс</label>
-        <select class="form-input" id="tr-orth">
-          <option value="academic">Академічны</option>
-          <option value="tarashkevitsa">Альтэрнатыўны</option>
-          <option value="lacinka">Лацінка</option>
-        </select>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;padding-top:6px">
+          <label class="checkbox-label"><input type="checkbox" class="orth-cb" value="academic"> Акадэмічны</label>
+          <label class="checkbox-label"><input type="checkbox" class="orth-cb" value="tarashkevitsa"> Альтэрнатыўны</label>
+          <label class="checkbox-label"><input type="checkbox" class="orth-cb" value="lacinka"> Лацінка</label>
+        </div>
       </div>
       <div class="form-group">
         <label>Афіцыйнасць</label>
@@ -902,7 +904,7 @@ function renderTranslationsTable() {
         <td><a href="game.html?slug=${t.game_slug}" target="_blank" style="color:var(--accent)">${t.game_title}</a></td>
         <td>${translationName(t)}</td>
         <td><span class="badge badge-${t.type}">${t.type==='manual'?'Ручны':'ШІ'}</span></td>
-        <td><span class="badge badge-orth">${ORTH[t.orthography]||t.orthography}</span><br/><span class="badge badge-orth" style="margin-top:4px">${OFFICIAL[t.official_status]||t.official_status}</span></td>
+        <td>${(t.orthography||[]).map(o => `<span class="badge badge-orth">${ORTH[o]||o}</span>`).join('')}<br/><span class="badge badge-orth" style="margin-top:4px">${OFFICIAL[t.official_status]||t.official_status}</span></td>
         <td style="font-size:12px;color:var(--text-muted)">${(t.coverage||[]).join(', ')||'—'}</td>
         <td style="font-family:var(--mono)">${t.click_count}</td>
         <td class="rating-num">${t.avg_rating ? t.avg_rating.toFixed(1) : '—'}</td>
@@ -927,9 +929,12 @@ function openTranslationModal(tOrId) {
   sel.innerHTML = _games.map(g => `<option value="${g.id}" ${t?.game_id===g.id?'selected':''}>${g.title}</option>`).join('');
 
   document.getElementById('tr-type').value        = t?.type || 'manual';
-  document.getElementById('tr-orth').value        = t?.orthography || 'academic';
   document.getElementById('tr-official').value    = t?.official_status || 'unofficial';
   document.getElementById('tr-translators').value = (t?.translator_names||[]).join(', ');
+  const selectedOrth = t?.orthography || [];
+  document.querySelectorAll('.orth-cb').forEach(cb => {
+    cb.checked = selectedOrth.includes(cb.value);
+  });
   const selectedCoverage = t?.coverage || [];
   document.querySelectorAll('#tr-coverage input').forEach(input => {
     input.checked = selectedCoverage.includes(input.value);
@@ -945,7 +950,7 @@ async function saveTranslation() {
     game_id:          parseInt(document.getElementById('tr-game').value),
     type:             document.getElementById('tr-type').value,
     official_status:  document.getElementById('tr-official').value,
-    orthography:      document.getElementById('tr-orth').value,
+    orthography:      [...document.querySelectorAll('.orth-cb:checked')].map(i => i.value),
     external_url:     document.getElementById('tr-url').value.trim(),
     translator_names: document.getElementById('tr-translators').value.split(',').map(s=>s.trim()).filter(Boolean),
     coverage:         [...document.querySelectorAll('#tr-coverage input:checked')].map(i => i.value),

@@ -128,6 +128,17 @@ func migrate(db *sql.DB) error {
 		return fmt.Errorf("create click_events index: %w", err)
 	}
 
+	// Migration: convert orthography from single string to JSON array
+	if _, err := db.Exec(`
+		UPDATE translations SET orthography =
+		  CASE
+		    WHEN orthography IS NULL OR orthography = '' THEN '[]'
+		    WHEN orthography NOT LIKE '[%' THEN '["' || orthography || '"]'
+		    ELSE orthography
+		  END`); err != nil {
+		_ = err
+	}
+
 	if err := seedSteamTagGenres(db); err != nil {
 		return err
 	}
