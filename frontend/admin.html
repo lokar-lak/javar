@@ -276,7 +276,7 @@
           <div class="stat-box__value" id="s-manual" style="color:var(--green)">—</div>
         </div>
         <div class="stat-box">
-          <div class="stat-box__label">Машынны-перакладаў</div>
+          <div class="stat-box__label">Машынных перакладаў</div>
           <div class="stat-box__value" id="s-ai" style="color:var(--text-muted)">—</div>
         </div>
       </div>
@@ -515,6 +515,7 @@
         <label>Статус</label>
         <select class="form-input" id="tr-official">
           <option value="unofficial">Неафіцыйны</option>
+          <option value="semi-official">Паўафіцыйны</option>
           <option value="official">Афіцыйны</option>
         </select>
       </div>
@@ -878,7 +879,7 @@ function deleteGame(id, title) {
 // ══ TRANSLATIONS ══════════════════════════════════════════════════════════
 
 const ORTH = { academic:'Академічны', tarashkevitsa:'Альтэрнатыўны', lacinka:'Лацінка' };
-const OFFICIAL = { official:'Афіцыйны', unofficial:'Неафіцыйны' };
+const OFFICIAL = { official:'Афіцыйны', 'semi-official':'Паўафіцыйны', unofficial:'Неафіцыйны' };
 
 function translationName(t) {
   return (t?.translator_names || []).join(', ') || 'Беларусізатар';

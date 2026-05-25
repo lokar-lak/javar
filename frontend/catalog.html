@@ -315,6 +315,9 @@
             <div class="dropdown__item" data-value="official">
               <span class="check"></span> Афіцыйны
             </div>
+            <div class="dropdown__item" data-value="semi-official">
+              <span class="check"></span> Паўафіцыйны
+            </div>
             <div class="dropdown__item" data-value="unofficial">
               <span class="check"></span> Неафіцыйны
             </div>
@@ -530,7 +533,7 @@ searchInput.addEventListener('input', () => {
 // ── Active filter chips ───────────────────────────────────────────────────
 const ORTH_LABELS = { academic: 'Акадэмічны', tarashkevitsa: 'Альтэрнатыўны', lacinka: 'Лацінка' };
 const TYPE_LABELS = { manual: 'Ручны пераклад', ai: 'Машынны пераклад' };
-const OFFICIAL_LABELS = { official: 'Афіцыйны', unofficial: 'Неафіцыйны' };
+const OFFICIAL_LABELS = { official: 'Афіцыйны', 'semi-official': 'Паўафіцыйны', unofficial: 'Неафіцыйны' };
 
 function updateChips() {
   const cont = document.getElementById('active-filters');

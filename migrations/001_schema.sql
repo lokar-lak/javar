@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS translations (
     game_id          INTEGER NOT NULL REFERENCES games(id) ON DELETE CASCADE,
     translator_names TEXT    NOT NULL DEFAULT '[]',  -- JSON array
     type             TEXT    NOT NULL CHECK(type IN ('manual','ai')),
-    official_status  TEXT    NOT NULL DEFAULT 'unofficial' CHECK(official_status IN ('official','unofficial')),
+    official_status  TEXT    NOT NULL DEFAULT 'unofficial' CHECK(official_status IN ('official','semi-official','unofficial')),
     coverage         TEXT    NOT NULL DEFAULT '[]',  -- JSON array
     external_url     TEXT    NOT NULL,
     click_count      INTEGER NOT NULL DEFAULT 0,

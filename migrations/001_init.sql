@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS translations (
     game_id          INTEGER NOT NULL REFERENCES games(id) ON DELETE CASCADE,
     translator_names TEXT    NOT NULL DEFAULT '[]',  -- JSON: ["Ivan K.","Maria P."]
     type             TEXT    NOT NULL CHECK(type IN ('manual','ai')),
-    official_status  TEXT    NOT NULL DEFAULT 'unofficial' CHECK(official_status IN ('official','unofficial')),
+    official_status  TEXT    NOT NULL DEFAULT 'unofficial' CHECK(official_status IN ('official','semi-official','unofficial')),
     coverage         TEXT    NOT NULL DEFAULT '[]',  -- JSON: ["subtitles","menu",...]
     external_url     TEXT    NOT NULL,
     click_count      INTEGER NOT NULL DEFAULT 0,
@@ -66,7 +66,7 @@ CREATE TABLE IF NOT EXISTS translation_submissions (
     id               INTEGER PRIMARY KEY AUTOINCREMENT,
     game_title       TEXT    NOT NULL,
     platforms        TEXT    NOT NULL DEFAULT '[]',
-    category         TEXT    NOT NULL CHECK(category IN ('official','unofficial')),
+    category         TEXT    NOT NULL CHECK(category IN ('official','semi-official','unofficial')),
     localization_type TEXT   NOT NULL DEFAULT '[]',
     authors          TEXT    NOT NULL,
     game_url         TEXT    NOT NULL,

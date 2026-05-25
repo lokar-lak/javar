@@ -238,7 +238,6 @@ func (r *Repo) hasOfficial(gameID int) bool {
 	r.db.QueryRow(`SELECT COUNT(*) FROM translations WHERE game_id=? AND official_status='official'`, gameID).Scan(&cnt)
 	return cnt > 0
 }
-
 func (r *Repo) bestRating(gameID int) float64 {
 	var rating sql.NullFloat64
 	r.db.QueryRow(`
@@ -335,7 +334,7 @@ func (r *Repo) translationsByGame(gameID int) ([]model.TranslationDetail, error)
 }
 
 func (r *Repo) CreateTranslation(req model.CreateTranslationRequest) (int64, error) {
-	if req.OfficialStatus != "official" && req.OfficialStatus != "unofficial" {
+	if req.OfficialStatus != "official" && req.OfficialStatus != "semi-official" && req.OfficialStatus != "unofficial" {
 		req.OfficialStatus = "unofficial"
 	}
 	if len(req.Orthography) == 0 {
@@ -360,7 +359,7 @@ func (r *Repo) UpdateTranslation(id int, req model.CreateTranslationRequest) err
 	if len(req.Orthography) == 0 {
 		req.Orthography = []string{"academic"}
 	}
-	if req.OfficialStatus != "official" && req.OfficialStatus != "unofficial" {
+	if req.OfficialStatus != "official" && req.OfficialStatus != "semi-official" && req.OfficialStatus != "unofficial" {
 		req.OfficialStatus = "unofficial"
 	}
 	namesJSON, _ := json.Marshal(req.TranslatorNames)

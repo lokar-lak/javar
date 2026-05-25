@@ -62,7 +62,7 @@ func (h *Handler) ListGenres(w http.ResponseWriter, r *http.Request) {
 }
 
 // ── GET /api/games ────────────────────────────────────────────────────────
-// ?search=  &genre_id=  &type=manual|ai  &orthography=  &official_status=official|unofficial
+// ?search=  &genre_id=  &type=manual|ai  &orthography=  &official_status=official|semi-official|unofficial
 // &sort_by=created_at|release_date|steam_rating|best_rating  &sort_order=desc  &page=  &limit=
 
 func (h *Handler) ListGames(w http.ResponseWriter, r *http.Request) {

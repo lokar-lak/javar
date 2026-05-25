@@ -432,7 +432,7 @@ function renderGame(game) {
         const data = await res.json();
         window.open(data.url, '_blank', 'noopener');
       } catch {
-        alert('Не атрымалася атрымаць спасылку');
+        alert('Не ўдалося атрымаць спасылку');
       }
     });
   });
@@ -445,7 +445,7 @@ function renderGame(game) {
 
 
 const ORTH_LABELS = { academic: 'Акадэмічны', tarashkevitsa: 'Альтэрнатыўны', lacinka: 'Лацінка' };
-const OFFICIAL_LABELS = { official: 'Афіцыйны', unofficial: 'Неафіцыйны' };
+const OFFICIAL_LABELS = { official: 'Афіцыйны', 'semi-official': 'Паўафіцыйны', unofficial: 'Неафіцыйны' };
 function translationName(t) {
   return (t?.translator_names || []).join(', ') || 'Беларусізатар';
 }

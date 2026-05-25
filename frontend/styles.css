@@ -297,7 +297,6 @@ img { display: block; max-width: 100%; }
   background: rgba(38, 200, 38, 0.82);
   border-radius: 50%;
 }
-
 .game-card__body {
   padding: 16px 18px 18px;
   display: flex;

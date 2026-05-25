@@ -39,7 +39,7 @@ type Translation struct {
 	GameID          int       `json:"game_id"`
 	TranslatorNames []string  `json:"translator_names"`
 	Type            string    `json:"type"`            // "manual" | "ai"
-	OfficialStatus  string    `json:"official_status"` // "official" | "unofficial"
+	OfficialStatus  string    `json:"official_status"` // "official" | "semi-official" | "unofficial"
 	Coverage        []string  `json:"coverage"`
 	ExternalURL     string    `json:"external_url"`
 	Orthography     []string  `json:"orthography"` // ["academic","tarashkevitsa","lacinka"]
