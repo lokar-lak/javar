@@ -106,6 +106,8 @@
     td{padding:12px 16px;font-size:13px;border-bottom:1px solid var(--border);vertical-align:middle}
     tr:last-child td{border-bottom:none}
     tr:hover td{background:rgba(255,255,255,.02)}
+    tr.has-relations td{background:rgba(255,60,60,.07)}
+    tr.has-relations:hover td{background:rgba(255,60,60,.12)}
     .td-actions{display:flex;gap:8px;align-items:center}
 
     /* ── Buttons ────────────────────────────────────────────── */
@@ -733,7 +735,7 @@ async function renderGamesTable() {
     tbody.innerHTML = '<tr><td colspan="6" class="empty">Гульняў няма</td></tr>'; return;
   }
   tbody.innerHTML = list.map(g => `
-    <tr>
+    <tr class="${!g.translation_count ? 'has-relations' : ''}">
       <td><strong>${g.title}</strong><br/><span style="font-size:11px;color:var(--text-muted)">${g.slug}</span></td>
       <td>${g.developer}</td>
       <td>${g.steam_rating != null ? `<span style="color:var(--green);font-family:var(--mono)">${g.steam_rating}%</span>` : '—'}</td>

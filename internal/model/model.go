@@ -22,8 +22,9 @@ type Game struct {
 	SteamRating *int      `json:"steam_rating,omitempty"`
 	CreatedAt   time.Time `json:"created_at"`
 	Genres      []Genre   `json:"genres,omitempty"`
-	HasOnlyAI   bool      `json:"has_only_ai,omitempty"`
-	BestRating  float64   `json:"best_rating"`
+	HasOnlyAI         bool      `json:"has_only_ai,omitempty"`
+	BestRating        float64   `json:"best_rating"`
+	TranslationCount  int       `json:"translation_count,omitempty"`
 }
 
 // GameDetail - game plus all its translations (for game page)

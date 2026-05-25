@@ -44,19 +44,20 @@ func (r *Repo) ListGames(f model.GameFilter) ([]model.Game, error) {
 	}
 
 	q := `SELECT DISTINCT g.id, g.title, g.slug, g.developer,
-		       COALESCE(g.publisher,''), COALESCE(g.release_date,''),
-		       COALESCE(g.description,''), COALESCE(g.cover_url,''), COALESCE(g.steamdb_url,''),
-		       COALESCE(g.platforms,'[]'), g.steam_rating, g.created_at,
-		       COALESCE(
-		         (SELECT MAX(avg_r) FROM (
-		           SELECT AVG(rv.rating) as avg_r
-		           FROM translations t2
-		           LEFT JOIN reviews rv ON rv.translation_id = t2.id
-		           WHERE t2.game_id = g.id
-		           GROUP BY t2.id
-		         )),
-		         0
-		       ) as best_rating
+	       COALESCE(g.publisher,''), COALESCE(g.release_date,''),
+	       COALESCE(g.description,''), COALESCE(g.cover_url,''), COALESCE(g.steamdb_url,''),
+	       COALESCE(g.platforms,'[]'), g.steam_rating, g.created_at,
+	       COALESCE(
+	         (SELECT MAX(avg_r) FROM (
+	           SELECT AVG(rv.rating) as avg_r
+	           FROM translations t2
+	           LEFT JOIN reviews rv ON rv.translation_id = t2.id
+	           WHERE t2.game_id = g.id
+	           GROUP BY t2.id
+	         )),
+	         0
+	       ) as best_rating,
+	       (SELECT COUNT(*) FROM translations WHERE game_id = g.id) as translation_count
 		FROM games g
 		LEFT JOIN game_genres gg ON gg.game_id = g.id
 		LEFT JOIN translations t  ON t.game_id  = g.id
@@ -115,7 +116,8 @@ func (r *Repo) ListGames(f model.GameFilter) ([]model.Game, error) {
 		var rating sql.NullInt64
 		var platformsJSON string
 		if err := rows.Scan(&g.ID, &g.Title, &g.Slug, &g.Developer, &g.Publisher,
-			&g.ReleaseDate, &g.Description, &g.CoverURL, &g.SteamDBURL, &platformsJSON, &rating, &g.CreatedAt, &g.BestRating); err != nil {
+			&g.ReleaseDate, &g.Description, &g.CoverURL, &g.SteamDBURL, &platformsJSON, &rating, &g.CreatedAt, &g.BestRating,
+			&g.TranslationCount); err != nil {
 			return nil, err
 		}
 		json.Unmarshal([]byte(platformsJSON), &g.Platforms)
@@ -418,8 +420,9 @@ func (r *Repo) ListAllGames(search string) ([]model.Game, error) {
 	q := `SELECT id, title, slug, developer,
 	       COALESCE(publisher,''), COALESCE(release_date,''),
 	       COALESCE(description,''), COALESCE(cover_url,''), COALESCE(steamdb_url,''),
-	       COALESCE(platforms,'[]'), steam_rating, created_at
-	FROM games`
+	       COALESCE(platforms,'[]'), steam_rating, created_at,
+	       (SELECT COUNT(*) FROM translations WHERE game_id = g.id)
+	FROM games g`
 	var args []any
 	if search != "" {
 		q += ` WHERE LOWER(title) LIKE LOWER(?) OR LOWER(developer) LIKE LOWER(?)`
@@ -439,7 +442,8 @@ func (r *Repo) ListAllGames(search string) ([]model.Game, error) {
 		var rating sql.NullInt64
 		var platformsJSON string
 		if err := rows.Scan(&g.ID, &g.Title, &g.Slug, &g.Developer, &g.Publisher,
-			&g.ReleaseDate, &g.Description, &g.CoverURL, &g.SteamDBURL, &platformsJSON, &rating, &g.CreatedAt); err != nil {
+			&g.ReleaseDate, &g.Description, &g.CoverURL, &g.SteamDBURL, &platformsJSON, &rating, &g.CreatedAt,
+			&g.TranslationCount); err != nil {
 			return nil, err
 		}
 		json.Unmarshal([]byte(platformsJSON), &g.Platforms)
