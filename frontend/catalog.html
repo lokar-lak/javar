@@ -398,17 +398,19 @@
 <script>
 const PAGE_SIZE = 15;
 
-// ── State ────────────────────────────────────────────────────────────────
+// ── State (from URL) ────────────────────────────────────────────────────
+const _params = new URLSearchParams(location.search);
+
 const state = {
-  search:      new URLSearchParams(location.search).get('search') || '',
-  genreId:     0,
+  search:      _params.get('search') || '',
+  genreId:     parseInt(_params.get('genre_id')) || 0,
   genreName:   '',
-  type:        '',
-  orthography: '',
-  official:    '',
-  sortBy:      'created_at',
-  sortOrder:   'desc',
-  page:        0,
+  type:        _params.get('type') || '',
+  orthography: _params.get('orthography') || '',
+  official:    _params.get('official_status') || '',
+  sortBy:      _params.get('sort_by') || 'created_at',
+  sortOrder:   _params.get('sort_order') || 'desc',
+  page:        parseInt(_params.get('page')) || 0,
 };
 
 // ── Navbar search ─────────────────────────────────────────────────────────
@@ -578,6 +580,46 @@ function resetDropdown(ddId) {
   dd.querySelector('.dropdown__trigger').classList.remove('has-value');
 }
 
+// ── Sync URL with state ─────────────────────────────────────────────────
+function syncUrl() {
+  const p = new URLSearchParams();
+  if (state.search)      p.set('search', state.search);
+  if (state.genreId)     p.set('genre_id',   state.genreId);
+  if (state.type)        p.set('type',        state.type);
+  if (state.orthography) p.set('orthography', state.orthography);
+  if (state.official)    p.set('official_status', state.official);
+  if (state.sortBy !== 'created_at' || state.sortOrder !== 'desc') {
+    p.set('sort_by',   state.sortBy);
+    p.set('sort_order', state.sortOrder);
+  }
+  if (state.page > 0) p.set('page', state.page);
+  const qs = p.toString();
+  history.replaceState(null, '', qs ? `catalog.html?${qs}` : 'catalog.html');
+}
+
+function setDropdownValue(ddId, value) {
+  const dd = document.getElementById(ddId);
+  const items = dd.querySelectorAll('.dropdown__item');
+  let found = false;
+  items.forEach(item => {
+    if (item.dataset.value == value) {
+      item.classList.add('selected');
+      item.querySelector('.check').textContent = '✓';
+      found = true;
+    } else {
+      item.classList.remove('selected');
+      item.querySelector('.check').textContent = '';
+    }
+  });
+  const trigger = dd.querySelector('.dropdown__trigger');
+  if (value && found) {
+    trigger.classList.add('has-value');
+  } else {
+    trigger.classList.remove('has-value');
+  }
+  return found;
+}
+
 // ── Load games ────────────────────────────────────────────────────────────
 async function loadGames() {
   const grid   = document.getElementById('grid');
@@ -629,6 +671,7 @@ async function loadGames() {
         <div style="font-size:14px">Праверце, ці запушчаны сервер</div>
       </div>`;
   }
+  syncUrl();
 }
 
 // ── Pagination ────────────────────────────────────────────────────────────
@@ -650,6 +693,20 @@ function renderPagination(count, container) {
 // ── Init ──────────────────────────────────────────────────────────────────
 (async () => {
   await loadGenres();
+
+  // Restore dropdown UI from URL params
+  if (_params.has('genre_id')) {
+    setDropdownValue('dd-genre', state.genreId);
+    const sel = document.querySelector('#dd-genre .dropdown__item.selected');
+    if (sel) state.genreName = sel.textContent.trim().replace('✓', '').trim();
+  }
+  if (_params.has('type'))        setDropdownValue('dd-type', state.type);
+  if (_params.has('orthography')) setDropdownValue('dd-orth', state.orthography);
+  if (_params.has('official_status')) setDropdownValue('dd-official', state.official);
+  if (_params.has('sort_by') || _params.has('sort_order')) {
+    setDropdownValue('dd-sort', `${state.sortBy},${state.sortOrder}`);
+  }
+
   if (state.search) updateChips();
   await loadGames();
 })();
