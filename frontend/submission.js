@@ -1,5 +1,37 @@
 (() => {
-  const copy = t('submission');
+  const fallbackTexts = {
+    common: { actions: { submit: 'Адправіць', submitting: 'Адпраўляю...' } },
+    submission: {
+      platforms: ['macOS', 'iOS', 'Linux', 'PlayStation', 'Android', 'Windows', 'Xbox', 'Nintendo Switch', 'Іншая'],
+      close: 'Закрыць',
+      title: 'Дадаць беларусізатар',
+      gameTitle: 'Назва гульні',
+      platformsLegend: 'Платформы',
+      platformsHint: 'Абярыце 1 ці болей платформ, дзе ёсць беларусізатар.',
+      category: 'Катэгорыя лакалізацыі',
+      official: 'Афіцыйная',
+      unofficial: 'Неафіцыйная',
+      localizationType: 'Тып лакалізацыі',
+      text: 'Тэкст',
+      voice: 'Агучванне',
+      authors: 'Аўтары лакалізацыі',
+      gameUrl: 'Спасылка на гульню',
+      translationUrl: 'Спасылка на беларусізатар',
+      description: 'Апісанне лакалізацыі',
+      platformRequired: 'Абярыце хаця б адну платформу.',
+      typeRequired: 'Абярыце хаця б адзін тып лакалізацыі.',
+      duplicate: 'Падобная гульня ўжо ёсць у каталогу{names}',
+      genericError: 'Не атрымалася адправіць прапанову.',
+      success: 'Дзякуй! Прапанова адпраўлена на мадэрацыю.',
+      networkError: 'Памылка сеткі. Паспрабуйце яшчэ раз.'
+    }
+  };
+  const tr = window.t || ((path, vars = {}) => {
+    const value = path.split('.').reduce((acc, key) => acc?.[key], fallbackTexts);
+    if (typeof value !== 'string') return value;
+    return value.replace(/\{(\w+)\}/g, (_, key) => vars[key] ?? '');
+  });
+  const copy = tr('submission');
   const platforms = copy.platforms;
 
   function optionPill(type, name, label) {
@@ -80,7 +112,7 @@
 
           <div class="submission-error" id="submission-error" role="alert"></div>
           <div class="submission-actions">
-            <button class="submission-submit" type="submit">${t('common.actions.submit')}</button>
+            <button class="submission-submit" type="submit">${tr('common.actions.submit')}</button>
           </div>
         </form>
       </div>`;
@@ -132,7 +164,7 @@
     const button = document.querySelector('#submission-form .submission-submit');
     if (!button) return;
     button.disabled = isSubmitting;
-    button.textContent = isSubmitting ? t('common.actions.submitting') : t('common.actions.submit');
+    button.textContent = isSubmitting ? tr('common.actions.submitting') : tr('common.actions.submit');
   }
 
   function updateUnofficialFields() {
@@ -199,7 +231,7 @@
       const payload = await res.json().catch(() => ({}));
       if (res.status === 409) {
         const names = (payload.similar_games || []).map(g => `«${g.title}»`).join(', ');
-        showError(t('submission.duplicate', { names: names ? ': ' + names : '.' }));
+        showError(tr('submission.duplicate', { names: names ? ': ' + names : '.' }));
         return;
       }
       if (!res.ok) {

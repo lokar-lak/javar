@@ -184,3 +184,7 @@ function applyI18n(root = document) {
 }
 
 document.addEventListener('DOMContentLoaded', () => applyI18n());
+
+window.TEXTS = TEXTS;
+window.t = t;
+window.applyI18n = applyI18n;
