@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="be">
+<html lang="be" data-title-key="pages.catalog.title">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -209,18 +209,18 @@
       <img src="JaVar_SVG.svg" alt="JAVAR" style="height:28px;width:auto;display:block" />
     </a>
     <ul class="navbar__links">
-      <li><a href="index.html">Галоўная</a></li>
-      <li><a href="catalog.html" class="active">Каталог</a></li>
-      <li><a href="contacts.html">Кантакты</a></li>
-      <li><a href="faq.html">FAQ</a></li>
+      <li><a href="index.html" data-i18n="common.nav.home">Галоўная</a></li>
+      <li><a href="catalog.html" class="active" data-i18n="common.nav.catalog">Каталог</a></li>
+      <li><a href="contacts.html" data-i18n="common.nav.contacts">Кантакты</a></li>
+      <li><a href="faq.html" data-i18n="common.nav.faq">FAQ</a></li>
     </ul>
-    <div class="navbar__submit-item"><button type="button" class="navbar__submit" data-open-submission>Дадаць беларусізатар</button></div>
+    <div class="navbar__submit-item"><button type="button" class="navbar__submit" data-open-submission data-i18n="common.nav.submit">Дадаць беларусізатар</button></div>
     <div class="navbar__search">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
         <circle cx="6.5" cy="6.5" r="5" stroke="#7A7A9A" stroke-width="1.5"/>
         <line x1="10.5" y1="10.5" x2="14" y2="14" stroke="#7A7A9A" stroke-width="1.5" stroke-linecap="round"/>
       </svg>
-      <input type="text" id="nav-search" placeholder="Пошук..." />
+      <input type="text" id="nav-search" placeholder="Пошук..." data-i18n-placeholder="common.nav.searchPlaceholder" />
     </div>
   </nav>
 
@@ -228,7 +228,7 @@
     <section class="section">
 
       <div class="section-heading">
-        <h2>Каталог</h2>
+        <h2 data-i18n="pages.catalog.heading">Каталог</h2>
         <div class="section-heading__bar" style="width:100px"></div>
       </div>
 
@@ -241,7 +241,7 @@
             <circle cx="6.5" cy="6.5" r="5" stroke="#7A7A9A" stroke-width="1.5"/>
             <line x1="10.5" y1="10.5" x2="14" y2="14" stroke="#7A7A9A" stroke-width="1.5" stroke-linecap="round"/>
           </svg>
-          <input type="text" id="search-input" placeholder="Назва або распрацоўшчык..." />
+          <input type="text" id="search-input" placeholder="Назва або распрацоўшчык..." data-i18n-placeholder="pages.catalog.searchPlaceholder" />
         </div>
 
         <div class="filter-sep"></div>
@@ -249,11 +249,11 @@
         <!-- Genre -->
         <div class="dropdown" id="dd-genre">
           <div class="dropdown__trigger" id="dd-genre-trigger">
-            Жанр <span class="dropdown__arrow">▾</span>
+            <span data-i18n="pages.catalog.genre">Жанр</span> <span class="dropdown__arrow">▾</span>
           </div>
           <div class="dropdown__menu" id="dd-genre-menu">
             <div class="dropdown__item selected" data-value="">
-              <span class="check">✓</span> Усе жанры
+              <span class="check">✓</span> <span data-i18n="pages.catalog.allGenres">Усе жанры</span>
             </div>
             <div class="dropdown__divider"></div>
             <!-- populated from API -->
@@ -263,20 +263,20 @@
         <!-- Translation type -->
         <div class="dropdown" id="dd-type">
           <div class="dropdown__trigger" id="dd-type-trigger">
-            Тып перакладу <span class="dropdown__arrow">▾</span>
+            <span data-i18n="pages.catalog.type">Тып перакладу</span> <span class="dropdown__arrow">▾</span>
           </div>
           <div class="dropdown__menu">
             <div class="dropdown__item selected" data-value="">
-              <span class="check">✓</span> Усе тыпы
+              <span class="check">✓</span> <span data-i18n="pages.catalog.allTypes">Усе тыпы</span>
             </div>
             <div class="dropdown__divider"></div>
             <div class="dropdown__item" data-value="manual">
               <span class="check"></span>
-              <span style="color:#26C26A">●</span> Ручны пераклад
+              <span style="color:#26C26A">●</span> <span data-i18n="common.translationTypes.manual">Ручны пераклад</span>
             </div>
             <div class="dropdown__item" data-value="ai">
               <span class="check"></span>
-              <span style="color:#7A7A9A">●</span> Машынны пераклад
+              <span style="color:#7A7A9A">●</span> <span data-i18n="common.translationTypes.ai">Машынны пераклад</span>
             </div>
           </div>
         </div>
@@ -284,21 +284,21 @@
         <!-- Orthography -->
         <div class="dropdown" id="dd-orth">
           <div class="dropdown__trigger" id="dd-orth-trigger">
-            Правапіс <span class="dropdown__arrow">▾</span>
+            <span data-i18n="pages.catalog.orthography">Правапіс</span> <span class="dropdown__arrow">▾</span>
           </div>
           <div class="dropdown__menu">
             <div class="dropdown__item selected" data-value="">
-              <span class="check">✓</span> Любы правапіс
+              <span class="check">✓</span> <span data-i18n="pages.catalog.anyOrthography">Любы правапіс</span>
             </div>
             <div class="dropdown__divider"></div>
             <div class="dropdown__item" data-value="academic">
-              <span class="check"></span> Акадэмічны
+              <span class="check"></span> <span data-i18n="common.orthography.academic">Акадэмічны</span>
             </div>
             <div class="dropdown__item" data-value="tarashkevitsa">
-              <span class="check"></span> Альтэрнатыўны
+              <span class="check"></span> <span data-i18n="common.orthography.tarashkevitsa">Альтэрнатыўны</span>
             </div>
             <div class="dropdown__item" data-value="lacinka">
-              <span class="check"></span> Лацінка
+              <span class="check"></span> <span data-i18n="common.orthography.lacinka">Лацінка</span>
             </div>
           </div>
         </div>
@@ -306,21 +306,21 @@
         <!-- Official status -->
         <div class="dropdown" id="dd-official">
           <div class="dropdown__trigger" id="dd-official-trigger">
-            Статус <span class="dropdown__arrow">▾</span>
+            <span data-i18n="pages.catalog.status">Статус</span> <span class="dropdown__arrow">▾</span>
           </div>
           <div class="dropdown__menu">
             <div class="dropdown__item selected" data-value="">
-              <span class="check">✓</span> Любы статус
+              <span class="check">✓</span> <span data-i18n="pages.catalog.anyStatus">Любы статус</span>
             </div>
             <div class="dropdown__divider"></div>
             <div class="dropdown__item" data-value="official">
-              <span class="check"></span> Афіцыйны
+              <span class="check"></span> <span data-i18n="common.officialStatus.official">Афіцыйны</span>
             </div>
             <div class="dropdown__item" data-value="semi-official">
-              <span class="check"></span> Паўафіцыйны
+              <span class="check"></span> <span data-i18n="common.officialStatus.semiOfficial">Паўафіцыйны</span>
             </div>
             <div class="dropdown__item" data-value="unofficial">
-              <span class="check"></span> Неафіцыйны
+              <span class="check"></span> <span data-i18n="common.officialStatus.unofficial">Неафіцыйны</span>
             </div>
           </div>
         </div>
@@ -328,35 +328,35 @@
         <!-- Sort -->
         <div class="dropdown" id="dd-sort">
           <div class="dropdown__trigger" id="dd-sort-trigger">
-            Сартаванне <span class="dropdown__arrow">▾</span>
+            <span data-i18n="pages.catalog.sort">Сартаванне</span> <span class="dropdown__arrow">▾</span>
           </div>
           <div class="dropdown__menu">
             <div class="dropdown__item selected" data-value="created_at,desc">
-              <span class="check">✓</span> Па даце (новыя)
+              <span class="check">✓</span> <span data-i18n="pages.catalog.sortCreatedDesc">Па даце (новыя)</span>
             </div>
             <div class="dropdown__item" data-value="created_at,asc">
-              <span class="check"></span> Па даце (старыя)
+              <span class="check"></span> <span data-i18n="pages.catalog.sortCreatedAsc">Па даце (старыя)</span>
             </div>
             <div class="dropdown__divider"></div>
             <div class="dropdown__item" data-value="release_date,desc">
-              <span class="check"></span> Па даце выхаду (новыя)
+              <span class="check"></span> <span data-i18n="pages.catalog.sortReleaseDesc">Па даце выхаду (новыя)</span>
             </div>
             <div class="dropdown__item" data-value="release_date,asc">
-              <span class="check"></span> Па даце выхаду (старыя)
+              <span class="check"></span> <span data-i18n="pages.catalog.sortReleaseAsc">Па даце выхаду (старыя)</span>
             </div>
             <div class="dropdown__divider"></div>
             <div class="dropdown__item" data-value="steam_rating,desc">
-              <span class="check"></span> Па рэйтынгу Steam
+              <span class="check"></span> <span data-i18n="pages.catalog.sortSteamDesc">Па рэйтынгу Steam</span>
             </div>
             <div class="dropdown__item" data-value="steam_rating,asc">
-              <span class="check"></span> Па рэйтынгу Steam (адваротны)
+              <span class="check"></span> <span data-i18n="pages.catalog.sortSteamAsc">Па рэйтынгу Steam (адваротны)</span>
             </div>
             <div class="dropdown__divider"></div>
             <div class="dropdown__item" data-value="best_rating,desc">
-              <span class="check"></span> Па рэйтынгу перакладу
+              <span class="check"></span> <span data-i18n="pages.catalog.sortTranslationDesc">Па рэйтынгу перакладу</span>
             </div>
             <div class="dropdown__item" data-value="best_rating,asc">
-              <span class="check"></span> Па рэйтынгу перакладу (адваротны)
+              <span class="check"></span> <span data-i18n="pages.catalog.sortTranslationAsc">Па рэйтынгу перакладу (адваротны)</span>
             </div>
           </div>
         </div>
@@ -383,17 +383,18 @@
       <span class="footer__logo">
         <img src="JaVar_SVG.svg" alt="JAVAR" style="height:24px;width:auto;display:block" />
       </span>
-      <span class="footer__copy">© 2024 САА «БЫВАЕ»</span>
+      <span class="footer__copy" data-i18n="common.footer.copyright">© 2024 САА «БЫВАЕ»</span>
     </div>
     <ul class="footer__nav">
-      <li><a href="index.html">Галоўная</a></li>
-      <li><a href="catalog.html">Каталог</a></li>
-      <li><a href="contacts.html">Кантакты</a></li>
-      <li><a href="faq.html">FAQ</a></li>
+      <li><a href="index.html" data-i18n="common.nav.home">Галоўная</a></li>
+      <li><a href="catalog.html" data-i18n="common.nav.catalog">Каталог</a></li>
+      <li><a href="contacts.html" data-i18n="common.nav.contacts">Кантакты</a></li>
+      <li><a href="faq.html" data-i18n="common.nav.faq">FAQ</a></li>
     </ul>
   </footer>
 </div>
 
+<script src="texts.js?v=2"></script>
 <script src="shared.js?v=2"></script>
 <script src="submission.js?v=2"></script>
 <script>
@@ -469,7 +470,7 @@ document.addEventListener('click', () => {
 // ── Initialize dropdowns ──────────────────────────────────────────────────
 initDropdown('dd-genre', (value, label) => {
   state.genreId   = parseInt(value) || 0;
-  state.genreName = label === 'Усе жанры' ? '' : label;
+  state.genreName = label === t('pages.catalog.allGenres') ? '' : label;
   state.page = 0;
   updateChips();
   loadGames();
@@ -534,18 +535,18 @@ searchInput.addEventListener('input', () => {
 });
 
 // ── Active filter chips ───────────────────────────────────────────────────
-const ORTH_LABELS = { academic: 'Акадэмічны', tarashkevitsa: 'Альтэрнатыўны', lacinka: 'Лацінка' };
-const TYPE_LABELS = { manual: 'Ручны пераклад', ai: 'Машынны пераклад' };
-const OFFICIAL_LABELS = { official: 'Афіцыйны', 'semi-official': 'Паўафіцыйны', unofficial: 'Неафіцыйны' };
+const ORTH_LABELS = { academic: t('common.orthography.academic'), tarashkevitsa: t('common.orthography.tarashkevitsa'), lacinka: t('common.orthography.lacinka') };
+const TYPE_LABELS = { manual: t('common.translationTypes.manual'), ai: t('common.translationTypes.ai') };
+const OFFICIAL_LABELS = { official: t('common.officialStatus.official'), 'semi-official': t('common.officialStatus.semiOfficial'), unofficial: t('common.officialStatus.unofficial') };
 
 function updateChips() {
   const cont = document.getElementById('active-filters');
   const chips = [];
 
   if (state.search)
-    chips.push({ label: `Пошук: ${state.search}`, clear: () => { state.search = ''; searchInput.value = ''; } });
+    chips.push({ label: t('common.labels.search', { value: state.search }), clear: () => { state.search = ''; searchInput.value = ''; } });
   if (state.genreId)
-    chips.push({ label: `Жанр: ${state.genreName}`, clear: () => {
+    chips.push({ label: t('common.labels.genre', { value: state.genreName }), clear: () => {
       state.genreId = 0; state.genreName = '';
       resetDropdown('dd-genre');
     }});
@@ -658,8 +659,8 @@ async function loadGames() {
       grid.innerHTML = `
         <div class="empty-state">
           <div class="empty-state__icon">🔍</div>
-          <div class="empty-state__title">Нічога не знойдзена</div>
-          <div style="font-size:14px">Паспрабуйце змяніць фільтры</div>
+          <div class="empty-state__title">${t('pages.catalog.emptyTitle')}</div>
+          <div style="font-size:14px">${t('pages.catalog.emptyHint')}</div>
         </div>`;
       return;
     }
@@ -671,8 +672,8 @@ async function loadGames() {
     grid.innerHTML = `
       <div class="empty-state">
         <div class="empty-state__icon">⚠️</div>
-        <div class="empty-state__title">Памылка загрузкі</div>
-        <div style="font-size:14px">Праверце, ці запушчаны сервер</div>
+        <div class="empty-state__title">${t('pages.catalog.errorTitle')}</div>
+        <div style="font-size:14px">${t('pages.catalog.errorHint')}</div>
       </div>`;
   }
   syncUrl();
@@ -697,9 +698,9 @@ function renderPagination(total, container) {
   }).join('');
 
   container.innerHTML = `
-    <button class="page-btn" data-page="${current - 1}" ${current === 0 ? 'disabled' : ''}>← Назад</button>
+    <button class="page-btn" data-page="${current - 1}" ${current === 0 ? 'disabled' : ''}>${t('pages.catalog.prevPage')}</button>
     ${pageButtons}
-    <button class="page-btn" data-page="${current + 1}" ${current >= totalPages - 1 ? 'disabled' : ''}>Далей →</button>
+    <button class="page-btn" data-page="${current + 1}" ${current >= totalPages - 1 ? 'disabled' : ''}>${t('pages.catalog.nextPage')}</button>
   `;
   container.querySelectorAll('.page-btn[data-page]').forEach(btn => {
     btn.addEventListener('click', () => {

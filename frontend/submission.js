@@ -1,8 +1,6 @@
 (() => {
-  const platforms = [
-    'macOS', 'iOS', 'Linux', 'PlayStation', 'Android', 'Windows',
-    'Xbox', 'Nintendo Switch', 'Іншая'
-  ];
+  const copy = t('submission');
+  const platforms = copy.platforms;
 
   function optionPill(type, name, label) {
     return `
@@ -20,17 +18,17 @@
     modal.id = 'submission-modal';
     modal.innerHTML = `
       <div class="submission-dialog" role="dialog" aria-modal="true" aria-labelledby="submission-title">
-        <button class="submission-close" type="button" aria-label="Закрыць" data-close-submission>×</button>
-        <h2 id="submission-title">Дадаць беларусізатар</h2>
+        <button class="submission-close" type="button" aria-label="${copy.close}" data-close-submission>×</button>
+        <h2 id="submission-title">${copy.title}</h2>
         <form class="submission-form" id="submission-form">
           <div class="submission-field">
-            <label for="submission-game-title">Назва гульні</label>
+            <label for="submission-game-title">${copy.gameTitle}</label>
             <input id="submission-game-title" name="game_title" type="text" required />
           </div>
 
           <fieldset class="submission-field">
-            <legend>Платформы</legend>
-            <p>Абярыце 1 ці болей платформ, дзе ёсць беларусізатар.</p>
+            <legend>${copy.platformsLegend}</legend>
+            <p>${copy.platformsHint}</p>
             <div class="submission-pills submission-pills--platforms">
               ${platforms.map(p => optionPill('checkbox', 'platforms', p).replace(' required', '')).join('')}
             </div>
@@ -38,51 +36,51 @@
 
           <div class="submission-grid">
             <fieldset class="submission-field">
-              <legend>Катэгорыя лакалізацыі</legend>
+              <legend>${copy.category}</legend>
               <div class="submission-checks">
                 <label class="submission-pill">
                   <input type="radio" name="category" value="official" required />
-                  <span>Афіцыйная</span>
+                  <span>${copy.official}</span>
                 </label>
                 <label class="submission-pill">
                   <input type="radio" name="category" value="unofficial" required />
-                  <span>Неафіцыйная</span>
+                  <span>${copy.unofficial}</span>
                 </label>
               </div>
             </fieldset>
 
             <fieldset class="submission-field">
-              <legend>Тып лакалізацыі</legend>
+              <legend>${copy.localizationType}</legend>
               <div class="submission-checks">
-                ${optionPill('checkbox', 'localization_type', 'Тэкст').replace(' required', '')}
-                ${optionPill('checkbox', 'localization_type', 'Агучванне').replace(' required', '')}
+                ${optionPill('checkbox', 'localization_type', copy.text).replace(' required', '')}
+                ${optionPill('checkbox', 'localization_type', copy.voice).replace(' required', '')}
               </div>
             </fieldset>
           </div>
 
           <div class="submission-field submission-unofficial-field" hidden>
-            <label for="submission-authors">Аўтары лакалізацыі</label>
+            <label for="submission-authors">${copy.authors}</label>
             <input id="submission-authors" name="authors" type="text" />
           </div>
 
           <div class="submission-field">
-            <label for="submission-game-url">Спасылка на гульню</label>
+            <label for="submission-game-url">${copy.gameUrl}</label>
             <input id="submission-game-url" name="game_url" type="url" required />
           </div>
 
           <div class="submission-field submission-unofficial-field" hidden>
-            <label for="submission-translation-url">Спасылка на беларусізатар</label>
+            <label for="submission-translation-url">${copy.translationUrl}</label>
             <input id="submission-translation-url" name="translation_url" type="url" />
           </div>
 
           <div class="submission-field">
-            <label for="submission-description">Апісанне лакалізацыі</label>
+            <label for="submission-description">${copy.description}</label>
             <textarea id="submission-description" name="description"></textarea>
           </div>
 
           <div class="submission-error" id="submission-error" role="alert"></div>
           <div class="submission-actions">
-            <button class="submission-submit" type="submit">Адправіць</button>
+            <button class="submission-submit" type="submit">${t('common.actions.submit')}</button>
           </div>
         </form>
       </div>`;
@@ -134,7 +132,7 @@
     const button = document.querySelector('#submission-form .submission-submit');
     if (!button) return;
     button.disabled = isSubmitting;
-    button.textContent = isSubmitting ? 'Адпраўляю...' : 'Адправіць';
+    button.textContent = isSubmitting ? t('common.actions.submitting') : t('common.actions.submit');
   }
 
   function updateUnofficialFields() {
@@ -170,11 +168,11 @@
     event.preventDefault();
     showError('');
     if (selectedCount('platforms') === 0) {
-      showError('Абярыце хаця б адну платформу.');
+      showError(copy.platformRequired);
       return;
     }
     if (selectedCount('localization_type') === 0) {
-      showError('Абярыце хаця б адзін тып лакалізацыі.');
+      showError(copy.typeRequired);
       return;
     }
     const form = event.target;
@@ -201,19 +199,19 @@
       const payload = await res.json().catch(() => ({}));
       if (res.status === 409) {
         const names = (payload.similar_games || []).map(g => `«${g.title}»`).join(', ');
-        showError(`Падобная гульня ўжо ёсць у каталогу${names ? ': ' + names : '.'}`);
+        showError(t('submission.duplicate', { names: names ? ': ' + names : '.' }));
         return;
       }
       if (!res.ok) {
-        showError(payload.error || 'Не атрымалася адправіць прапанову.');
+        showError(payload.error || copy.genericError);
         return;
       }
       form.reset();
       updateUnofficialFields();
       closeModal();
-      showSuccess('Дзякуй! Прапанова адпраўлена на мадэрацыю.');
+      showSuccess(copy.success);
     } catch {
-      showError('Памылка сеткі. Паспрабуйце яшчэ раз.');
+      showError(copy.networkError);
     } finally {
       setSubmitting(false);
     }

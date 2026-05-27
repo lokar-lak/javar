@@ -1,0 +1,184 @@
+const TEXTS = {
+  common: {
+    titlePrefix: 'JAVAR',
+    nav: {
+      home: 'Галоўная',
+      catalog: 'Каталог',
+      contacts: 'Кантакты',
+      faq: 'FAQ',
+      submit: 'Дадаць беларусізатар',
+      searchPlaceholder: 'Пошук...'
+    },
+    footer: {
+      copyright: '© 2024 САА «БЫВАЕ»'
+    },
+    actions: {
+      details: 'Падрабязней',
+      submit: 'Адправіць',
+      submitting: 'Адпраўляю...',
+      backToCatalog: 'Вярнуцца ў каталог'
+    },
+    status: {
+      noRating: 'Яшчэ без ацэнак',
+      loadingError: 'Памылка загрузкі.',
+      gameNotFound: 'Гульня не знойдзена.'
+    },
+    labels: {
+      reviewCount: 'Колькасць водгукаў: {count}',
+      search: 'Пошук: {value}',
+      genre: 'Жанр: {value}'
+    },
+    translationTypes: {
+      manual: 'Ручны пераклад',
+      ai: 'Машынны пераклад',
+      manualShort: 'Ручны',
+      aiShort: 'Машынны'
+    },
+    orthography: {
+      academic: 'Акадэмічны',
+      tarashkevitsa: 'Альтэрнатыўны',
+      lacinka: 'Лацінка'
+    },
+    officialStatus: {
+      official: 'Афіцыйны',
+      semiOfficial: 'Паўафіцыйны',
+      unofficial: 'Неафіцыйны'
+    }
+  },
+  pages: {
+    home: {
+      title: 'JAVAR — Галоўная',
+      statsLabel: 'Колькасць перакладаў',
+      officialCount: 'Афіцыйных',
+      semiOfficialCount: 'Паўафіцыйных',
+      unofficialCount: 'Неафіцыйных',
+      newReleases: 'Новыя рэлізы',
+      gameOfDay: 'Гульня дня',
+      aboutTitle: 'Пра нас',
+      aboutText: 'Javar — спроба сабраць пад адным дахам увесь размаіты і разнастайны свет беларускіх лакалізацый. Раскіданыя па розных пляцоўках, яны часта застаюцца незаўважанымі і недаацэненымі. Мы хочам змяніць гэта, стварыўшы месца, дзе можна лёгка знайсці і ацаніць працу беларускіх перакладчыка. На Javar вы знойдзеце каталог гульняў з беларускімі лакалізацыямі, рэйтынгі і водгукі супольнасці, а таксама магчымасць падзяліцца сваім досведам і ўражаннямі. Наша мэта — не толькі папулярызаваць беларускія лакалізацыі, але і стварыць актыўную і падтрымліваючую супольнасць вакол іх.',
+      noGames: 'Гульняў пакуль няма.'
+    },
+    catalog: {
+      title: 'JAVAR — Каталог',
+      heading: 'Каталог',
+      searchPlaceholder: 'Назва або распрацоўшчык...',
+      genre: 'Жанр',
+      allGenres: 'Усе жанры',
+      type: 'Тып перакладу',
+      allTypes: 'Усе тыпы',
+      orthography: 'Правапіс',
+      anyOrthography: 'Любы правапіс',
+      status: 'Статус',
+      anyStatus: 'Любы статус',
+      sort: 'Сартаванне',
+      sortCreatedDesc: 'Па даце (новыя)',
+      sortCreatedAsc: 'Па даце (старыя)',
+      sortReleaseDesc: 'Па даце выхаду (новыя)',
+      sortReleaseAsc: 'Па даце выхаду (старыя)',
+      sortSteamDesc: 'Па рэйтынгу Steam',
+      sortSteamAsc: 'Па рэйтынгу Steam (адваротны)',
+      sortTranslationDesc: 'Па рэйтынгу перакладу',
+      sortTranslationAsc: 'Па рэйтынгу перакладу (адваротны)',
+      emptyTitle: 'Нічога не знойдзена',
+      emptyHint: 'Паспрабуйце змяніць фільтры',
+      errorTitle: 'Памылка загрузкі',
+      errorHint: 'Праверце, ці запушчаны сервер',
+      prevPage: '← Назад',
+      nextPage: 'Далей →'
+    },
+    game: {
+      title: 'JAVAR — Гульня',
+      steamPositive: 'станоўчых водгукаў',
+      translationRating: 'Рэйтынг перакладу',
+      avgRating: 'сярэдняя ацэнка',
+      translationsCount: 'Перакладаў',
+      available: 'даступна',
+      totalClicks: 'Усяго пераходаў',
+      searchClicks: 'на пошук',
+      releaseDate: 'Дата выхаду',
+      developer: 'Распрацоўшчык',
+      publisher: 'Выдавец',
+      genres: 'Жанры',
+      platforms: 'Платформы',
+      aboutGame: 'Пра гульню',
+      translations: 'Пераклады',
+      translatorFallback: 'Беларусізатар',
+      clicks: 'Пераходаў: {count}',
+      authors: 'Аўтары',
+      translated: 'Перакладзена',
+      findTranslation: 'Знайсці пераклад ↗',
+      reviews: 'Водгукі',
+      reviewsFor: 'Водгукі — {name}',
+      leaveReview: 'Пакінуць водгук',
+      nameOptional: 'Імя (неабавязкова)',
+      anonymous: 'Ананім',
+      rating: 'Рэйтынг',
+      comment: 'Каментарый',
+      reviewPlaceholder: 'Напішыце свой водгук...',
+      noReviews: 'Водгукаў пакуль няма. Будзьце першым!',
+      updateError: 'Памылка абнаўлення.',
+      linkError: 'Не ўдалося атрымаць спасылку',
+      chooseRating: 'Абярыце рэйтынг',
+      writeComment: 'Напішыце каментарый',
+      submitError: 'Памылка адпраўкі'
+    },
+    contacts: {
+      title: 'JAVAR — Кантакты',
+      heading: 'Звяжыцеся з намі',
+      text: 'Ёсць пытанні, прапановы або хочаце далучыцца да праекту?<br/>Напішыце нам у Telegram-бот, і мы адкажам як мага хутчэй.',
+      botLabel: 'Наш Telegram-бот:'
+    },
+    faq: {
+      title: 'JAVAR — FAQ',
+      items: [
+        { question: 'Чаму ў вас няма файлаў, а толькі ссылкі на гугл-пошук, гэта ж нязручна?', answer: 'Я хв, што тут напісаць' },
+        { question: 'Пытанне 2', answer: 'плэйсхолдэр 2' },
+        { question: 'Што рабіць, калі беларусіатар не працуе', answer: 'Звяртацца непасрэдна да аўтара перакладу.' },
+        { question: 'Пытанне 4', answer: 'плэйсхолдэр 4' },
+        { question: 'Пытанне 5', answer: 'плэйсхолдэр 5' }
+      ]
+    }
+  },
+  submission: {
+    platforms: ['macOS', 'iOS', 'Linux', 'PlayStation', 'Android', 'Windows', 'Xbox', 'Nintendo Switch', 'Іншая'],
+    close: 'Закрыць',
+    title: 'Дадаць беларусізатар',
+    gameTitle: 'Назва гульні',
+    platformsLegend: 'Платформы',
+    platformsHint: 'Абярыце 1 ці болей платформ, дзе ёсць беларусізатар.',
+    category: 'Катэгорыя лакалізацыі',
+    official: 'Афіцыйная',
+    unofficial: 'Неафіцыйная',
+    localizationType: 'Тып лакалізацыі',
+    text: 'Тэкст',
+    voice: 'Агучванне',
+    authors: 'Аўтары лакалізацыі',
+    gameUrl: 'Спасылка на гульню',
+    translationUrl: 'Спасылка на беларусізатар',
+    description: 'Апісанне лакалізацыі',
+    platformRequired: 'Абярыце хаця б адну платформу.',
+    typeRequired: 'Абярыце хаця б адзін тып лакалізацыі.',
+    duplicate: 'Падобная гульня ўжо ёсць у каталогу{names}',
+    genericError: 'Не атрымалася адправіць прапанову.',
+    success: 'Дзякуй! Прапанова адпраўлена на мадэрацыю.',
+    networkError: 'Памылка сеткі. Паспрабуйце яшчэ раз.'
+  }
+};
+
+function t(path, vars = {}) {
+  const value = path.split('.').reduce((acc, key) => acc?.[key], TEXTS);
+  if (value == null) return path;
+  if (typeof value !== 'string') return value;
+  return value.replace(/\{(\w+)\}/g, (_, key) => vars[key] ?? '');
+}
+
+function applyI18n(root = document) {
+  root.querySelectorAll('[data-i18n]').forEach(el => { el.innerHTML = t(el.dataset.i18n); });
+  root.querySelectorAll('[data-i18n-text]').forEach(el => { el.textContent = t(el.dataset.i18nText); });
+  root.querySelectorAll('[data-i18n-placeholder]').forEach(el => { el.placeholder = t(el.dataset.i18nPlaceholder); });
+  root.querySelectorAll('[data-i18n-aria-label]').forEach(el => { el.setAttribute('aria-label', t(el.dataset.i18nAriaLabel)); });
+  const titleKey = document.documentElement.dataset.titleKey;
+  if (titleKey) document.title = t(titleKey);
+}
+
+document.addEventListener('DOMContentLoaded', () => applyI18n());

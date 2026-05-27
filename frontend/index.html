@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="be">
+<html lang="be" data-title-key="pages.home.title">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -44,35 +44,35 @@
       <img src="JaVar_SVG.svg" alt="JAVAR" style="height:28px;width:auto;display:block" />
     </a>
     <ul class="navbar__links">
-      <li><a href="index.html" class="active">Галоўная</a></li>
-      <li><a href="catalog.html">Каталог</a></li>
-      <li><a href="contacts.html">Кантакты</a></li>
-      <li><a href="faq.html">FAQ</a></li>
+      <li><a href="index.html" class="active" data-i18n="common.nav.home">Галоўная</a></li>
+      <li><a href="catalog.html" data-i18n="common.nav.catalog">Каталог</a></li>
+      <li><a href="contacts.html" data-i18n="common.nav.contacts">Кантакты</a></li>
+      <li><a href="faq.html" data-i18n="common.nav.faq">FAQ</a></li>
     </ul>
-    <div class="navbar__submit-item"><button type="button" class="navbar__submit" data-open-submission>Дадаць беларусізатар</button></div>
+    <div class="navbar__submit-item"><button type="button" class="navbar__submit" data-open-submission data-i18n="common.nav.submit">Дадаць беларусізатар</button></div>
     <div class="navbar__search">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
         <circle cx="6.5" cy="6.5" r="5" stroke="#7A7A9A" stroke-width="1.5"/>
         <line x1="10.5" y1="10.5" x2="14" y2="14" stroke="#7A7A9A" stroke-width="1.5" stroke-linecap="round"/>
       </svg>
-      <input type="text" id="nav-search" placeholder="Пошук..." />
+      <input type="text" id="nav-search" placeholder="Пошук..." data-i18n-placeholder="common.nav.searchPlaceholder" />
     </div>
   </nav>
 
   <main class="main">
 
     <!-- TRANSLATION STATS -->
-    <section class="translation-stats" aria-label="Колькасць перакладаў">
+    <section class="translation-stats" aria-label="Колькасць перакладаў" data-i18n-aria-label="pages.home.statsLabel">
       <div class="translation-stat">
-        <div class="translation-stat__label"><span class="translation-stat__icon">★</span>Афіцыйных</div>
+        <div class="translation-stat__label"><span class="translation-stat__icon">★</span><span data-i18n="pages.home.officialCount">Афіцыйных</span></div>
         <div class="translation-stat__value" id="stat-official">—</div>
       </div>
       <div class="translation-stat">
-        <div class="translation-stat__label"><span class="translation-stat__icon">◐</span>Паўафіцыйных</div>
+        <div class="translation-stat__label"><span class="translation-stat__icon">◐</span><span data-i18n="pages.home.semiOfficialCount">Паўафіцыйных</span></div>
         <div class="translation-stat__value" id="stat-semi-official">—</div>
       </div>
       <div class="translation-stat">
-        <div class="translation-stat__label"><span class="translation-stat__icon">◇</span>Неафіцыйных</div>
+        <div class="translation-stat__label"><span class="translation-stat__icon">◇</span><span data-i18n="pages.home.unofficialCount">Неафіцыйных</span></div>
         <div class="translation-stat__value" id="stat-unofficial">—</div>
       </div>
     </section>
@@ -80,7 +80,7 @@
     <!-- NEW RELEASES -->
     <section class="section">
       <div class="section-heading">
-        <h2>Новыя рэлізы</h2>
+        <h2 data-i18n="pages.home.newReleases">Новыя рэлізы</h2>
         <div class="section-heading__bar" style="width:166px"></div>
       </div>
       <div class="games-grid" id="grid">
@@ -93,7 +93,7 @@
     <!-- GAME OF THE DAY -->
     <section class="section">
       <div class="section-heading">
-        <h2>Гульня дня</h2>
+        <h2 data-i18n="pages.home.gameOfDay">Гульня дня</h2>
         <div class="section-heading__bar" style="width:132px"></div>
       </div>
       <div id="featured">
@@ -113,12 +113,12 @@
     <!-- ABOUT US -->
     <section class="section">
       <div class="section-heading">
-        <h2>Пра нас</h2>
+        <h2 data-i18n="pages.home.aboutTitle">Пра нас</h2>
         <div class="section-heading__bar" style="width:90px"></div>
       </div>
       <div class="about-block">
         <p>
-          Javar — спроба сабраць пад адным дахам увесь размаіты і разнастайны свет беларускіх лакалізацый. Раскіданыя па розных пляцоўках, яны часта застаюцца незаўважанымі і недаацэненымі. Мы хочам змяніць гэта, стварыўшы месца, дзе можна лёгка знайсці і ацаніць працу беларускіх перакладчыка. На Javar вы знойдзеце каталог гульняў з беларускімі лакалізацыямі, рэйтынгі і водгукі супольнасці, а таксама магчымасць падзяліцца сваім досведам і ўражаннямі. Наша мэта — не толькі папулярызаваць беларускія лакалізацыі, але і стварыць актыўную і падтрымліваючую супольнасць вакол іх.
+          <span data-i18n="pages.home.aboutText">Javar — спроба сабраць пад адным дахам увесь размаіты і разнастайны свет беларускіх лакалізацый. Раскіданыя па розных пляцоўках, яны часта застаюцца незаўважанымі і недаацэненымі. Мы хочам змяніць гэта, стварыўшы месца, дзе можна лёгка знайсці і ацаніць працу беларускіх перакладчыка. На Javar вы знойдзеце каталог гульняў з беларускімі лакалізацыямі, рэйтынгі і водгукі супольнасці, а таксама магчымасць падзяліцца сваім досведам і ўражаннямі. Наша мэта — не толькі папулярызаваць беларускія лакалізацыі, але і стварыць актыўную і падтрымліваючую супольнасць вакол іх.</span>
         </p>
       </div>
     </section>
@@ -130,17 +130,18 @@
       <span class="footer__logo">
         <img src="JaVar_SVG.svg" alt="JAVAR" style="height:24px;width:auto;display:block" />
       </span>
-      <span class="footer__copy">© 2024 САА «БЫВАЕ»</span>
+      <span class="footer__copy" data-i18n="common.footer.copyright">© 2024 САА «БЫВАЕ»</span>
     </div>
     <ul class="footer__nav">
-      <li><a href="index.html">Галоўная</a></li>
-      <li><a href="catalog.html">Каталог</a></li>
-      <li><a href="contacts.html">Кантакты</a></li>
-      <li><a href="faq.html">FAQ</a></li>
+      <li><a href="index.html" data-i18n="common.nav.home">Галоўная</a></li>
+      <li><a href="catalog.html" data-i18n="common.nav.catalog">Каталог</a></li>
+      <li><a href="contacts.html" data-i18n="common.nav.contacts">Кантакты</a></li>
+      <li><a href="faq.html" data-i18n="common.nav.faq">FAQ</a></li>
     </ul>
   </footer>
 
 </div>
+<script src="texts.js?v=2"></script>
 <script src="shared.js?v=2"></script>
 <script src="submission.js?v=2"></script>
 <script>
@@ -170,17 +171,17 @@ function renderFeatured(game) {
       </div>
       <div class="featured__content">
         <div style="display:flex;align-items:center;gap:16px;margin-bottom:12px;flex-wrap:wrap">
-          <div class="featured__label" style="margin-bottom:0">Гульня дня</div>
+          <div class="featured__label" style="margin-bottom:0">${t('pages.home.gameOfDay')}</div>
           <div class="featured__tags" style="margin-bottom:0">${tags}</div>
         </div>
         <div class="featured__title">${game.title}</div>
         <p class="featured__desc">${desc}</p>
         <div class="featured__rating">
           <span class="stars" style="font-size:18px;letter-spacing:3px">${stars(rating)}</span>
-          <span class="score">${rating > 0 ? rating.toFixed(1) + ' / 5.0' : 'Яшчэ без ацэнак'}</span>
+          <span class="score">${rating > 0 ? rating.toFixed(1) + ' / 5.0' : t('common.status.noRating')}</span>
         </div>
         <div class="featured__actions" style="margin-top:14px">
-          <a href="game.html?slug=${game.slug}" class="btn btn--primary-lg" onclick="event.stopPropagation()">Падрабязней</a>
+          <a href="game.html?slug=${game.slug}" class="btn btn--primary-lg" onclick="event.stopPropagation()">${t('common.actions.details')}</a>
         </div>
       </div>
     </div>`;
@@ -243,7 +244,7 @@ function renderStats(stats) {
     const gridGames = featuredGame ? games.filter(g => g.id !== featuredGame.id).slice(0, 6) : games;
     document.getElementById('grid').innerHTML = gridGames.length
       ? gridGames.map((g, i) => renderGameCard(g, i)).join('')
-      : `<p style="color:var(--text-muted);grid-column:1/-1">Гульняў пакуль няма.</p>`;
+      : `<p style="color:var(--text-muted);grid-column:1/-1">${t('pages.home.noGames')}</p>`;
 
     // Game of the Day: deterministic daily pick for all users
     document.getElementById('featured').innerHTML = featuredGame
@@ -253,7 +254,7 @@ function renderStats(stats) {
   } catch (err) {
     console.error(err);
     document.getElementById('grid').innerHTML =
-      `<p style="color:var(--text-muted);grid-column:1/-1">Памылка загрузкі.</p>`;
+      `<p style="color:var(--text-muted);grid-column:1/-1">${t('common.status.loadingError')}</p>`;
     document.getElementById('featured').innerHTML = '';
   }
 })();

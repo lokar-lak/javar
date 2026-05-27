@@ -65,8 +65,8 @@ function renderGameCard(game, idx = 0) {
       <div class="game-card__cover game-card__cover--placeholder" style="${!game.cover_url ? coverStyle(game, idx) : ''}">
         ${coverImageHTML(game, idx)}
         ${!game.cover_url ? `<span style="font-size:40px;opacity:.2">🎮</span>` : ''}
-        ${aiOnly ? `<div class="game-card__ai-badge">Машынны ПЕРАКЛАД</div>` : ''}
-        ${off ? `<div class="game-card__official-badge">АФІЦЫЙНЫ</div>` : ''}
+        ${aiOnly ? `<div class="game-card__ai-badge">${t('common.translationTypes.ai').toUpperCase()}</div>` : ''}
+        ${off ? `<div class="game-card__official-badge">${t('common.officialStatus.official').toUpperCase()}</div>` : ''}
       </div>
       <div class="game-card__body">
         <div class="game-card__meta">
@@ -75,7 +75,7 @@ function renderGameCard(game, idx = 0) {
         </div>
         <div class="game-card__title">${game.title}</div>
         <div class="game-card__dev">${game.developer}${year ? ` • ${year}` : ''}</div>
-        <a href="game.html?slug=${game.slug}" class="btn btn--primary" style="width:fit-content">Падрабязней</a>
+        <a href="game.html?slug=${game.slug}" class="btn btn--primary" style="width:fit-content">${t('common.actions.details')}</a>
       </div>
     </div>`;
 }

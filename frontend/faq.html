@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="be">
+<html lang="be" data-title-key="pages.faq.title">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -28,18 +28,18 @@
       <img src="JaVar_SVG.svg" alt="JAVAR" style="height:28px;width:auto;display:block" />
     </a>
     <ul class="navbar__links">
-      <li><a href="index.html">Галоўная</a></li>
-      <li><a href="catalog.html">Каталог</a></li>
-      <li><a href="contacts.html">Кантакты</a></li>
-      <li><a href="faq.html" class="active">FAQ</a></li>
+      <li><a href="index.html" data-i18n="common.nav.home">Галоўная</a></li>
+      <li><a href="catalog.html" data-i18n="common.nav.catalog">Каталог</a></li>
+      <li><a href="contacts.html" data-i18n="common.nav.contacts">Кантакты</a></li>
+      <li><a href="faq.html" class="active" data-i18n="common.nav.faq">FAQ</a></li>
     </ul>
-    <div class="navbar__submit-item"><button type="button" class="navbar__submit" data-open-submission>Дадаць беларусізатар</button></div>
+    <div class="navbar__submit-item"><button type="button" class="navbar__submit" data-open-submission data-i18n="common.nav.submit">Дадаць беларусізатар</button></div>
     <div class="navbar__search">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
         <circle cx="6.5" cy="6.5" r="5" stroke="#7A7A9A" stroke-width="1.5"/>
         <line x1="10.5" y1="10.5" x2="14" y2="14" stroke="#7A7A9A" stroke-width="1.5" stroke-linecap="round"/>
       </svg>
-      <input type="text" placeholder="Пошук..." />
+      <input type="text" placeholder="Пошук..." data-i18n-placeholder="common.nav.searchPlaceholder" />
     </div>
   </nav>
 
@@ -48,46 +48,46 @@
 
     <!-- FAQ 1 -->
     <div class="faq-item">
-      <div class="faq-question">Чаму ў вас няма файлаў, а толькі ссылкі на гугл-пошук, гэта ж нязручна?</div>
+      <div class="faq-question" data-i18n="pages.faq.items.0.question">Чаму ў вас няма файлаў, а толькі ссылкі на гугл-пошук, гэта ж нязручна?</div>
       <div class="faq-question__bar"></div>
       <div class="faq-answer">
-        Я хв, што тут напісаць
+        <span data-i18n="pages.faq.items.0.answer">Я хв, што тут напісаць</span>
       </div>
     </div>
 
     <!-- FAQ 2 -->
     <div class="faq-item">
-      <div class="faq-question">Пытанне 2</div>
+      <div class="faq-question" data-i18n="pages.faq.items.1.question">Пытанне 2</div>
       <div class="faq-question__bar"></div>
       <div class="faq-answer">
-        плэйсхолдэр 2
+        <span data-i18n="pages.faq.items.1.answer">плэйсхолдэр 2</span>
       </div>
     </div>
 
     <!-- FAQ 3 -->
     <div class="faq-item">
-      <div class="faq-question">Што рабіць, калі беларусіатар не працуе</div>
+      <div class="faq-question" data-i18n="pages.faq.items.2.question">Што рабіць, калі беларусіатар не працуе</div>
       <div class="faq-question__bar"></div>
       <div class="faq-answer">
-        Звяртацца непасрэдна да аўтара перакладу.
+        <span data-i18n="pages.faq.items.2.answer">Звяртацца непасрэдна да аўтара перакладу.</span>
       </div>
     </div>
 
     <!-- FAQ 4 -->
     <div class="faq-item">
-      <div class="faq-question">Пытанне 4</div>
+      <div class="faq-question" data-i18n="pages.faq.items.3.question">Пытанне 4</div>
       <div class="faq-question__bar"></div>
       <div class="faq-answer">
-        плэйсхолдэр 4
+        <span data-i18n="pages.faq.items.3.answer">плэйсхолдэр 4</span>
       </div>
     </div>
 
     <!-- FAQ 5 -->
     <div class="faq-item">
-      <div class="faq-question">Пытанне 5</div>
+      <div class="faq-question" data-i18n="pages.faq.items.4.question">Пытанне 5</div>
       <div class="faq-question__bar"></div>
       <div class="faq-answer">
-          плэйсхолдэр 5
+          <span data-i18n="pages.faq.items.4.answer">плэйсхолдэр 5</span>
       </div>
     </div>
 
@@ -99,17 +99,18 @@
       <span class="footer__logo">
         <img src="JaVar_SVG.svg" alt="JAVAR" style="height:24px;width:auto;display:block" />
       </span>
-      <span class="footer__copy">© 2024 САА «БЫВАЕ»</span>
+      <span class="footer__copy" data-i18n="common.footer.copyright">© 2024 САА «БЫВАЕ»</span>
     </div>
     <ul class="footer__nav">
-      <li><a href="index.html">Галоўная</a></li>
-      <li><a href="catalog.html">Каталог</a></li>
-      <li><a href="contacts.html">Кантакты</a></li>
-      <li><a href="faq.html">FAQ</a></li>
+      <li><a href="index.html" data-i18n="common.nav.home">Галоўная</a></li>
+      <li><a href="catalog.html" data-i18n="common.nav.catalog">Каталог</a></li>
+      <li><a href="contacts.html" data-i18n="common.nav.contacts">Кантакты</a></li>
+      <li><a href="faq.html" data-i18n="common.nav.faq">FAQ</a></li>
     </ul>
   </footer>
 
 </div>
+<script src="texts.js?v=2"></script>
 <script src="submission.js?v=2"></script>
 </body>
 </html>

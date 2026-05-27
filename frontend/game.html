@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="be">
+<html lang="be" data-title-key="pages.game.title">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -182,18 +182,18 @@
       <img src="JaVar_SVG.svg" alt="JAVAR" style="height:28px;width:auto;display:block" />
     </a>
     <ul class="navbar__links">
-      <li><a href="index.html">Галоўная</a></li>
-      <li><a href="catalog.html">Каталог</a></li>
-      <li><a href="contacts.html">Кантакты</a></li>
-      <li><a href="faq.html">FAQ</a></li>
+      <li><a href="index.html" data-i18n="common.nav.home">Галоўная</a></li>
+      <li><a href="catalog.html" data-i18n="common.nav.catalog">Каталог</a></li>
+      <li><a href="contacts.html" data-i18n="common.nav.contacts">Кантакты</a></li>
+      <li><a href="faq.html" data-i18n="common.nav.faq">FAQ</a></li>
     </ul>
-    <div class="navbar__submit-item"><button type="button" class="navbar__submit" data-open-submission>Дадаць беларусізатар</button></div>
+    <div class="navbar__submit-item"><button type="button" class="navbar__submit" data-open-submission data-i18n="common.nav.submit">Дадаць беларусізатар</button></div>
     <div class="navbar__search">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
         <circle cx="6.5" cy="6.5" r="5" stroke="#7A7A9A" stroke-width="1.5"/>
         <line x1="10.5" y1="10.5" x2="14" y2="14" stroke="#7A7A9A" stroke-width="1.5" stroke-linecap="round"/>
       </svg>
-      <input type="text" placeholder="Пошук..." />
+      <input type="text" placeholder="Пошук..." data-i18n-placeholder="common.nav.searchPlaceholder" />
     </div>
   </nav>
 
@@ -213,17 +213,18 @@
       <span class="footer__logo">
         <img src="JaVar_SVG.svg" alt="JAVAR" style="height:24px;width:auto;display:block" />
       </span>
-      <span class="footer__copy">© 2024 САА «БЫВАЕ»</span>
+      <span class="footer__copy" data-i18n="common.footer.copyright">© 2024 САА «БЫВАЕ»</span>
     </div>
     <ul class="footer__nav">
-      <li><a href="index.html">Галоўная</a></li>
-      <li><a href="catalog.html">Каталог</a></li>
-      <li><a href="contacts.html">Кантакты</a></li>
-      <li><a href="faq.html">FAQ</a></li>
+      <li><a href="index.html" data-i18n="common.nav.home">Галоўная</a></li>
+      <li><a href="catalog.html" data-i18n="common.nav.catalog">Каталог</a></li>
+      <li><a href="contacts.html" data-i18n="common.nav.contacts">Кантакты</a></li>
+      <li><a href="faq.html" data-i18n="common.nav.faq">FAQ</a></li>
     </ul>
   </footer>
 </div>
 
+<script src="texts.js?v=2"></script>
 <script src="submission.js?v=2"></script>
 <script>
 const API = '';  // same origin
@@ -246,8 +247,8 @@ function formatDate(value) {
 }
 
 function badge(type) {
-  if (type === 'manual') return `<span class="badge badge--manual">Ручны</span>`;
-  return `<span class="badge badge--ai">Машынны</span>`;
+  if (type === 'manual') return `<span class="badge badge--manual">${t('common.translationTypes.manualShort')}</span>`;
+  return `<span class="badge badge--ai">${t('common.translationTypes.aiShort')}</span>`;
 }
 
 function esc(value) {
@@ -309,9 +310,9 @@ function renderGame(game) {
   document.getElementById('main-content').innerHTML = `
     <!-- Breadcrumb -->
     <nav class="breadcrumb">
-      <a href="index.html">Галоўная</a>
+      <a href="index.html">${t('common.nav.home')}</a>
       <span class="breadcrumb__sep">›</span>
-      <a href="catalog.html">Каталог</a>
+      <a href="catalog.html">${t('common.nav.catalog')}</a>
       <span class="breadcrumb__sep">›</span>
       <span class="breadcrumb__current">${game.title}</span>
     </nav>
@@ -327,22 +328,22 @@ function renderGame(game) {
       <div class="stat-card" style="flex:1;min-width:140px">
         <div class="stat-card__label">Steam</div>
         <div class="stat-card__value stat-card__value--green">${game.steam_rating != null ? game.steam_rating + '%' : '—'}</div>
-        <div class="stat-card__sub">станоўчых водгукаў</div>
+        <div class="stat-card__sub">${t('pages.game.steamPositive')}</div>
       </div>
       <div class="stat-card" style="flex:1;min-width:140px">
-        <div class="stat-card__label">Рэйтынг перакладу</div>
+        <div class="stat-card__label">${t('pages.game.translationRating')}</div>
         <div class="stat-card__value" style="color:var(--accent)">${bestAvgRating}</div>
-        <div class="stat-card__sub">сярэдняя ацэнка</div>
+        <div class="stat-card__sub">${t('pages.game.avgRating')}</div>
       </div>
       <div class="stat-card" style="flex:1;min-width:140px">
-        <div class="stat-card__label">Перакладаў</div>
+        <div class="stat-card__label">${t('pages.game.translationsCount')}</div>
         <div class="stat-card__value" style="color:var(--text)">${(game.translations||[]).length}</div>
-        <div class="stat-card__sub">даступна</div>
+        <div class="stat-card__sub">${t('pages.game.available')}</div>
       </div>
       <div class="stat-card" style="flex:1;min-width:140px">
-        <div class="stat-card__label">Усяго пераходаў</div>
+        <div class="stat-card__label">${t('pages.game.totalClicks')}</div>
         <div class="stat-card__value" style="color:var(--text-muted)">${(game.translations||[]).reduce((s,t)=>s+(t.click_count||0),0)}</div>
-        <div class="stat-card__sub">на пошук</div>
+        <div class="stat-card__sub">${t('pages.game.searchClicks')}</div>
       </div>
     </div>
 
@@ -364,25 +365,25 @@ function renderGame(game) {
         <div class="info-table">
           <div class="info-row">
             <div class="info-cell">
-              <span class="info-cell__label">Дата выхаду</span>
+              <span class="info-cell__label">${t('pages.game.releaseDate')}</span>
               <span class="info-cell__value">${formatDate(game.release_date)}</span>
             </div>
             <div class="info-cell">
-              <span class="info-cell__label">Распрацоўшчык</span>
+              <span class="info-cell__label">${t('pages.game.developer')}</span>
               <span class="info-cell__value">${game.developer}</span>
             </div>
           </div>
           <div class="info-row">
             <div class="info-cell">
-              <span class="info-cell__label">Выдавец</span>
+              <span class="info-cell__label">${t('pages.game.publisher')}</span>
               <span class="info-cell__value">${game.publisher || '—'}</span>
             </div>
             <div class="info-cell">
-              <span class="info-cell__label">Жанры</span>
+              <span class="info-cell__label">${t('pages.game.genres')}</span>
               <div class="tag-list">${genreTags}</div>
             </div>
             <div class="info-cell">
-              <span class="info-cell__label">Платформы</span>
+              <span class="info-cell__label">${t('pages.game.platforms')}</span>
               <div class="info-cell__value">${renderPlatformLinks(game)}</div>
             </div>
           </div>
@@ -390,7 +391,7 @@ function renderGame(game) {
 
         <!-- Description -->
         <div style="margin-top:20px">
-          <h3 class="section-h2">Пра гульню</h3>
+          <h3 class="section-h2">${t('pages.game.aboutGame')}</h3>
           <p class="game-desc">${game.description || ''}</p>
         </div>
       </div>
@@ -398,7 +399,7 @@ function renderGame(game) {
 
     <!-- Translations -->
     <div class="section" style="margin-top:52px">
-      <h3 class="section-h2">Пераклады</h3>
+      <h3 class="section-h2">${t('pages.game.translations')}</h3>
       <div class="translation-cards" id="translation-cards">
         ${translationCards}
       </div>
@@ -432,7 +433,7 @@ function renderGame(game) {
         const data = await res.json();
         window.open(data.url, '_blank', 'noopener');
       } catch {
-        alert('Не ўдалося атрымаць спасылку');
+        alert(t('pages.game.linkError'));
       }
     });
   });
@@ -444,10 +445,10 @@ function renderGame(game) {
 }
 
 
-const ORTH_LABELS = { academic: 'Акадэмічны', tarashkevitsa: 'Альтэрнатыўны', lacinka: 'Лацінка' };
-const OFFICIAL_LABELS = { official: 'Афіцыйны', 'semi-official': 'Паўафіцыйны', unofficial: 'Неафіцыйны' };
-function translationName(t) {
-  return (t?.translator_names || []).join(', ') || 'Беларусізатар';
+const ORTH_LABELS = { academic: t('common.orthography.academic'), tarashkevitsa: t('common.orthography.tarashkevitsa'), lacinka: t('common.orthography.lacinka') };
+const OFFICIAL_LABELS = { official: t('common.officialStatus.official'), 'semi-official': t('common.officialStatus.semiOfficial'), unofficial: t('common.officialStatus.unofficial') };
+function translationName(translation) {
+  return (translation?.translator_names || []).join(', ') || t('pages.game.translatorFallback');
 }
 function renderTranslationCard(t, open = false) {
   const coverageHTML = (t.coverage || []).map(c =>
@@ -463,9 +464,9 @@ function renderTranslationCard(t, open = false) {
           <div class="translation-card__studio">${translationName(t)}</div>
           <div class="translation-card__meta">
             ${badge(t.type)}
-            <span class="tag-sm" style="font-size:10px;padding:2px 7px;background:var(--surface-2);border:1px solid var(--border);color:var(--text-muted)">${OFFICIAL_LABELS[t.official_status] || 'Неафіцыйны'}</span>
+            <span class="tag-sm" style="font-size:10px;padding:2px 7px;background:var(--surface-2);border:1px solid var(--border);color:var(--text-muted)">${OFFICIAL_LABELS[t.official_status] || window.t('common.officialStatus.unofficial')}</span>
             ${(t.orthography||[]).map(o => `<span class="tag-sm" style="font-size:10px;padding:2px 7px;background:var(--surface-2);border:1px solid var(--border);color:var(--text-muted)">${ORTH_LABELS[o] || o}</span>`).join(' ')}
-            <span style="font-size:12px;color:var(--text-muted)">Пераходаў: ${t.click_count}</span>
+            <span style="font-size:12px;color:var(--text-muted)">${window.t('pages.game.clicks', { count: t.click_count })}</span>
           </div>
         </div>
         <div class="translation-card__right">
@@ -473,22 +474,22 @@ function renderTranslationCard(t, open = false) {
             ${avgStr} <span>/ 5.0</span>
           </div>
           <div class="stars" style="font-size:14px;letter-spacing:2px">${stars(t.avg_rating)}</div>
-          <div style="font-size:11px;color:var(--text-muted)">Колькасць водгукаў: ${t.review_count}</div>
+            <div style="font-size:11px;color:var(--text-muted)">${window.t('common.labels.reviewCount', { count: t.review_count })}</div>
         </div>
       </div>
       <div class="translation-card__body">
         <div class="translation-card__info-row">
           <div class="translation-card__info-item">
-            <span class="translation-card__info-label">Аўтары</span>
+            <span class="translation-card__info-label">${window.t('pages.game.authors')}</span>
             <span class="translation-card__info-value">${translatorsHTML}</span>
           </div>
           <div class="translation-card__info-item">
-            <span class="translation-card__info-label">Перакладзена</span>
+            <span class="translation-card__info-label">${window.t('pages.game.translated')}</span>
             <div class="tag-list">${coverageHTML}</div>
           </div>
         </div>
         <button class="btn btn--primary translation-card__go btn-goto" data-tid="${t.id}">
-          Знайсці пераклад ↗
+          ${window.t('pages.game.findTranslation')}
         </button>
       </div>
     </div>
@@ -499,21 +500,21 @@ function renderTranslationCard(t, open = false) {
 function renderReviewsSection(t) {
   return `
     <div class="section" style="margin-top:52px" id="reviews-section">
-      <h3 class="section-h2" id="reviews-title">Водгукі — ${translationName(t)}</h3>
+      <h3 class="section-h2" id="reviews-title">${window.t('pages.game.reviewsFor', { name: translationName(t) })}</h3>
 
       <!-- Rating summary -->
       <div id="rating-summary"></div>
 
       <!-- Review form -->
       <div style="margin:24px 0 20px">
-        <h4 style="font-size:16px;font-weight:700;margin-bottom:14px;color:var(--text)">Пакінуць водгук</h4>
+        <h4 style="font-size:16px;font-weight:700;margin-bottom:14px;color:var(--text)">${window.t('pages.game.leaveReview')}</h4>
         <div style="display:flex;flex-direction:column;gap:12px">
           <div>
-            <label class="form-label" for="review-name">Імя (неабавязкова)</label>
-            <input class="anon-input" id="review-name" type="text" placeholder="Ананім" maxlength="60"/>
+            <label class="form-label" for="review-name">${window.t('pages.game.nameOptional')}</label>
+            <input class="anon-input" id="review-name" type="text" placeholder="${window.t('pages.game.anonymous')}" maxlength="60"/>
           </div>
           <div>
-            <label class="form-label">Рэйтынг</label>
+            <label class="form-label">${window.t('pages.game.rating')}</label>
             <div class="stars-input" id="stars-input">
               <span data-v="1">★</span>
               <span data-v="2">★</span>
@@ -523,14 +524,14 @@ function renderReviewsSection(t) {
             </div>
           </div>
           <div>
-            <label class="form-label" for="review-body">Каментарый</label>
-            <textarea class="review-textarea" id="review-body" placeholder="Напішыце свой водгук..."></textarea>
+            <label class="form-label" for="review-body">${window.t('pages.game.comment')}</label>
+            <textarea class="review-textarea" id="review-body" placeholder="${window.t('pages.game.reviewPlaceholder')}"></textarea>
           </div>
           <div style="display:flex;justify-content:flex-end">
             <button class="btn btn--primary" id="submit-review"
               style="height:40px;padding:0 24px"
               data-tid="${t.id}">
-              Адправіць
+              ${window.t('common.actions.submit')}
             </button>
           </div>
         </div>
@@ -557,7 +558,7 @@ function loadReviews(tid) {
 
   // Update section title
   const titleEl = document.getElementById('reviews-title');
-  if (titleEl) titleEl.textContent = `Водгукі — ${studioName}`;
+  if (titleEl) titleEl.textContent = t('pages.game.reviewsFor', { name: studioName });
 
   // Update data-tid on submit button
   const submitBtn = document.getElementById('submit-review');
@@ -577,7 +578,7 @@ function loadReviews(tid) {
     listEl.innerHTML   = reviews.map(renderReviewCard).join('');
   } else {
     ratingEl.innerHTML = '';
-    listEl.innerHTML   = `<p style="color:var(--text-muted);font-size:14px">Водгукаў пакуль няма. Будзьце першым!</p>`;
+    listEl.innerHTML   = `<p style="color:var(--text-muted);font-size:14px">${t('pages.game.noReviews')}</p>`;
   }
 }
 
@@ -591,7 +592,7 @@ async function reloadReviews(tid) {
     loadReviews(tid);
   } catch {
     const listEl = document.getElementById('reviews-list');
-    if (listEl) listEl.innerHTML = `<p style="color:var(--text-muted)">Памылка абнаўлення.</p>`;
+    if (listEl) listEl.innerHTML = `<p style="color:var(--text-muted)">${t('pages.game.updateError')}</p>`;
   }
 }
 
@@ -611,7 +612,7 @@ function renderRatingSummary(avg, total, counts) {
       <div class="rating-summary__left">
         <div class="rating-summary__score">${avg.toFixed(1)}</div>
         <div class="stars rating-summary__stars">${stars(avg)}</div>
-        <div class="rating-summary__count">Колькасць водгукаў: ${total}</div>
+        <div class="rating-summary__count">${t('common.labels.reviewCount', { count: total })}</div>
       </div>
       <div class="rating-bars">${bars}</div>
     </div>`;
@@ -672,17 +673,17 @@ document.addEventListener('click', async (e) => {
   const name = document.getElementById('review-name').value.trim();
   const body = document.getElementById('review-body').value.trim();
 
-  if (!selectedRating) { alert('Абярыце рэйтынг'); return; }
-  if (!body) { alert('Напішыце каментарый'); return; }
+  if (!selectedRating) { alert(t('pages.game.chooseRating')); return; }
+  if (!body) { alert(t('pages.game.writeComment')); return; }
 
   btn.disabled = true;
-  btn.textContent = 'Адпраўляю...';
+  btn.textContent = t('common.actions.submitting');
 
   try {
     const res = await fetch(`${API}/api/reviews`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ translation_id: tid, author_name: name || 'Ананім', rating: selectedRating, body })
+      body: JSON.stringify({ translation_id: tid, author_name: name || t('pages.game.anonymous'), rating: selectedRating, body })
     });
 
     if (!res.ok) throw new Error();
@@ -694,10 +695,10 @@ document.addEventListener('click', async (e) => {
 
     await reloadReviews(tid);
   } catch {
-    alert('Памылка адпраўкі');
+    alert(t('pages.game.submitError'));
   } finally {
     btn.disabled = false;
-    btn.textContent = 'Адправіць';
+    btn.textContent = t('common.actions.submit');
   }
 });
 
@@ -706,7 +707,7 @@ document.addEventListener('click', async (e) => {
   const slug = new URLSearchParams(location.search).get('slug');
   if (!slug) {
     document.getElementById('main-content').innerHTML =
-      `<p style="color:var(--text-muted);padding:40px 0">Гульня не знойдзена. <a href="catalog.html" style="color:var(--accent)">Вярнуцца ў каталог</a></p>`;
+      `<p style="color:var(--text-muted);padding:40px 0">${t('common.status.gameNotFound')} <a href="catalog.html" style="color:var(--accent)">${t('common.actions.backToCatalog')}</a></p>`;
     return;
   }
 
@@ -718,7 +719,7 @@ document.addEventListener('click', async (e) => {
     renderGame(game);
   } catch {
     document.getElementById('main-content').innerHTML =
-      `<p style="color:var(--text-muted);padding:40px 0">Памылка загрузкі. <a href="catalog.html" style="color:var(--accent)">Вярнуцца ў каталог</a></p>`;
+      `<p style="color:var(--text-muted);padding:40px 0">${t('common.status.loadingError')} <a href="catalog.html" style="color:var(--accent)">${t('common.actions.backToCatalog')}</a></p>`;
   }
 })();
 </script>
