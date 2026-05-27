@@ -678,7 +678,8 @@ async function initApp() {
   try {
     _genres = await fetch(API + '/api/genres').then(r => r.json());
     const res = await fetch(API + '/api/games?limit=500');
-    _games  = await res.json();
+    const data = await res.json();
+    _games = Array.isArray(data) ? data : data.items || [];
     _gamesMap = Object.fromEntries(_games.map(g => [g.id, g]));
   } catch {}
   loadDashboard();
@@ -716,7 +717,8 @@ async function loadDashboard() {
 async function loadGames() {
   try {
     const res = await fetch(API + '/api/games?limit=500');
-    _games  = await res.json();
+    const data = await res.json();
+    _games = Array.isArray(data) ? data : data.items || [];
     _gamesMap = Object.fromEntries(_games.map(g => [g.id, g]));
   } catch (e) { toast(e.message, 'err'); }
   renderGamesTable();
@@ -728,7 +730,8 @@ async function renderGamesTable() {
   if (query) {
     try {
       const res = await fetch(API + '/api/games?limit=100&search=' + encodeURIComponent(query));
-      list = await res.json();
+      const data = await res.json();
+      list = Array.isArray(data) ? data : data.items || [];
     } catch (e) { toast(e.message, 'err'); return; }
   }
   const tbody = document.getElementById('games-body');

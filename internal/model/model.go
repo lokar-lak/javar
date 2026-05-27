@@ -9,23 +9,23 @@ type Genre struct {
 }
 
 type Game struct {
-	ID          int       `json:"id"`
-	Title       string    `json:"title"`
-	Slug        string    `json:"slug"`
-	Developer   string    `json:"developer"`
-	Publisher   string    `json:"publisher,omitempty"`
-	ReleaseDate string    `json:"release_date,omitempty"`
-	Description string    `json:"description,omitempty"`
-	CoverURL    string    `json:"cover_url,omitempty"`
-	SteamDBURL  string    `json:"steamdb_url,omitempty"`
-	Platforms   []string  `json:"platforms,omitempty"`
-	SteamRating *int      `json:"steam_rating,omitempty"`
-	CreatedAt   time.Time `json:"created_at"`
-	Genres      []Genre   `json:"genres,omitempty"`
-	HasOnlyAI         bool      `json:"has_only_ai,omitempty"`
-	HasOfficial       bool      `json:"has_official,omitempty"`
-	BestRating        float64   `json:"best_rating"`
-	TranslationCount  int       `json:"translation_count,omitempty"`
+	ID               int       `json:"id"`
+	Title            string    `json:"title"`
+	Slug             string    `json:"slug"`
+	Developer        string    `json:"developer"`
+	Publisher        string    `json:"publisher,omitempty"`
+	ReleaseDate      string    `json:"release_date,omitempty"`
+	Description      string    `json:"description,omitempty"`
+	CoverURL         string    `json:"cover_url,omitempty"`
+	SteamDBURL       string    `json:"steamdb_url,omitempty"`
+	Platforms        []string  `json:"platforms,omitempty"`
+	SteamRating      *int      `json:"steam_rating,omitempty"`
+	CreatedAt        time.Time `json:"created_at"`
+	Genres           []Genre   `json:"genres,omitempty"`
+	HasOnlyAI        bool      `json:"has_only_ai,omitempty"`
+	HasOfficial      bool      `json:"has_official,omitempty"`
+	BestRating       float64   `json:"best_rating"`
+	TranslationCount int       `json:"translation_count,omitempty"`
 }
 
 // GameDetail - game plus all its translations (for game page)
@@ -55,6 +55,12 @@ type TranslationDetail struct {
 	ReviewCount     int      `json:"review_count"`
 	RatingBreakdown [5]int   `json:"rating_breakdown"` // index 0 = 1★, 4 = 5★
 	Reviews         []Review `json:"reviews,omitempty"`
+}
+
+type PublicStats struct {
+	Official     int `json:"official"`
+	SemiOfficial int `json:"semi_official"`
+	Unofficial   int `json:"unofficial"`
 }
 
 type Review struct {

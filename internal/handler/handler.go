@@ -61,6 +61,17 @@ func (h *Handler) ListGenres(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, 200, genres)
 }
 
+// ── GET /api/stats ────────────────────────────────────────────────────────
+
+func (h *Handler) GetPublicStats(w http.ResponseWriter, r *http.Request) {
+	stats, err := h.repo.GetPublicStats()
+	if err != nil {
+		writeError(w, 500, "internal error")
+		return
+	}
+	writeJSON(w, 200, stats)
+}
+
 // ── GET /api/games ────────────────────────────────────────────────────────
 // ?search=  &genre_id=  &type=manual|ai  &orthography=  &official_status=official|semi-official|unofficial
 // &sort_by=created_at|release_date|steam_rating|best_rating  &sort_order=desc  &page=  &limit=
@@ -90,7 +101,19 @@ func (h *Handler) ListGames(w http.ResponseWriter, r *http.Request) {
 	if games == nil {
 		games = []model.Game{}
 	}
+	total, err := h.repo.CountGames(model.GameFilter{
+		Search:      q.Get("search"),
+		GenreID:     genreID,
+		Type:        q.Get("type"),
+		Orthography: q.Get("orthography"),
+		Official:    q.Get("official_status"),
+	})
+	if err != nil {
+		writeError(w, 500, "internal error")
+		return
+	}
 	enrichGamesFromSteam(r.Context(), games)
+	w.Header().Set("X-Total-Count", strconv.Itoa(total))
 	writeJSON(w, 200, games)
 }
 

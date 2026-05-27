@@ -186,7 +186,7 @@
     .empty-state__title { font-size: 18px; font-weight: 700; color: var(--text); }
 
     /* ── Pagination ───────────────────────────────── */
-    .pagination { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 36px; }
+    .pagination { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 8px; margin-top: 36px; }
     .page-btn {
       display: inline-flex; align-items: center; justify-content: center;
       min-width: 36px; height: 36px; padding: 0 12px;
@@ -198,6 +198,7 @@
     .page-btn:hover { border-color: #4a4a6a; color: var(--text); }
     .page-btn.active { background: var(--accent-glow); border-color: var(--accent); color: var(--accent); }
     .page-btn:disabled { opacity: .35; cursor: default; pointer-events: none; }
+    .page-gap { color: var(--text-muted); padding: 0 2px; }
   </style>
 </head>
 <body>
@@ -648,7 +649,10 @@ async function loadGames() {
   params.set('limit', PAGE_SIZE);
 
   try {
-    const games = await apiFetch(`/api/games?${params}`);
+    const res = await fetch(`${API}/api/games?${params}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const games = await res.json();
+    const total = parseInt(res.headers.get('X-Total-Count')) || 0;
 
     if (!games.length) {
       grid.innerHTML = `
@@ -661,7 +665,7 @@ async function loadGames() {
     }
 
     grid.innerHTML = games.map((g, i) => renderGameCard(g, i)).join('');
-    renderPagination(games.length, pageEl);
+    renderPagination(total, pageEl);
 
   } catch {
     grid.innerHTML = `
@@ -675,18 +679,36 @@ async function loadGames() {
 }
 
 // ── Pagination ────────────────────────────────────────────────────────────
-function renderPagination(count, container) {
-  if (state.page === 0 && count < PAGE_SIZE) return;
+function renderPagination(total, container) {
+  const totalPages = Math.ceil(total / PAGE_SIZE);
+  if (totalPages <= 1) return;
+
+  const current = Math.min(state.page, totalPages - 1);
+  const pages = new Set([0, totalPages - 1, current]);
+  for (let i = current - 2; i <= current + 2; i++) {
+    if (i >= 0 && i < totalPages) pages.add(i);
+  }
+
+  let last = -1;
+  const pageButtons = [...pages].sort((a, b) => a - b).map(page => {
+    const gap = page - last > 1 ? '<span class="page-gap">…</span>' : '';
+    last = page;
+    return `${gap}<button class="page-btn ${page === current ? 'active' : ''}" data-page="${page}" ${page === current ? 'disabled' : ''}>${page + 1}</button>`;
+  }).join('');
+
   container.innerHTML = `
-    <button class="page-btn" id="btn-prev" ${state.page === 0 ? 'disabled' : ''}>← Назад</button>
-    <button class="page-btn active" style="cursor:default">${state.page + 1}</button>
-    <button class="page-btn" id="btn-next" ${count < PAGE_SIZE ? 'disabled' : ''}>Далей →</button>
+    <button class="page-btn" data-page="${current - 1}" ${current === 0 ? 'disabled' : ''}>← Назад</button>
+    ${pageButtons}
+    <button class="page-btn" data-page="${current + 1}" ${current >= totalPages - 1 ? 'disabled' : ''}>Далей →</button>
   `;
-  document.getElementById('btn-prev')?.addEventListener('click', () => {
-    state.page--; scrollTo({top:0,behavior:'smooth'}); loadGames();
-  });
-  document.getElementById('btn-next')?.addEventListener('click', () => {
-    state.page++; scrollTo({top:0,behavior:'smooth'}); loadGames();
+  container.querySelectorAll('.page-btn[data-page]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const page = parseInt(btn.dataset.page);
+      if (Number.isNaN(page) || page === state.page) return;
+      state.page = page;
+      scrollTo({top:0,behavior:'smooth'});
+      loadGames();
+    });
   });
 }
 

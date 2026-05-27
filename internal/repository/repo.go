@@ -139,6 +139,58 @@ func (r *Repo) ListGames(f model.GameFilter) ([]model.Game, error) {
 	return games, nil
 }
 
+func (r *Repo) CountGames(f model.GameFilter) (int, error) {
+	q := `SELECT COUNT(DISTINCT g.id)
+		FROM games g
+		LEFT JOIN game_genres gg ON gg.game_id = g.id
+		LEFT JOIN translations t  ON t.game_id  = g.id
+		WHERE 1=1`
+
+	var args []any
+
+	if f.Search != "" {
+		q += ` AND (g.title LIKE ? OR g.developer LIKE ?)`
+		like := "%" + f.Search + "%"
+		args = append(args, like, like)
+	}
+	if f.GenreID > 0 {
+		q += ` AND gg.genre_id = ?`
+		args = append(args, f.GenreID)
+	}
+	if f.Type != "" {
+		q += ` AND t.type = ?`
+		args = append(args, f.Type)
+	}
+	if f.Orthography != "" {
+		q += ` AND t.orthography LIKE '%"' || ? || '"%'`
+		args = append(args, f.Orthography)
+	}
+	if f.Official != "" {
+		q += ` AND t.official_status = ?`
+		args = append(args, f.Official)
+	}
+
+	var total int
+	if err := r.db.QueryRow(q, args...).Scan(&total); err != nil {
+		return 0, err
+	}
+	return total, nil
+}
+
+func (r *Repo) GetPublicStats() (*model.PublicStats, error) {
+	s := &model.PublicStats{}
+	if err := r.db.QueryRow(`SELECT COUNT(*) FROM translations WHERE official_status='official'`).Scan(&s.Official); err != nil {
+		return nil, err
+	}
+	if err := r.db.QueryRow(`SELECT COUNT(*) FROM translations WHERE official_status='semi-official'`).Scan(&s.SemiOfficial); err != nil {
+		return nil, err
+	}
+	if err := r.db.QueryRow(`SELECT COUNT(*) FROM translations WHERE official_status='unofficial'`).Scan(&s.Unofficial); err != nil {
+		return nil, err
+	}
+	return s, nil
+}
+
 func (r *Repo) GetGameBySlug(slug string) (*model.GameDetail, error) {
 	var g model.Game
 	var rating sql.NullInt64

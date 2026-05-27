@@ -61,6 +61,22 @@
 
   <main class="main">
 
+    <!-- TRANSLATION STATS -->
+    <section class="translation-stats" aria-label="Колькасць перакладаў">
+      <div class="translation-stat">
+        <div class="translation-stat__label"><span class="translation-stat__icon">★</span>Афіцыйных</div>
+        <div class="translation-stat__value" id="stat-official">—</div>
+      </div>
+      <div class="translation-stat">
+        <div class="translation-stat__label"><span class="translation-stat__icon">◐</span>Паўафіцыйных</div>
+        <div class="translation-stat__value" id="stat-semi-official">—</div>
+      </div>
+      <div class="translation-stat">
+        <div class="translation-stat__label"><span class="translation-stat__icon">◇</span>Неафіцыйных</div>
+        <div class="translation-stat__value" id="stat-unofficial">—</div>
+      </div>
+    </section>
+
     <!-- NEW RELEASES -->
     <section class="section">
       <div class="section-heading">
@@ -206,10 +222,21 @@ function pickFeaturedGame(candidates) {
   return candidates[todayIdx];
 }
 
+function renderStats(stats) {
+  const format = value => Number(value || 0).toLocaleString('be-BY');
+  document.getElementById('stat-official').textContent = format(stats.official);
+  document.getElementById('stat-semi-official').textContent = format(stats.semi_official);
+  document.getElementById('stat-unofficial').textContent = format(stats.unofficial);
+}
+
 (async () => {
   try {
-    const games = await apiFetch('/api/games');
-    const featuredCandidates = await apiFetch('/api/games?type=manual&orthography=academic&limit=50');
+    apiFetch('/api/stats').then(renderStats).catch(() => {});
+
+    const gamesData = await apiFetch('/api/games');
+    const featuredData = await apiFetch('/api/games?type=manual&orthography=academic&limit=50');
+    const games = Array.isArray(gamesData) ? gamesData : gamesData.items || [];
+    const featuredCandidates = Array.isArray(featuredData) ? featuredData : featuredData.items || [];
     const featuredGame = pickFeaturedGame(featuredCandidates) || games[0];
 
     // Grid: all games except the featured one
