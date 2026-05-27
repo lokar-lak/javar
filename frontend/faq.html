@@ -44,52 +44,79 @@
   </nav>
 
   <!-- MAIN -->
-  <main class="main">
+  <main class="main faq-page">
+
+    <section class="faq-hero">
+      <div class="section-heading">
+        <h1 id="faq-heading" data-i18n="pages.faq.heading">Частыя пытанні</h1>
+        <div class="section-heading__bar" style="width:160px"></div>
+      </div>
+      <p data-i18n="pages.faq.intro">Адказы на асноўныя пытанні пра беларусізатары, спасылкі і даданне новых лакалізацый у каталог.</p>
+    </section>
+
+    <section class="faq-list" aria-labelledby="faq-heading">
 
     <!-- FAQ 1 -->
-    <div class="faq-item">
-      <div class="faq-question" data-i18n="pages.faq.items.0.question">Чаму ў вас няма файлаў, а толькі ссылкі на гугл-пошук, гэта ж нязручна?</div>
-      <div class="faq-question__bar"></div>
+    <details class="faq-item" open>
+      <summary class="faq-question">
+        <span class="faq-question__index">01</span>
+        <span data-i18n="pages.faq.items.0.question">Чаму ў вас няма файлаў, а толькі ссылкі на гугл-пошук, гэта ж нязручна?</span>
+        <span class="faq-question__icon" aria-hidden="true"></span>
+      </summary>
       <div class="faq-answer">
         <span data-i18n="pages.faq.items.0.answer">Я хв, што тут напісаць</span>
       </div>
-    </div>
+    </details>
 
     <!-- FAQ 2 -->
-    <div class="faq-item">
-      <div class="faq-question" data-i18n="pages.faq.items.1.question">Пытанне 2</div>
-      <div class="faq-question__bar"></div>
+    <details class="faq-item">
+      <summary class="faq-question">
+        <span class="faq-question__index">02</span>
+        <span data-i18n="pages.faq.items.1.question">Пытанне 2</span>
+        <span class="faq-question__icon" aria-hidden="true"></span>
+      </summary>
       <div class="faq-answer">
         <span data-i18n="pages.faq.items.1.answer">плэйсхолдэр 2</span>
       </div>
-    </div>
+    </details>
 
     <!-- FAQ 3 -->
-    <div class="faq-item">
-      <div class="faq-question" data-i18n="pages.faq.items.2.question">Што рабіць, калі беларусіатар не працуе</div>
-      <div class="faq-question__bar"></div>
+    <details class="faq-item">
+      <summary class="faq-question">
+        <span class="faq-question__index">03</span>
+        <span data-i18n="pages.faq.items.2.question">Што рабіць, калі беларусіатар не працуе</span>
+        <span class="faq-question__icon" aria-hidden="true"></span>
+      </summary>
       <div class="faq-answer">
         <span data-i18n="pages.faq.items.2.answer">Звяртацца непасрэдна да аўтара перакладу.</span>
       </div>
-    </div>
+    </details>
 
     <!-- FAQ 4 -->
-    <div class="faq-item">
-      <div class="faq-question" data-i18n="pages.faq.items.3.question">Пытанне 4</div>
-      <div class="faq-question__bar"></div>
+    <details class="faq-item">
+      <summary class="faq-question">
+        <span class="faq-question__index">04</span>
+        <span data-i18n="pages.faq.items.3.question">Пытанне 4</span>
+        <span class="faq-question__icon" aria-hidden="true"></span>
+      </summary>
       <div class="faq-answer">
         <span data-i18n="pages.faq.items.3.answer">плэйсхолдэр 4</span>
       </div>
-    </div>
+    </details>
 
     <!-- FAQ 5 -->
-    <div class="faq-item">
-      <div class="faq-question" data-i18n="pages.faq.items.4.question">Пытанне 5</div>
-      <div class="faq-question__bar"></div>
+    <details class="faq-item">
+      <summary class="faq-question">
+        <span class="faq-question__index">05</span>
+        <span data-i18n="pages.faq.items.4.question">Пытанне 5</span>
+        <span class="faq-question__icon" aria-hidden="true"></span>
+      </summary>
       <div class="faq-answer">
           <span data-i18n="pages.faq.items.4.answer">плэйсхолдэр 5</span>
       </div>
-    </div>
+    </details>
+
+    </section>
 
   </main>
 
@@ -112,5 +139,15 @@
 </div>
 <script src="texts.js?v=2"></script>
 <script src="submission.js?v=2"></script>
+<script>
+document.querySelectorAll('.faq-item').forEach(item => {
+  item.addEventListener('toggle', () => {
+    if (!item.open) return;
+    document.querySelectorAll('.faq-item[open]').forEach(openItem => {
+      if (openItem !== item) openItem.open = false;
+    });
+  });
+});
+</script>
 </body>
 </html>
