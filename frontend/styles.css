@@ -76,6 +76,14 @@ img { display: block; max-width: 100%; }
   white-space: nowrap;
 }
 
+.navbar__menu {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  gap: 0;
+}
+
 .navbar__links {
   display: flex;
   align-items: center;
@@ -1147,7 +1155,6 @@ fieldset.submission-field { border: 0; padding: 0; }
 .submission-submit:disabled { opacity: 0.65; cursor: wait; }
 
 @media (max-width: 680px) {
-  .translation-stats { grid-template-columns: 1fr; }
   .submission-grid { grid-template-columns: 1fr; }
   .submission-dialog { padding: 18px; }
 }
@@ -1405,3 +1412,212 @@ fieldset.submission-field { border: 0; padding: 0; }
 .mt-16 { margin-top: 16px; }
 .mt-24 { margin-top: 24px; }
 .mt-52 { margin-top: 52px; }
+
+/* ============================================================
+   MOBILE RESPONSIVE
+   ============================================================ */
+
+/* ── Navbar toggle (hamburger) ─────────────────────────── */
+.navbar__toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  gap: 5px;
+  padding: 8px;
+  margin-left: auto;
+  flex-shrink: 0;
+  color: var(--text-muted);
+  font-size: 24px;
+  line-height: 1;
+  transition: color 0.2s;
+}
+.navbar__toggle:hover { color: var(--text); }
+.navbar__toggle span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: var(--text-muted);
+  border-radius: 2px;
+  transition: transform 0.2s, opacity 0.2s;
+}
+.navbar.open .navbar__toggle span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.navbar.open .navbar__toggle span:nth-child(2) { opacity: 0; }
+.navbar.open .navbar__toggle span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+@media (max-width: 820px) {
+  :root {
+    --page-px: 24px;
+  }
+
+  .navbar__menu { display: none; }
+
+  .navbar__toggle { display: flex; }
+
+  .navbar.open .navbar__menu {
+    display: flex;
+    position: absolute;
+    top: var(--nav-h);
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    background: rgba(24, 24, 36, 0.98);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 200;
+  }
+
+  .navbar.open .navbar__links {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    padding: 4px 0;
+  }
+
+  .navbar.open .navbar__links a {
+    display: block;
+    padding: 14px var(--page-px);
+    font-size: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .navbar.open .navbar__links li:last-child a { border-bottom: none; }
+
+  .navbar.open .navbar__submit-item {
+    flex: none;
+    min-width: 0;
+    padding: 12px var(--page-px);
+  }
+
+  .navbar.open .navbar__submit { width: 100%; }
+
+  .navbar.open .navbar__search {
+    width: 100%;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+
+  /* Games grid: 2 columns */
+  .games-grid { grid-template-columns: repeat(2, 1fr); }
+
+  /* Featured stacks vertically */
+  .featured-skeleton { flex-direction: column; }
+  .featured-skeleton__img { width: 100%; aspect-ratio: 16/9; }
+  .featured-skeleton__body { padding: 24px 28px; }
+
+  /* Game page: stack layout */
+  .game-layout { grid-template-columns: 1fr; }
+  .game-cover-col { order: -1; }
+
+  /* Info table: single column */
+  .info-row { grid-template-columns: 1fr; }
+  .info-cell { border-right: none; }
+  .info-cell:first-child { border-bottom: 1px solid var(--border); }
+
+  /* Rating summary: stack */
+  .rating-summary { flex-direction: column; align-items: stretch; }
+  .rating-summary__left {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    padding-right: 0;
+    padding-bottom: 16px;
+    min-width: 0;
+  }
+  .rating-bars { padding-left: 0; padding-top: 16px; }
+
+  /* Stat cards wide */
+  .stat-cards-wide { grid-template-columns: 1fr; }
+
+  /* Catalog filters */
+  .catalog-search { min-width: 0; width: 100%; }
+  .filter-sep { display: none; }
+  .filter-bar { gap: 8px; }
+
+  .dropdown { flex: 1; min-width: calc(50% - 4px); }
+  .dropdown__trigger {
+    width: 100%;
+    justify-content: space-between;
+    font-size: 11px;
+    padding: 0 12px;
+    height: 36px;
+  }
+  .dropdown__menu {
+    position: fixed !important;
+    top: auto !important;
+    left: 12px !important;
+    right: 12px !important;
+    bottom: 12px !important;
+    max-height: 55vh !important;
+    min-width: 0 !important;
+    z-index: 300 !important;
+  }
+}
+
+@media (max-width: 580px) {
+  :root {
+    --page-px: 14px;
+    --nav-h: 56px;
+  }
+
+  .navbar__logo { margin-right: auto; }
+  .navbar__logo img { height: 22px !important; }
+
+  /* Grid: 1 column */
+  .games-grid { grid-template-columns: 1fr; }
+
+  /* Font sizes */
+  .section-heading h2 { font-size: 28px; }
+  .featured__title { font-size: 24px; }
+  .game-title-block h1 { font-size: 28px; }
+  .translation-stat__value { font-size: 26px; }
+  .section-h2 { font-size: 20px; }
+  .stat-card__value { font-size: 22px; }
+
+  /* Spacing */
+  .main { padding-top: 28px; }
+  .featured__content { padding: 20px; }
+  .about-block { padding: 24px; }
+  .about-block p { font-size: 14px; }
+  .footer { flex-direction: column; text-align: center; gap: 16px; }
+  .footer__nav { justify-content: center; }
+
+  /* Homepage stat cards */
+  .translation-stat { padding: 18px 20px; min-height: 100px; }
+
+  /* Game page stat cards */
+  .stat-card { min-width: calc(50% - 8px); padding: 12px 14px; }
+
+  /* Translation cards */
+  .translation-card__head { flex-direction: column; align-items: flex-start; padding: 14px 16px; }
+  .translation-card__right { align-items: flex-start; }
+  .translation-card__body { padding: 14px 16px; }
+  .translation-card__info-row { gap: 16px; }
+
+  /* Reviews */
+  .review-card { padding: 14px 16px; }
+  .rating-summary { padding: 12px 16px; }
+
+  /* Contact form */
+  .contacts-content > div { padding: 40px 20px !important; }
+
+  /* Submission dialog */
+  .submission-dialog { padding: 14px; }
+
+  /* Featured skeleton */
+  .featured-skeleton { min-height: auto; }
+}
+
+@media (max-width: 420px) {
+  .translation-stats { gap: 6px; }
+  .translation-stat { padding: 12px 10px; min-height: 72px; }
+  .translation-stat__value { font-size: 20px; }
+  .translation-stat__label { font-size: 11px; gap: 6px; }
+  .translation-stat__icon { width: 20px; height: 20px; font-size: 10px; }
+  .dropdown { min-width: 100%; }
+  .stat-card { min-width: 100%; }
+}

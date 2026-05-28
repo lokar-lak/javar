@@ -197,6 +197,42 @@
       .stat-grid{grid-template-columns:1fr 1fr}
       .form-grid{grid-template-columns:1fr}
     }
+
+    @media(max-width:768px){
+      :root{--sidebar:0px}
+      body{flex-direction:column}
+      .sidebar{
+        position:fixed;top:0;left:0;right:0;height:auto;z-index:100;
+        flex-direction:row;align-items:center;
+        padding:0 16px;height:56px;
+        border-right:none;border-bottom:1px solid var(--border);
+      }
+      .sidebar__logo{padding:0;border-bottom:none;font-size:22px;margin-right:auto;display:flex;align-items:center;gap:8px}
+      .sidebar__logo span{display:none}
+      .sidebar__nav{display:none;position:fixed;top:56px;left:0;right:0;background:var(--surface);border-bottom:1px solid var(--border);z-index:100;padding:4px 0}
+      .sidebar__nav.open{display:block}
+      .sidebar__footer{display:none}
+      .sidebar__toggle{display:flex!important}
+      .content{padding:20px 16px;margin-top:56px;max-width:none}
+      .stat-grid{grid-template-columns:1fr 1fr;gap:10px}
+      .stat-box{padding:14px}
+      .stat-box__value{font-size:28px}
+      .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+      .tbl-wrap table{min-width:600px}
+      .page-heading h1{font-size:22px}
+      .modal{width:100%;max-width:100%;border-radius:14px;min-height:auto;max-height:90vh}
+      .confirm-box{width:100%;max-width:380px;min-height:auto;border-radius:16px}
+    }
+
+    .sidebar__toggle{
+      display:none;
+      width:36px;height:36px;
+      align-items:center;justify-content:center;
+      background:var(--surface-2);border:1px solid var(--border);
+      border-radius:6px;color:var(--text-muted);font-size:20px;
+      cursor:pointer;transition:color .2s;
+    }
+    .sidebar__toggle:hover{color:var(--text)}
   </style>
 </head>
 <body>
@@ -224,6 +260,7 @@
   <!-- Sidebar -->
   <aside class="sidebar">
     <div class="sidebar__logo">JAVAR <span>Адміністрацыя</span></div>
+    <button class="sidebar__toggle" data-toggle-sidebar aria-label="Меню">☰</button>
     <nav class="sidebar__nav">
       <div class="nav-item active" data-section="dashboard" onclick="gotoSection('dashboard',this)">
         <span class="icon">📊</span> Панэль кіравання
@@ -298,7 +335,7 @@
       </div>
 
       <div class="form-card" style="padding:14px;margin-bottom:16px">
-        <input class="form-input" id="games-search" placeholder="Пошук па назве гульні..." oninput="renderGamesTable()"/>
+        <input class="form-input" id="games-search" placeholder="Пошук па назве гульні або распрацоўшчыку..." oninput="renderGamesTable()"/>
       </div>
 
       <div class="tbl-wrap">
@@ -317,7 +354,7 @@
       </div>
 
       <div class="form-card" style="padding:14px;margin-bottom:16px">
-        <input class="form-input" id="translations-search" placeholder="Пошук па назве гульні..." oninput="renderTranslationsTable()"/>
+        <input class="form-input" id="translations-search" placeholder="Пошук па назве, перакладчыку або студыі..." oninput="renderTranslationsTable()"/>
       </div>
 
       <div class="tbl-wrap">
@@ -916,7 +953,12 @@ async function loadTranslations() {
 function renderTranslationsTable() {
     const query = normalizeSearch(document.getElementById('translations-search')?.value || '');
     const list = query
-      ? (_translations || []).filter(t => normalizeSearch(t.game_title || '').includes(query))
+      ? (_translations || []).filter(t => {
+          const translators = (t.translator_names || []).join(' ');
+          return normalizeSearch(t.game_title || '').includes(query)
+              || normalizeSearch(t.studio || '').includes(query)
+              || normalizeSearch(translators).includes(query);
+        })
       : (_translations || []);
     const tbody = document.getElementById('translations-body');
     if (!list.length) {
@@ -1299,7 +1341,20 @@ document.getElementById('g-steam').addEventListener('change', autofillFromSteam)
 document.getElementById('g-steam').addEventListener('blur', autofillFromSteam);
 
 // ── Auto-slug ─────────────────────────────────────────────────────────────
-document.getElementById('g-title').addEventListener('input', function() {
+  // ── Mobile sidebar toggle ──────────────────────────────────
+  document.querySelector('[data-toggle-sidebar]')?.addEventListener('click', e => {
+    e.stopPropagation();
+    document.querySelector('.sidebar__nav').classList.toggle('open');
+  });
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.sidebar')) document.querySelector('.sidebar__nav')?.classList.remove('open');
+  });
+  // Close sidebar nav on nav item click
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', () => document.querySelector('.sidebar__nav')?.classList.remove('open'));
+  });
+
+  document.getElementById('g-title').addEventListener('input', function() {
   const slugField = document.getElementById('g-slug');
   if (!slugField.dataset.manual) {
     slugField.value = this.value
