@@ -41,6 +41,7 @@ CREATE TABLE IF NOT EXISTS game_genres (
 CREATE TABLE IF NOT EXISTS translations (
     id               INTEGER PRIMARY KEY AUTOINCREMENT,
     game_id          INTEGER NOT NULL REFERENCES games(id) ON DELETE CASCADE,
+    studio           TEXT    NOT NULL DEFAULT '',
     translator_names TEXT    NOT NULL DEFAULT '[]',  -- JSON: ["Ivan K.","Maria P."]
     type             TEXT    NOT NULL CHECK(type IN ('manual','ai')),
     official_status  TEXT    NOT NULL DEFAULT 'unofficial' CHECK(official_status IN ('official','semi-official','unofficial')),

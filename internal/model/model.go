@@ -37,6 +37,7 @@ type GameDetail struct {
 type Translation struct {
 	ID              int       `json:"id"`
 	GameID          int       `json:"game_id"`
+	Studio          string    `json:"studio"`
 	TranslatorNames []string  `json:"translator_names"`
 	Type            string    `json:"type"`            // "manual" | "ai"
 	OfficialStatus  string    `json:"official_status"` // "official" | "semi-official" | "unofficial"
@@ -90,6 +91,7 @@ type CreateGameRequest struct {
 
 type CreateTranslationRequest struct {
 	GameID          int      `json:"game_id"`
+	Studio          string   `json:"studio"`
 	TranslatorNames []string `json:"translator_names"`
 	Type            string   `json:"type"`
 	OfficialStatus  string   `json:"official_status"`
@@ -152,6 +154,7 @@ type AdminReview struct {
 	Review
 	GameTitle       string   `json:"game_title"`
 	GameSlug        string   `json:"game_slug"`
+	Studio          string   `json:"studio"`
 	TranslatorNames []string `json:"translator_names"`
 }
 

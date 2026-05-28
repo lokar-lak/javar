@@ -70,6 +70,14 @@ func migrate(db *sql.DB) error {
 			return fmt.Errorf("add translations.official_status: %w", err)
 		}
 	}
+	if _, err := db.Exec(`ALTER TABLE translations ADD COLUMN studio TEXT NOT NULL DEFAULT ''`); err != nil {
+		if !strings.Contains(strings.ToLower(err.Error()), "duplicate column name") {
+			return fmt.Errorf("add translations.studio: %w", err)
+		}
+	}
+	if err := backfillTranslationStudios(db); err != nil {
+		return err
+	}
 
 	// Remove legacy page-specific cover column if present.
 	if _, err := db.Exec(`ALTER TABLE games DROP COLUMN page_cover_url`); err != nil {
@@ -181,6 +189,43 @@ func normalizeTranslationCoverage(db *sql.DB) error {
 		}
 		if _, err := db.Exec(`UPDATE translations SET coverage=? WHERE id=?`, string(data), it.id); err != nil {
 			return fmt.Errorf("update translation coverage %d: %w", it.id, err)
+		}
+	}
+	return nil
+}
+
+func backfillTranslationStudios(db *sql.DB) error {
+	rows, err := db.Query(`SELECT id, translator_names FROM translations WHERE COALESCE(studio,'') = ''`)
+	if err != nil {
+		return fmt.Errorf("select empty translation studios: %w", err)
+	}
+	defer rows.Close()
+
+	type item struct {
+		id     int
+		studio string
+	}
+	var updates []item
+	for rows.Next() {
+		var id int
+		var raw string
+		if err := rows.Scan(&id, &raw); err != nil {
+			return fmt.Errorf("scan empty translation studio: %w", err)
+		}
+		var names []string
+		_ = json.Unmarshal([]byte(raw), &names)
+		studio := ""
+		if len(names) > 0 {
+			studio = strings.TrimSpace(names[0])
+		}
+		updates = append(updates, item{id: id, studio: studio})
+	}
+	if err := rows.Err(); err != nil {
+		return fmt.Errorf("iterate empty translation studios: %w", err)
+	}
+	for _, it := range updates {
+		if _, err := db.Exec(`UPDATE translations SET studio=? WHERE id=?`, it.studio, it.id); err != nil {
+			return fmt.Errorf("backfill translation studio: %w", err)
 		}
 	}
 	return nil

@@ -520,6 +520,10 @@
         </select>
       </div>
       <div class="form-group span-2">
+        <label>Студыя</label>
+        <input class="form-input" id="tr-studio" placeholder="Назва студыі або каманды"/>
+      </div>
+      <div class="form-group span-2">
         <label>Перакладчыкі (праз коску)</label>
         <input class="form-input" id="tr-translators" placeholder="Іван Іваноў, Марыя Петрова"/>
       </div>
@@ -885,7 +889,7 @@ const ORTH = { academic:'Академічны', tarashkevitsa:'Альтэрна�
 const OFFICIAL = { official:'Афіцыйны', 'semi-official':'Паўафіцыйны', unofficial:'Неафіцыйны' };
 
 function translationName(t) {
-  return (t?.translator_names || []).join(', ') || 'Беларусізатар';
+  return t?.studio || (t?.translator_names || []).join(', ') || 'Беларусізатар';
 }
 
 async function loadTranslations() {
@@ -936,6 +940,7 @@ function openTranslationModal(tOrId) {
 
   document.getElementById('tr-type').value        = t?.type || 'manual';
   document.getElementById('tr-official').value    = t?.official_status || 'unofficial';
+  document.getElementById('tr-studio').value      = t?.studio || '';
   document.getElementById('tr-translators').value = (t?.translator_names||[]).join(', ');
   const selectedOrth = t?.orthography || [];
   document.querySelectorAll('.orth-cb').forEach(cb => {
@@ -956,6 +961,7 @@ async function saveTranslation() {
     game_id:          parseInt(document.getElementById('tr-game').value),
     type:             document.getElementById('tr-type').value,
     official_status:  document.getElementById('tr-official').value,
+    studio:           document.getElementById('tr-studio').value.trim(),
     orthography:      [...document.querySelectorAll('.orth-cb:checked')].map(i => i.value),
     external_url:     document.getElementById('tr-url').value.trim(),
     translator_names: document.getElementById('tr-translators').value.split(',').map(s=>s.trim()).filter(Boolean),

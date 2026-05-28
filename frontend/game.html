@@ -50,6 +50,53 @@
       color: var(--text);
     }
 
+    .translation-card__studio-tip {
+      position: relative;
+      display: inline-flex;
+      width: fit-content;
+      max-width: 100%;
+      color: var(--accent);
+      border-bottom: 1px dashed var(--accent);
+      cursor: help;
+      transition: color .15s ease, border-color .15s ease;
+    }
+
+    .translation-card__studio-tip:hover {
+      color: var(--text);
+      border-color: var(--text);
+    }
+
+    .translation-card__studio-tip::after {
+      content: attr(data-translators);
+      position: absolute;
+      left: 0;
+      bottom: calc(100% + 8px);
+      z-index: 20;
+      width: max-content;
+      max-width: min(340px, 80vw);
+      padding: 10px 12px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-lg);
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 600;
+      line-height: 1.45;
+      white-space: normal;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transform: translateY(4px);
+      transition: opacity .12s ease, transform .12s ease, visibility .12s ease;
+    }
+
+    .translation-card__studio-tip:hover::after {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
     .translation-card__meta {
       display: flex;
       flex-wrap: wrap;
@@ -453,7 +500,7 @@ function renderGame(game) {
 const ORTH_LABELS = { academic: t('common.orthography.academic'), tarashkevitsa: t('common.orthography.tarashkevitsa'), lacinka: t('common.orthography.lacinka') };
 const OFFICIAL_LABELS = { official: t('common.officialStatus.official'), 'semi-official': t('common.officialStatus.semiOfficial'), unofficial: t('common.officialStatus.unofficial') };
 function translationName(translation) {
-  return (translation?.translator_names || []).join(', ') || t('pages.game.translatorFallback');
+  return translation?.studio || (translation?.translator_names || []).join(', ') || t('pages.game.translatorFallback');
 }
 function renderTranslationCard(t, open = false) {
   const coverageHTML = (t.coverage || []).map(c =>
@@ -473,7 +520,11 @@ function renderTranslationCard(t, open = false) {
     <div class="stars" style="font-size:14px;letter-spacing:2px">${stars(t.avg_rating)}</div>
     <div style="font-size:11px;color:var(--text-muted)">${window.t('common.labels.reviewCount', { count: t.review_count })}</div>
   `;
-  const translatorsHTML = (t.translator_names || []).join(', ') || '—';
+  const translatorsText = (t.translator_names || []).join(', ') || '—';
+  const studioText = (t.studio || '').trim();
+  const studioHTML = studioText
+    ? `<span class="translation-card__info-value translation-card__studio-tip" data-translators="${esc(translatorsText)}">${esc(studioText)}</span>`
+    : `<span class="translation-card__info-value">${esc(translatorsText)}</span>`;
 
   return `
     <div class="translation-card ${open ? 'active' : ''}" data-tid="${t.id}">
@@ -487,8 +538,8 @@ function renderTranslationCard(t, open = false) {
       <div class="translation-card__body">
         <div class="translation-card__info-row">
           <div class="translation-card__info-item">
-            <span class="translation-card__info-label">${window.t('pages.game.authors')}</span>
-            <span class="translation-card__info-value">${translatorsHTML}</span>
+            <span class="translation-card__info-label">${window.t('pages.game.studio')}</span>
+            ${studioHTML}
           </div>
           <div class="translation-card__info-item">
             <span class="translation-card__info-label">${window.t('pages.game.translated')}</span>

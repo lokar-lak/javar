@@ -107,6 +107,7 @@ const TEXTS = {
       translatorFallback: 'Беларусізатар',
       clicks: 'Пераходаў: {count}',
       authors: 'Аўтары',
+      studio: 'Студыя',
       translated: 'Перакладзена',
       findTranslation: 'Знайсці пераклад ↗',
       reviews: 'Водгукі',
