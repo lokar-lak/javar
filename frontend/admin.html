@@ -740,7 +740,7 @@ async function renderGamesTable() {
   }
   tbody.innerHTML = list.map(g => `
     <tr class="${!g.translation_count ? 'has-relations' : ''}">
-      <td><strong>${g.title}</strong><br/><span style="font-size:11px;color:var(--text-muted)">${g.slug}</span></td>
+      <td><a href="game.html?slug=${encodeURIComponent(g.slug)}" style="color:inherit;text-decoration:none"><strong>${esc(g.title)}</strong></a><br/><span style="font-size:11px;color:var(--text-muted)">${esc(g.slug)}</span></td>
       <td>${g.developer}</td>
       <td>${g.steam_rating != null ? `<span style="color:var(--green);font-family:var(--mono)">${g.steam_rating}%</span>` : '—'}</td>
       <td>${(g.genres||[]).map(x => `<span class="badge badge-genre" style="font-size:10px">${x.name}</span>`).join(' ')}<br/><span style="font-size:11px;color:var(--text-muted)">${(g.platforms||[]).join(', ')||'—'}</span></td>
