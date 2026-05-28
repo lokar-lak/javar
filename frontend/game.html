@@ -251,6 +251,11 @@ function badge(type) {
   return `<span class="badge badge--ai">${t('common.translationTypes.aiShort')}</span>`;
 }
 
+function officialBadge(status) {
+  const cls = status === 'official' ? 'tag-sm--green' : 'tag-sm--neutral';
+  return `<span class="tag-sm ${cls}">${OFFICIAL_LABELS[status] || window.t('common.officialStatus.unofficial')}</span>`;
+}
+
 function esc(value) {
   return String(value ?? '').replace(/[&<>'"]/g, ch => ({
     '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;'
@@ -454,27 +459,29 @@ function renderTranslationCard(t, open = false) {
   const coverageHTML = (t.coverage || []).map(c =>
     `<span class="tag-sm tag-sm--neutral">${c}</span>`
   ).join('');
-  const translatorsHTML = (t.translator_names || []).join(', ') || '—';
+  const paramsHTML = `
+    ${badge(t.type)}
+    ${officialBadge(t.official_status)}
+    ${(t.orthography||[]).map(o => `<span class="tag-sm tag-sm--neutral">${ORTH_LABELS[o] || o}</span>`).join(' ')}
+    <span class="tag-sm tag-sm--neutral">${window.t('pages.game.clicks', { count: t.click_count })}</span>
+  `;
   const avgStr = t.avg_rating > 0 ? t.avg_rating.toFixed(1) : '—';
+  const ratingHTML = `
+    <div class="translation-card__rating">
+      ${avgStr} <span>/ 5.0</span>
+    </div>
+    <div class="stars" style="font-size:14px;letter-spacing:2px">${stars(t.avg_rating)}</div>
+    <div style="font-size:11px;color:var(--text-muted)">${window.t('common.labels.reviewCount', { count: t.review_count })}</div>
+  `;
+  const translatorsHTML = (t.translator_names || []).join(', ') || '—';
 
   return `
     <div class="translation-card ${open ? 'active' : ''}" data-tid="${t.id}">
       <div class="translation-card__head">
         <div class="translation-card__left">
-          <div class="translation-card__studio">${translationName(t)}</div>
           <div class="translation-card__meta">
-            ${badge(t.type)}
-            <span class="tag-sm" style="font-size:10px;padding:2px 7px;background:var(--surface-2);border:1px solid var(--border);color:var(--text-muted)">${OFFICIAL_LABELS[t.official_status] || window.t('common.officialStatus.unofficial')}</span>
-            ${(t.orthography||[]).map(o => `<span class="tag-sm" style="font-size:10px;padding:2px 7px;background:var(--surface-2);border:1px solid var(--border);color:var(--text-muted)">${ORTH_LABELS[o] || o}</span>`).join(' ')}
-            <span style="font-size:12px;color:var(--text-muted)">${window.t('pages.game.clicks', { count: t.click_count })}</span>
+            ${paramsHTML}
           </div>
-        </div>
-        <div class="translation-card__right">
-          <div class="translation-card__rating">
-            ${avgStr} <span>/ 5.0</span>
-          </div>
-          <div class="stars" style="font-size:14px;letter-spacing:2px">${stars(t.avg_rating)}</div>
-            <div style="font-size:11px;color:var(--text-muted)">${window.t('common.labels.reviewCount', { count: t.review_count })}</div>
         </div>
       </div>
       <div class="translation-card__body">
@@ -486,6 +493,9 @@ function renderTranslationCard(t, open = false) {
           <div class="translation-card__info-item">
             <span class="translation-card__info-label">${window.t('pages.game.translated')}</span>
             <div class="tag-list">${coverageHTML}</div>
+          </div>
+          <div class="translation-card__info-item" style="margin-left:auto;align-items:flex-end;text-align:right">
+            <div class="translation-card__right">${ratingHTML}</div>
           </div>
         </div>
         <button class="btn btn--primary translation-card__go btn-goto" data-tid="${t.id}">
