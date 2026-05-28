@@ -10,7 +10,7 @@ const TEXTS = {
       searchPlaceholder: 'Пошук...'
     },
     footer: {
-      copyright: '© 2024 САА «БЫВАЕ»'
+      copyright: '© {year} Javar. Каталог беларускіх лакалізацый.'
     },
     actions: {
       details: 'Падрабязней',
@@ -177,8 +177,9 @@ function t(path, vars = {}) {
 }
 
 function applyI18n(root = document) {
-  root.querySelectorAll('[data-i18n]').forEach(el => { el.innerHTML = t(el.dataset.i18n); });
-  root.querySelectorAll('[data-i18n-text]').forEach(el => { el.textContent = t(el.dataset.i18nText); });
+  const vars = { year: new Date().getFullYear() };
+  root.querySelectorAll('[data-i18n]').forEach(el => { el.innerHTML = t(el.dataset.i18n, vars); });
+  root.querySelectorAll('[data-i18n-text]').forEach(el => { el.textContent = t(el.dataset.i18nText, vars); });
   root.querySelectorAll('[data-i18n-placeholder]').forEach(el => { el.placeholder = t(el.dataset.i18nPlaceholder); });
   root.querySelectorAll('[data-i18n-aria-label]').forEach(el => { el.setAttribute('aria-label', t(el.dataset.i18nAriaLabel)); });
   const titleKey = document.documentElement.dataset.titleKey;
