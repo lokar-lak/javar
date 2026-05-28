@@ -14,6 +14,43 @@ type Repo struct{ db *sql.DB }
 
 func New(db *sql.DB) *Repo { return &Repo{db: db} }
 
+var searchReplacements = [][2]string{
+	{"ą", "a"}, {"Ą", "a"}, {"á", "a"}, {"Á", "a"}, {"à", "a"}, {"À", "a"}, {"â", "a"}, {"Â", "a"}, {"ä", "a"}, {"Ä", "a"}, {"ã", "a"}, {"Ã", "a"}, {"å", "a"}, {"Å", "a"}, {"ā", "a"}, {"Ā", "a"}, {"ă", "a"}, {"Ă", "a"},
+	{"ć", "c"}, {"Ć", "c"}, {"č", "c"}, {"Č", "c"}, {"ç", "c"}, {"Ç", "c"},
+	{"ę", "e"}, {"Ę", "e"}, {"é", "e"}, {"É", "e"}, {"è", "e"}, {"È", "e"}, {"ê", "e"}, {"Ê", "e"}, {"ë", "e"}, {"Ë", "e"}, {"ē", "e"}, {"Ē", "e"}, {"ě", "e"}, {"Ě", "e"},
+	{"í", "i"}, {"Í", "i"}, {"ì", "i"}, {"Ì", "i"}, {"î", "i"}, {"Î", "i"}, {"ï", "i"}, {"Ï", "i"}, {"ī", "i"}, {"Ī", "i"},
+	{"ł", "l"}, {"Ł", "l"},
+	{"ń", "n"}, {"Ń", "n"}, {"ñ", "n"}, {"Ñ", "n"},
+	{"ó", "o"}, {"Ó", "o"}, {"ò", "o"}, {"Ò", "o"}, {"ô", "o"}, {"Ô", "o"}, {"ö", "o"}, {"Ö", "o"}, {"õ", "o"}, {"Õ", "o"}, {"ø", "o"}, {"Ø", "o"}, {"ō", "o"}, {"Ō", "o"},
+	{"ś", "s"}, {"Ś", "s"}, {"š", "s"}, {"Š", "s"}, {"ş", "s"}, {"Ş", "s"},
+	{"ú", "u"}, {"Ú", "u"}, {"ù", "u"}, {"Ù", "u"}, {"û", "u"}, {"Û", "u"}, {"ü", "u"}, {"Ü", "u"}, {"ū", "u"}, {"Ū", "u"},
+	{"ý", "y"}, {"Ý", "y"}, {"ÿ", "y"}, {"Ÿ", "y"},
+	{"ź", "z"}, {"Ź", "z"}, {"ż", "z"}, {"Ż", "z"}, {"ž", "z"}, {"Ž", "z"},
+}
+
+var sqlSearchReplacements = [][2]string{
+	{"ą", "a"}, {"Ą", "a"}, {"ć", "c"}, {"Ć", "c"}, {"č", "c"}, {"Č", "c"},
+	{"ę", "e"}, {"Ę", "e"}, {"ł", "l"}, {"Ł", "l"}, {"ń", "n"}, {"Ń", "n"},
+	{"ó", "o"}, {"Ó", "o"}, {"ś", "s"}, {"Ś", "s"}, {"š", "s"}, {"Š", "s"},
+	{"ź", "z"}, {"Ź", "z"}, {"ż", "z"}, {"Ż", "z"}, {"ž", "z"}, {"Ž", "z"},
+}
+
+func normalizeSearchText(value string) string {
+	value = strings.ToLower(strings.TrimSpace(value))
+	for _, repl := range searchReplacements {
+		value = strings.ReplaceAll(value, repl[0], repl[1])
+	}
+	return value
+}
+
+func normalizedSQL(expr string) string {
+	out := "lower(" + expr + ")"
+	for _, repl := range sqlSearchReplacements {
+		out = "replace(" + out + ", '" + repl[0] + "', '" + repl[1] + "')"
+	}
+	return out
+}
+
 // ═══ GENRES ══════════════════════════════════════════════════════════════
 
 func (r *Repo) ListGenres() ([]model.Genre, error) {
@@ -38,10 +75,16 @@ func (r *Repo) ListGenres() ([]model.Genre, error) {
 
 func (r *Repo) ListTranslators() ([]string, error) {
 	rows, err := r.db.Query(`
-		SELECT DISTINCT trim(j.value)
-		FROM translations t, json_each(t.translator_names) j
-		WHERE trim(j.value) <> ''
-		ORDER BY trim(j.value)`)
+		SELECT DISTINCT name FROM (
+			SELECT trim(j.value) AS name
+			FROM translations t, json_each(t.translator_names) j
+			WHERE trim(j.value) <> ''
+			UNION
+			SELECT trim(studio) AS name
+			FROM translations
+			WHERE trim(studio) <> ''
+		)
+		ORDER BY name`)
 	if err != nil {
 		return nil, err
 	}
@@ -91,8 +134,8 @@ func (r *Repo) ListGames(f model.GameFilter) ([]model.Game, error) {
 	var args []any
 
 	if f.Search != "" {
-		q += ` AND (g.title LIKE ? OR g.developer LIKE ?)`
-		like := "%" + f.Search + "%"
+		q += ` AND (` + normalizedSQL("g.title") + ` LIKE ? OR ` + normalizedSQL("g.developer") + ` LIKE ?)`
+		like := "%" + normalizeSearchText(f.Search) + "%"
 		args = append(args, like, like)
 	}
 	if f.GenreID > 0 {
@@ -112,8 +155,8 @@ func (r *Repo) ListGames(f model.GameFilter) ([]model.Game, error) {
 		args = append(args, f.Official)
 	}
 	if f.Translator != "" {
-		q += ` AND EXISTS (SELECT 1 FROM json_each(t.translator_names) tn WHERE trim(tn.value) = ?)`
-		args = append(args, f.Translator)
+		q += ` AND (trim(t.studio) = ? OR EXISTS (SELECT 1 FROM json_each(t.translator_names) tn WHERE trim(tn.value) = ?))`
+		args = append(args, f.Translator, f.Translator)
 	}
 
 	// ── Sorting ──────────────────────────────────────────────────────────
@@ -184,8 +227,8 @@ func (r *Repo) CountGames(f model.GameFilter) (int, error) {
 	var args []any
 
 	if f.Search != "" {
-		q += ` AND (g.title LIKE ? OR g.developer LIKE ?)`
-		like := "%" + f.Search + "%"
+		q += ` AND (` + normalizedSQL("g.title") + ` LIKE ? OR ` + normalizedSQL("g.developer") + ` LIKE ?)`
+		like := "%" + normalizeSearchText(f.Search) + "%"
 		args = append(args, like, like)
 	}
 	if f.GenreID > 0 {
@@ -205,8 +248,8 @@ func (r *Repo) CountGames(f model.GameFilter) (int, error) {
 		args = append(args, f.Official)
 	}
 	if f.Translator != "" {
-		q += ` AND EXISTS (SELECT 1 FROM json_each(t.translator_names) tn WHERE trim(tn.value) = ?)`
-		args = append(args, f.Translator)
+		q += ` AND (trim(t.studio) = ? OR EXISTS (SELECT 1 FROM json_each(t.translator_names) tn WHERE trim(tn.value) = ?))`
+		args = append(args, f.Translator, f.Translator)
 	}
 
 	var total int
@@ -432,7 +475,7 @@ func (r *Repo) CreateTranslation(req model.CreateTranslationRequest) (int64, err
 		req.Orthography = []string{"academic"}
 	}
 	namesJSON, _ := json.Marshal(req.TranslatorNames)
-	req.Studio = normalizeStudio(req.Studio, req.TranslatorNames)
+	req.Studio = strings.TrimSpace(req.Studio)
 	req.Coverage = normalizeCoverageValues(req.Coverage)
 	coverageJSON, _ := json.Marshal(req.Coverage)
 	orthJSON, _ := json.Marshal(req.Orthography)
@@ -455,7 +498,7 @@ func (r *Repo) UpdateTranslation(id int, req model.CreateTranslationRequest) err
 		req.OfficialStatus = "unofficial"
 	}
 	namesJSON, _ := json.Marshal(req.TranslatorNames)
-	req.Studio = normalizeStudio(req.Studio, req.TranslatorNames)
+	req.Studio = strings.TrimSpace(req.Studio)
 	req.Coverage = normalizeCoverageValues(req.Coverage)
 	coverageJSON, _ := json.Marshal(req.Coverage)
 	orthJSON, _ := json.Marshal(req.Orthography)
@@ -465,17 +508,6 @@ func (r *Repo) UpdateTranslation(id int, req model.CreateTranslationRequest) err
 		req.Studio, string(namesJSON), req.Type, req.OfficialStatus, string(orthJSON),
 		string(coverageJSON), req.ExternalURL, time.Now(), id)
 	return err
-}
-
-func normalizeStudio(studio string, names []string) string {
-	studio = strings.TrimSpace(studio)
-	if studio != "" {
-		return studio
-	}
-	if len(names) > 0 {
-		return strings.TrimSpace(names[0])
-	}
-	return ""
 }
 
 func (r *Repo) DeleteTranslation(id int) error {
@@ -536,8 +568,8 @@ func (r *Repo) ListAllGames(search string) ([]model.Game, error) {
 	FROM games g`
 	var args []any
 	if search != "" {
-		q += ` WHERE LOWER(title) LIKE LOWER(?) OR LOWER(developer) LIKE LOWER(?)`
-		like := "%" + search + "%"
+		q += ` WHERE ` + normalizedSQL("title") + ` LIKE ? OR ` + normalizedSQL("developer") + ` LIKE ?`
+		like := "%" + normalizeSearchText(search) + "%"
 		args = append(args, like, like)
 	}
 	q += ` ORDER BY title`
@@ -617,8 +649,8 @@ func (r *Repo) FindSimilarGames(title string) ([]model.SimilarGame, error) {
 	}
 	rows, err := r.db.Query(`
 		SELECT title, slug FROM games
-		WHERE LOWER(title) LIKE LOWER(?) OR LOWER(?) LIKE '%' || LOWER(title) || '%'
-		ORDER BY title LIMIT 5`, "%"+title+"%", title)
+		WHERE `+normalizedSQL("title")+` LIKE ? OR ? LIKE '%' || `+normalizedSQL("title")+` || '%'
+		ORDER BY title LIMIT 5`, "%"+normalizeSearchText(title)+"%", normalizeSearchText(title))
 	if err != nil {
 		return nil, err
 	}
