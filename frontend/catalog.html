@@ -89,6 +89,36 @@
     .dropdown__menu::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
     .dropdown.open .dropdown__menu { display: block; }
 
+    .dropdown__search {
+      position: sticky;
+      top: -6px;
+      z-index: 1;
+      padding: 6px 0 8px;
+      background: var(--surface);
+    }
+
+    .dropdown__search-input {
+      width: 100%;
+      height: 34px;
+      padding: 0 10px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 13px;
+      outline: none;
+    }
+    .dropdown__search-input:focus { border-color: var(--accent); }
+    .dropdown__search-input::placeholder { color: var(--text-dim); }
+
+    .dropdown__empty {
+      display: none;
+      padding: 9px 12px;
+      color: var(--text-dim);
+      font-size: 13px;
+    }
+
     .dropdown__item {
       display: flex;
       align-items: center;
@@ -325,10 +355,23 @@
           </div>
         </div>
 
+        <!-- Translator -->
+        <div class="dropdown" id="dd-translator">
+          <div class="dropdown__trigger" id="dd-translator-trigger">
+            <span data-i18n="pages.catalog.translator">Аўтар перакладу</span> <span class="dropdown__arrow">▾</span>
+          </div>
+          <div class="dropdown__menu" id="dd-translator-menu">
+            <div class="dropdown__item selected" data-value="">
+              <span class="check">✓</span> <span data-i18n="pages.catalog.allTranslators">Усе аўтары</span>
+            </div>
+            <div class="dropdown__divider"></div>
+          </div>
+        </div>
+
         <!-- Sort -->
         <div class="dropdown" id="dd-sort">
           <div class="dropdown__trigger" id="dd-sort-trigger">
-            <span data-i18n="pages.catalog.sort">Сартаванне</span> <span class="dropdown__arrow">▾</span>
+            <span id="dd-sort-label">Па даце (новыя)</span> <span class="dropdown__arrow">▾</span>
           </div>
           <div class="dropdown__menu">
             <div class="dropdown__item selected" data-value="created_at,desc">
@@ -410,6 +453,7 @@ const state = {
   type:        _params.get('type') || '',
   orthography: _params.get('orthography') || '',
   official:    _params.get('official_status') || '',
+  translator:  _params.get('translator') || '',
   sortBy:      _params.get('sort_by') || 'created_at',
   sortOrder:   _params.get('sort_order') || 'desc',
   page:        parseInt(_params.get('page')) || 0,
@@ -428,6 +472,7 @@ function initDropdown(ddId, onSelect) {
   const dd      = document.getElementById(ddId);
   const trigger = dd.querySelector('.dropdown__trigger');
   const menu    = dd.querySelector('.dropdown__menu');
+  addDropdownSearch(menu);
 
   // Open / close
   trigger.addEventListener('click', e => {
@@ -435,11 +480,15 @@ function initDropdown(ddId, onSelect) {
     const isOpen = dd.classList.contains('open');
     // Close all
     document.querySelectorAll('.dropdown.open').forEach(d => d.classList.remove('open'));
-    if (!isOpen) dd.classList.add('open');
+    if (!isOpen) {
+      resetDropdownSearch(menu);
+      dd.classList.add('open');
+    }
   });
 
   // Select item
   menu.addEventListener('click', e => {
+    e.stopPropagation();
     const item = e.target.closest('.dropdown__item');
     if (!item) return;
     const value = item.dataset.value ?? '';
@@ -458,8 +507,62 @@ function initDropdown(ddId, onSelect) {
     }
 
     dd.classList.remove('open');
-    onSelect(value, item.textContent.trim().replace('✓', '').trim());
+    onSelect(value, dropdownItemLabel(item));
   });
+}
+
+function addDropdownSearch(menu) {
+  const search = document.createElement('div');
+  search.className = 'dropdown__search';
+  search.innerHTML = `<input class="dropdown__search-input" type="text" placeholder="Пошук..." autocomplete="off" />`;
+
+  const empty = document.createElement('div');
+  empty.className = 'dropdown__empty';
+  empty.textContent = t('pages.catalog.emptyTitle');
+
+  const input = search.querySelector('input');
+  input.addEventListener('click', e => e.stopPropagation());
+  input.addEventListener('keydown', e => e.stopPropagation());
+  input.addEventListener('input', () => filterDropdownItems(menu, input.value));
+
+  menu.prepend(search);
+  menu.appendChild(empty);
+}
+
+function filterDropdownItems(menu, query) {
+  const normalized = query.trim().toLowerCase();
+  let visibleCount = 0;
+
+  menu.querySelectorAll('.dropdown__item').forEach(item => {
+    const visible = !normalized || dropdownItemLabel(item).toLowerCase().includes(normalized);
+    item.style.display = visible ? '' : 'none';
+    if (visible) visibleCount++;
+  });
+
+  menu.querySelectorAll('.dropdown__divider').forEach(divider => {
+    divider.style.display = normalized ? 'none' : '';
+  });
+
+  const empty = menu.querySelector('.dropdown__empty');
+  if (empty) empty.style.display = visibleCount ? 'none' : 'block';
+}
+
+function resetDropdownSearch(menu) {
+  const input = menu.querySelector('.dropdown__search-input');
+  if (!input) return;
+  input.value = '';
+  filterDropdownItems(menu, '');
+}
+
+function dropdownItemLabel(item) {
+  const label = item.querySelector('[data-i18n]');
+  return (label ? label.textContent : item.textContent).trim().replace('✓', '').trim();
+}
+
+function updateSortLabel() {
+  const selected = document.querySelector('#dd-sort .dropdown__item.selected');
+  const label = selected ? dropdownItemLabel(selected) : t('pages.catalog.sortCreatedDesc');
+  document.getElementById('dd-sort-label').textContent = label;
 }
 
 // Close dropdowns on outside click
@@ -497,11 +600,19 @@ initDropdown('dd-official', (value, label) => {
   loadGames();
 });
 
+initDropdown('dd-translator', (value, label) => {
+  state.translator = value;
+  state.page = 0;
+  updateChips();
+  loadGames();
+});
+
 initDropdown('dd-sort', (value, label) => {
   const [sortBy, sortOrder] = value.split(',');
   state.sortBy    = sortBy || 'created_at';
   state.sortOrder = sortOrder || 'desc';
   state.page = 0;
+  updateSortLabel();
   loadGames();
 });
 
@@ -515,7 +626,21 @@ async function loadGenres() {
       item.className = 'dropdown__item';
       item.dataset.value = g.id;
       item.innerHTML = `<span class="check"></span> ${g.name}`;
-      menu.appendChild(item);
+      menu.insertBefore(item, menu.querySelector('.dropdown__empty'));
+    });
+  } catch {}
+}
+
+async function loadTranslators() {
+  try {
+    const translators = await apiFetch('/api/translators');
+    const menu = document.querySelector('#dd-translator .dropdown__menu');
+    translators.forEach(name => {
+      const item = document.createElement('div');
+      item.className = 'dropdown__item';
+      item.dataset.value = name;
+      item.innerHTML = `<span class="check"></span> ${name}`;
+      menu.insertBefore(item, menu.querySelector('.dropdown__empty'));
     });
   } catch {}
 }
@@ -556,6 +681,8 @@ function updateChips() {
     chips.push({ label: ORTH_LABELS[state.orthography], clear: () => { state.orthography = ''; resetDropdown('dd-orth'); } });
   if (state.official)
     chips.push({ label: OFFICIAL_LABELS[state.official], clear: () => { state.official = ''; resetDropdown('dd-official'); } });
+  if (state.translator)
+    chips.push({ label: state.translator, clear: () => { state.translator = ''; resetDropdown('dd-translator'); } });
 
   cont.innerHTML = chips.map((c, i) =>
     `<div class="chip">${c.label}<span class="chip__remove" data-idx="${i}">✕</span></div>`
@@ -590,6 +717,7 @@ function syncUrl() {
   if (state.type)        p.set('type',        state.type);
   if (state.orthography) p.set('orthography', state.orthography);
   if (state.official)    p.set('official_status', state.official);
+  if (state.translator)  p.set('translator', state.translator);
   if (state.sortBy !== 'created_at' || state.sortOrder !== 'desc') {
     p.set('sort_by',   state.sortBy);
     p.set('sort_order', state.sortOrder);
@@ -644,6 +772,7 @@ async function loadGames() {
   if (state.type)        params.set('type',         state.type);
   if (state.orthography) params.set('orthography',  state.orthography);
   if (state.official)    params.set('official_status', state.official);
+  if (state.translator)  params.set('translator',   state.translator);
   if (state.sortBy)      params.set('sort_by',     state.sortBy);
   if (state.sortOrder)   params.set('sort_order',  state.sortOrder);
   params.set('page',  state.page);
@@ -716,6 +845,7 @@ function renderPagination(total, container) {
 // ── Init ──────────────────────────────────────────────────────────────────
 (async () => {
   await loadGenres();
+  await loadTranslators();
 
   // Restore dropdown UI from URL params
   if (_params.has('genre_id')) {
@@ -726,11 +856,13 @@ function renderPagination(total, container) {
   if (_params.has('type'))        setDropdownValue('dd-type', state.type);
   if (_params.has('orthography')) setDropdownValue('dd-orth', state.orthography);
   if (_params.has('official_status')) setDropdownValue('dd-official', state.official);
+  if (_params.has('translator')) setDropdownValue('dd-translator', state.translator);
   if (_params.has('sort_by') || _params.has('sort_order')) {
     setDropdownValue('dd-sort', `${state.sortBy},${state.sortOrder}`);
   }
+  updateSortLabel();
 
-  if (state.search) updateChips();
+  if (state.search || state.genreId || state.type || state.orthography || state.official || state.translator) updateChips();
   await loadGames();
 })();
 </script>

@@ -61,6 +61,7 @@ func main() {
 	// ── Public API ────────────────────────────────────────
 	r.Route("/api", func(r chi.Router) {
 		r.Get("/genres", h.ListGenres)
+		r.Get("/translators", h.ListTranslators)
 		r.Get("/stats", h.GetPublicStats)
 
 		r.Get("/games", h.ListGames)

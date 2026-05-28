@@ -122,6 +122,7 @@ type GameFilter struct {
 	Type        string // "manual" | "ai" | ""
 	Orthography string // "academic" | "tarashkevitsa" | "lacinka" | ""
 	Official    string // "official" | "unofficial" | ""
+	Translator  string
 	SortBy      string // "created_at" | "release_date" | "steam_rating" | "best_rating"
 	SortOrder   string // "asc" | "desc"
 	Page        int

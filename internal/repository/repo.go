@@ -36,6 +36,31 @@ func (r *Repo) ListGenres() ([]model.Genre, error) {
 	return out, nil
 }
 
+func (r *Repo) ListTranslators() ([]string, error) {
+	rows, err := r.db.Query(`
+		SELECT DISTINCT trim(j.value)
+		FROM translations t, json_each(t.translator_names) j
+		WHERE trim(j.value) <> ''
+		ORDER BY trim(j.value)`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var out []string
+	for rows.Next() {
+		var name string
+		if err := rows.Scan(&name); err != nil {
+			return nil, err
+		}
+		out = append(out, name)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ═══ GAMES ═══════════════════════════════════════════════════════════════
 
 func (r *Repo) ListGames(f model.GameFilter) ([]model.Game, error) {
@@ -86,13 +111,23 @@ func (r *Repo) ListGames(f model.GameFilter) ([]model.Game, error) {
 		q += ` AND t.official_status = ?`
 		args = append(args, f.Official)
 	}
+	if f.Translator != "" {
+		q += ` AND EXISTS (SELECT 1 FROM json_each(t.translator_names) tn WHERE trim(tn.value) = ?)`
+		args = append(args, f.Translator)
+	}
 
 	// ── Sorting ──────────────────────────────────────────────────────────
 	sortBy := "g.created_at"
 	sortOrder := "DESC"
+	sortMissing := ""
 	switch f.SortBy {
 	case "release_date":
-		sortBy = "g.release_date"
+		sortBy = `CASE
+			WHEN g.release_date LIKE '__-__-____' THEN substr(g.release_date, 7, 4) || '-' || substr(g.release_date, 4, 2) || '-' || substr(g.release_date, 1, 2)
+			WHEN g.release_date LIKE '__-____' THEN substr(g.release_date, 4, 4) || '-' || substr(g.release_date, 1, 2) || '-00'
+			ELSE g.release_date
+		END`
+		sortMissing = `(g.release_date IS NULL OR g.release_date = '') ASC, `
 	case "steam_rating":
 		sortBy = "g.steam_rating"
 	case "best_rating":
@@ -101,7 +136,7 @@ func (r *Repo) ListGames(f model.GameFilter) ([]model.Game, error) {
 	if f.SortOrder == "asc" {
 		sortOrder = "ASC"
 	}
-	q += ` ORDER BY ` + sortBy + ` ` + sortOrder + ` NULLS LAST, g.id DESC LIMIT ? OFFSET ?`
+	q += ` ORDER BY ` + sortMissing + sortBy + ` ` + sortOrder + ` NULLS LAST, g.id DESC LIMIT ? OFFSET ?`
 	args = append(args, f.Limit, f.Page*f.Limit)
 
 	rows, err := r.db.Query(q, args...)
@@ -168,6 +203,10 @@ func (r *Repo) CountGames(f model.GameFilter) (int, error) {
 	if f.Official != "" {
 		q += ` AND t.official_status = ?`
 		args = append(args, f.Official)
+	}
+	if f.Translator != "" {
+		q += ` AND EXISTS (SELECT 1 FROM json_each(t.translator_names) tn WHERE trim(tn.value) = ?)`
+		args = append(args, f.Translator)
 	}
 
 	var total int

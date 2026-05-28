@@ -61,6 +61,20 @@ func (h *Handler) ListGenres(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, 200, genres)
 }
 
+// ── GET /api/translators ─────────────────────────────────────────────────
+
+func (h *Handler) ListTranslators(w http.ResponseWriter, r *http.Request) {
+	translators, err := h.repo.ListTranslators()
+	if err != nil {
+		writeError(w, 500, "internal error")
+		return
+	}
+	if translators == nil {
+		translators = []string{}
+	}
+	writeJSON(w, 200, translators)
+}
+
 // ── GET /api/stats ────────────────────────────────────────────────────────
 
 func (h *Handler) GetPublicStats(w http.ResponseWriter, r *http.Request) {
@@ -89,6 +103,7 @@ func (h *Handler) ListGames(w http.ResponseWriter, r *http.Request) {
 		Type:        q.Get("type"),
 		Orthography: q.Get("orthography"),
 		Official:    q.Get("official_status"),
+		Translator:  q.Get("translator"),
 		SortBy:      q.Get("sort_by"),
 		SortOrder:   q.Get("sort_order"),
 		Page:        page,
@@ -107,6 +122,7 @@ func (h *Handler) ListGames(w http.ResponseWriter, r *http.Request) {
 		Type:        q.Get("type"),
 		Orthography: q.Get("orthography"),
 		Official:    q.Get("official_status"),
+		Translator:  q.Get("translator"),
 	})
 	if err != nil {
 		writeError(w, 500, "internal error")
