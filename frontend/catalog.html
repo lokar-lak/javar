@@ -277,6 +277,42 @@
           <input type="text" id="search-input" placeholder="Назва або распрацоўшчык..." data-i18n-placeholder="pages.catalog.searchPlaceholder" />
         </div>
 
+        <!-- Sort -->
+        <div class="dropdown" id="dd-sort">
+          <div class="dropdown__trigger" id="dd-sort-trigger">
+            <span id="dd-sort-label">Па даце (новыя)</span> <span class="dropdown__arrow">▾</span>
+          </div>
+          <div class="dropdown__menu">
+            <div class="dropdown__item selected" data-value="created_at,desc">
+              <span class="check">✓</span> <span data-i18n="pages.catalog.sortCreatedDesc">Па даце (новыя)</span>
+            </div>
+            <div class="dropdown__item" data-value="created_at,asc">
+              <span class="check"></span> <span data-i18n="pages.catalog.sortCreatedAsc">Па даце (старыя)</span>
+            </div>
+            <div class="dropdown__divider"></div>
+            <div class="dropdown__item" data-value="release_date,desc">
+              <span class="check"></span> <span data-i18n="pages.catalog.sortReleaseDesc">Па даце выхаду (новыя)</span>
+            </div>
+            <div class="dropdown__item" data-value="release_date,asc">
+              <span class="check"></span> <span data-i18n="pages.catalog.sortReleaseAsc">Па даце выхаду (старыя)</span>
+            </div>
+            <div class="dropdown__divider"></div>
+            <div class="dropdown__item" data-value="steam_rating,desc">
+              <span class="check"></span> <span data-i18n="pages.catalog.sortSteamDesc">Па рэйтынгу Steam</span>
+            </div>
+            <div class="dropdown__item" data-value="steam_rating,asc">
+              <span class="check"></span> <span data-i18n="pages.catalog.sortSteamAsc">Па рэйтынгу Steam (адваротны)</span>
+            </div>
+            <div class="dropdown__divider"></div>
+            <div class="dropdown__item" data-value="best_rating,desc">
+              <span class="check"></span> <span data-i18n="pages.catalog.sortTranslationDesc">Па рэйтынгу перакладу</span>
+            </div>
+            <div class="dropdown__item" data-value="best_rating,asc">
+              <span class="check"></span> <span data-i18n="pages.catalog.sortTranslationAsc">Па рэйтынгу перакладу (адваротны)</span>
+            </div>
+          </div>
+        </div>
+
         <div class="filter-sep"></div>
 
         <!-- Genre -->
@@ -368,42 +404,6 @@
               <span class="check">✓</span> <span data-i18n="pages.catalog.allTranslators">Усе аўтары</span>
             </div>
             <div class="dropdown__divider"></div>
-          </div>
-        </div>
-
-        <!-- Sort -->
-        <div class="dropdown" id="dd-sort">
-          <div class="dropdown__trigger" id="dd-sort-trigger">
-            <span id="dd-sort-label">Па даце (новыя)</span> <span class="dropdown__arrow">▾</span>
-          </div>
-          <div class="dropdown__menu">
-            <div class="dropdown__item selected" data-value="created_at,desc">
-              <span class="check">✓</span> <span data-i18n="pages.catalog.sortCreatedDesc">Па даце (новыя)</span>
-            </div>
-            <div class="dropdown__item" data-value="created_at,asc">
-              <span class="check"></span> <span data-i18n="pages.catalog.sortCreatedAsc">Па даце (старыя)</span>
-            </div>
-            <div class="dropdown__divider"></div>
-            <div class="dropdown__item" data-value="release_date,desc">
-              <span class="check"></span> <span data-i18n="pages.catalog.sortReleaseDesc">Па даце выхаду (новыя)</span>
-            </div>
-            <div class="dropdown__item" data-value="release_date,asc">
-              <span class="check"></span> <span data-i18n="pages.catalog.sortReleaseAsc">Па даце выхаду (старыя)</span>
-            </div>
-            <div class="dropdown__divider"></div>
-            <div class="dropdown__item" data-value="steam_rating,desc">
-              <span class="check"></span> <span data-i18n="pages.catalog.sortSteamDesc">Па рэйтынгу Steam</span>
-            </div>
-            <div class="dropdown__item" data-value="steam_rating,asc">
-              <span class="check"></span> <span data-i18n="pages.catalog.sortSteamAsc">Па рэйтынгу Steam (адваротны)</span>
-            </div>
-            <div class="dropdown__divider"></div>
-            <div class="dropdown__item" data-value="best_rating,desc">
-              <span class="check"></span> <span data-i18n="pages.catalog.sortTranslationDesc">Па рэйтынгу перакладу</span>
-            </div>
-            <div class="dropdown__item" data-value="best_rating,asc">
-              <span class="check"></span> <span data-i18n="pages.catalog.sortTranslationAsc">Па рэйтынгу перакладу (адваротны)</span>
-            </div>
           </div>
         </div>
 

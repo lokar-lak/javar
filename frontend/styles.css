@@ -1481,7 +1481,7 @@ fieldset.submission-field { border: 0; padding: 0; }
 
   .navbar.open .navbar__links a {
     display: block;
-    padding: 14px var(--page-px);
+    padding: 14px 16px;
     font-size: 14px;
     border-bottom: 1px solid var(--border);
   }
@@ -1490,16 +1490,21 @@ fieldset.submission-field { border: 0; padding: 0; }
   .navbar.open .navbar__submit-item {
     flex: none;
     min-width: 0;
-    padding: 12px var(--page-px);
+    padding: 12px 16px;
   }
 
   .navbar.open .navbar__submit { width: 100%; }
 
   .navbar.open .navbar__search {
+    order: -1;
     width: 100%;
     border-radius: 0;
     border-left: none;
     border-right: none;
+    padding-left: 16px;
+    padding-right: 16px;
+    padding-top: 8px;
+    padding-bottom: 8px;
   }
 
   /* Games grid: 2 columns */
@@ -1534,26 +1539,28 @@ fieldset.submission-field { border: 0; padding: 0; }
   .stat-cards-wide { grid-template-columns: 1fr; }
 
   /* Catalog filters */
-  .catalog-search { min-width: 0; width: 100%; }
+  .catalog-search { min-width: 0; }
   .filter-sep { display: none; }
-  .filter-bar { gap: 8px; }
-
-  .dropdown { flex: 1; min-width: calc(50% - 4px); }
+  .filter-bar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .catalog-search { grid-column: 1 / -1; }
+  #dd-sort { grid-column: 1 / -1; }
   .dropdown__trigger {
     width: 100%;
     justify-content: space-between;
-    font-size: 11px;
+    font-size: 12px;
     padding: 0 12px;
     height: 36px;
   }
-  .dropdown__menu {
-    position: fixed !important;
-    top: auto !important;
-    left: 12px !important;
-    right: 12px !important;
-    bottom: 12px !important;
+  .dropdown.open .dropdown__menu {
+    width: max-content !important;
+    min-width: 100% !important;
+    max-width: calc(100vw - 24px) !important;
     max-height: 55vh !important;
-    min-width: 0 !important;
+    overflow-x: auto !important;
     z-index: 300 !important;
   }
 }
@@ -1618,6 +1625,5 @@ fieldset.submission-field { border: 0; padding: 0; }
   .translation-stat__value { font-size: 20px; }
   .translation-stat__label { font-size: 11px; gap: 6px; }
   .translation-stat__icon { width: 20px; height: 20px; font-size: 10px; }
-  .dropdown { min-width: 100%; }
   .stat-card { min-width: 100%; }
 }
