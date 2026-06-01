@@ -75,6 +75,47 @@ func migrate(db *sql.DB) error {
 			return fmt.Errorf("add translations.studio: %w", err)
 		}
 	}
+	if _, err := db.Exec(`ALTER TABLE translations ADD COLUMN game_title TEXT NOT NULL DEFAULT ''`); err != nil {
+		if !strings.Contains(strings.ToLower(err.Error()), "duplicate column name") {
+			return fmt.Errorf("add translations.game_title: %w", err)
+		}
+	}
+	if _, err := db.Exec(`
+		UPDATE translations
+		SET game_title = COALESCE((SELECT title FROM games WHERE games.id = translations.game_id), '')
+		WHERE game_title = ''`); err != nil {
+		return fmt.Errorf("backfill translations.game_title: %w", err)
+	}
+	if _, err := db.Exec(`
+		CREATE TRIGGER IF NOT EXISTS translations_game_title_insert
+		AFTER INSERT ON translations
+		BEGIN
+			UPDATE translations
+			SET game_title = (SELECT title FROM games WHERE id = NEW.game_id)
+			WHERE id = NEW.id;
+		END`); err != nil {
+		return fmt.Errorf("create translations game title insert trigger: %w", err)
+	}
+	if _, err := db.Exec(`
+		CREATE TRIGGER IF NOT EXISTS translations_game_title_game_update
+		AFTER UPDATE OF game_id ON translations
+		BEGIN
+			UPDATE translations
+			SET game_title = (SELECT title FROM games WHERE id = NEW.game_id)
+			WHERE id = NEW.id;
+		END`); err != nil {
+		return fmt.Errorf("create translations game title game update trigger: %w", err)
+	}
+	if _, err := db.Exec(`
+		CREATE TRIGGER IF NOT EXISTS games_title_update_translations
+		AFTER UPDATE OF title ON games
+		BEGIN
+			UPDATE translations
+			SET game_title = NEW.title
+			WHERE game_id = NEW.id;
+		END`); err != nil {
+		return fmt.Errorf("create games title translations trigger: %w", err)
+	}
 	if _, err := db.Exec(`ALTER TABLE translations ADD COLUMN verified INTEGER NOT NULL DEFAULT 0`); err != nil {
 		if !strings.Contains(strings.ToLower(err.Error()), "duplicate column name") {
 			return fmt.Errorf("add translations.verified: %w", err)

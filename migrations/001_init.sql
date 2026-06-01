@@ -41,6 +41,7 @@ CREATE TABLE IF NOT EXISTS game_genres (
 CREATE TABLE IF NOT EXISTS translations (
     id               INTEGER PRIMARY KEY AUTOINCREMENT,
     game_id          INTEGER NOT NULL REFERENCES games(id) ON DELETE CASCADE,
+    game_title       TEXT    NOT NULL DEFAULT '',
     studio           TEXT    NOT NULL DEFAULT '',
     translator_names TEXT    NOT NULL DEFAULT '[]',  -- JSON: ["Ivan K.","Maria P."]
     type             TEXT    NOT NULL CHECK(type IN ('manual','ai')),
@@ -53,6 +54,30 @@ CREATE TABLE IF NOT EXISTS translations (
     created_at       DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at       DATETIME DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TRIGGER IF NOT EXISTS translations_game_title_insert
+AFTER INSERT ON translations
+BEGIN
+    UPDATE translations
+    SET game_title = (SELECT title FROM games WHERE id = NEW.game_id)
+    WHERE id = NEW.id;
+END;
+
+CREATE TRIGGER IF NOT EXISTS translations_game_title_game_update
+AFTER UPDATE OF game_id ON translations
+BEGIN
+    UPDATE translations
+    SET game_title = (SELECT title FROM games WHERE id = NEW.game_id)
+    WHERE id = NEW.id;
+END;
+
+CREATE TRIGGER IF NOT EXISTS games_title_update_translations
+AFTER UPDATE OF title ON games
+BEGIN
+    UPDATE translations
+    SET game_title = NEW.title
+    WHERE game_id = NEW.id;
+END;
 
 -- ── Reviews (anonymous) ───────────────────────────────────────
 CREATE TABLE IF NOT EXISTS reviews (

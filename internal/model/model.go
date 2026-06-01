@@ -38,6 +38,7 @@ type GameDetail struct {
 type Translation struct {
 	ID              int        `json:"id"`
 	GameID          int        `json:"game_id"`
+	GameTitle       string     `json:"game_title"`
 	Studio          string     `json:"studio"`
 	TranslatorNames []string   `json:"translator_names"`
 	Type            string     `json:"type"`            // "manual" | "ai"
