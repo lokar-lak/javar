@@ -718,11 +718,11 @@ func (h *Handler) ExportCSV(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Disposition", `attachment; filename="javar_export.csv"`)
 
 	fmt.Fprintf(w, "# Статыстыка\n")
-	fmt.Fprintf(w, "Гульняў,%d\nПеракладаў,%d\nВодгукаў,%d\nКлікаў,%d\n\n",
+	fmt.Fprintf(w, "Гульняў,%d\nПеракладаў,%d\nВодгукаў,%d\nПераходаў,%d\n\n",
 		stats.TotalGames, stats.TotalTranslations, stats.TotalReviews, stats.TotalClicks)
 
-	fmt.Fprintf(w, "# Топ гульняў па кліках\n")
-	fmt.Fprintf(w, "Назва,Клікаў,Водгукаў\n")
+	fmt.Fprintf(w, "# Топ гульняў па пераходах\n")
+	fmt.Fprintf(w, "Назва,Пераходаў,Водгукаў\n")
 	for _, g := range stats.TopGames {
 		fmt.Fprintf(w, "%q,%d,%d\n", g.Title, g.Clicks, g.Reviews)
 	}

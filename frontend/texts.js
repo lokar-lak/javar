@@ -51,6 +51,7 @@ const TEXTS = {
     home: {
       title: 'JAVAR — Галоўная',
       statsLabel: 'Колькасць перакладаў',
+      translationsTitle: 'Пераклады',
       officialCount: 'Афіцыйных',
       semiOfficialCount: 'Паўафіцыйных',
       unofficialCount: 'Неафіцыйных',

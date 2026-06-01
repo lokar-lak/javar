@@ -65,19 +65,23 @@
   <main class="main">
 
     <!-- TRANSLATION STATS -->
+    <div class="section-heading section-heading--compact">
+      <h2 data-i18n="pages.home.translationsTitle">Пераклады</h2>
+      <div class="section-heading__bar" style="width:128px"></div>
+    </div>
     <section class="translation-stats" aria-label="Колькасць перакладаў" data-i18n-aria-label="pages.home.statsLabel">
-      <div class="translation-stat">
+      <a class="translation-stat" href="catalog.html?official_status=official">
         <div class="translation-stat__label"><span class="translation-stat__icon">★</span><span data-i18n="pages.home.officialCount">Афіцыйных</span></div>
         <div class="translation-stat__value" id="stat-official">—</div>
-      </div>
-      <div class="translation-stat">
+      </a>
+      <a class="translation-stat" href="catalog.html?official_status=semi-official">
         <div class="translation-stat__label"><span class="translation-stat__icon">◐</span><span data-i18n="pages.home.semiOfficialCount">Паўафіцыйных</span></div>
         <div class="translation-stat__value" id="stat-semi-official">—</div>
-      </div>
-      <div class="translation-stat">
+      </a>
+      <a class="translation-stat" href="catalog.html?official_status=unofficial">
         <div class="translation-stat__label"><span class="translation-stat__icon">◇</span><span data-i18n="pages.home.unofficialCount">Неафіцыйных</span></div>
         <div class="translation-stat__value" id="stat-unofficial">—</div>
-      </div>
+      </a>
     </section>
 
     <!-- NEW RELEASES -->

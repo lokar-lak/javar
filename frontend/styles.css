@@ -185,6 +185,8 @@ img { display: block; max-width: 100%; }
   margin-bottom: 28px;
 }
 
+.section-heading--compact { margin-bottom: 16px; }
+
 .section-heading h2 {
   font-family: var(--font-head);
   font-size: 40px;
@@ -213,12 +215,20 @@ img { display: block; max-width: 100%; }
 
 .translation-stat {
   position: relative;
+  display: block;
   overflow: hidden;
   min-height: 118px;
   padding: 24px 28px;
   background: linear-gradient(145deg, var(--surface), rgba(38, 38, 56, 0.72));
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
+  transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+
+.translation-stat:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.22), 0 0 0 1px rgba(255, 38, 38, 0.08);
 }
 
 .translation-stat::after {
