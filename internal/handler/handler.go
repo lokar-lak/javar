@@ -11,6 +11,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math/big"
 	"net"
 	"net/http"
 	"net/url"
@@ -98,6 +99,41 @@ func validReviewerID(value string) bool {
 		return false
 	}
 	return true
+}
+
+func randomAnonymousName() string {
+	names := []string{
+		"Ананімны янот",
+		"Ананімная сава",
+		"Ананімны кот",
+		"Ананімная ліса",
+		"Ананімны зубр",
+		"Ананімны вожык",
+		"Ананімная выдра",
+		"Ананімны бабёр",
+		"Ананімная рысь",
+		"Ананімны воўк",
+		"Ананімная вавёрка",
+		"Ананімны мядзведзь",
+		"Ананімны заяц",
+		"Ананімны алень",
+		"Ананімны лось",
+		"Ананімны хамяк",
+		"Ананімны цюлень",
+		"Ананімны пінгвін",
+		"Ананімны барсук",
+		"Ананімны кажан",
+		"Ананімная чарапаха",
+		"Ананімная жаба",
+		"Ананімная панда",
+		"Ананімны дэльфін",
+		"Ананімны леў",
+	}
+	n, err := rand.Int(rand.Reader, big.NewInt(int64(len(names))))
+	if err != nil {
+		return names[0]
+	}
+	return names[n.Int64()]
 }
 
 // ── GET /api/genres ───────────────────────────────────────────────────────
@@ -269,8 +305,9 @@ func (h *Handler) CreateReview(w http.ResponseWriter, r *http.Request) {
 		writeError(w, 400, "invalid body")
 		return
 	}
+	req.AuthorName = strings.TrimSpace(req.AuthorName)
 	if req.AuthorName == "" {
-		req.AuthorName = "Ананім"
+		req.AuthorName = randomAnonymousName()
 	}
 	if req.Rating < 1 || req.Rating > 5 {
 		writeError(w, 400, "rating must be 1–5")

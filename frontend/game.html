@@ -872,7 +872,7 @@ document.addEventListener('click', async (e) => {
     const res = await fetch(`${API}/api/reviews`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ translation_id: tid, author_name: name || t('pages.game.anonymous'), rating: selectedRating, body })
+      body: JSON.stringify({ translation_id: tid, author_name: name, rating: selectedRating, body })
     });
 
     if (!res.ok) throw new Error();
