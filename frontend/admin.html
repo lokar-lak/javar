@@ -30,7 +30,7 @@
     /* ── Login ─────────────────────────────────────────────── */
     #login-screen{
       display:flex;align-items:center;justify-content:center;
-      width:100%;min-height:100vh;
+      width:100%;min-height:100vh;padding:20px;
     }
     .login-box{
       background:var(--surface);border:1px solid var(--border);border-radius:16px;
@@ -74,7 +74,7 @@
     .sidebar__footer button:hover{color:var(--accent)}
 
     /* ── Main content ───────────────────────────────────────── */
-    .content{flex:1;padding:32px 36px;overflow-y:auto;max-width:1100px}
+    .content{flex:1;padding:32px 36px;overflow-y:auto;max-width:1100px;min-width:0}
     .section{display:none}
     .section.active{display:block}
 
@@ -88,6 +88,7 @@
 
     /* ── Stat cards ─────────────────────────────────────────── */
     .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:32px}
+    .stat-grid--secondary{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
     .stat-box{
       background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);
       padding:20px;display:flex;flex-direction:column;gap:4px;
@@ -108,7 +109,7 @@
     tr:hover td{background:rgba(255,255,255,.02)}
     tr.has-relations td{background:rgba(255,60,60,.07)}
     tr.has-relations:hover td{background:rgba(255,60,60,.12)}
-    .td-actions{display:flex;gap:8px;align-items:center}
+    .td-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 
     /* ── Buttons ────────────────────────────────────────────── */
     .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 16px;border-radius:var(--r);font-size:13px;font-weight:600;cursor:pointer;transition:opacity .2s,transform .15s;border:none}
@@ -139,7 +140,8 @@
     .form-input::placeholder{color:var(--text-muted)}
     textarea.form-input{height:auto;padding:10px 12px;resize:vertical;min-height:80px}
     select.form-input{cursor:pointer}
-    .form-actions{display:flex;gap:10px;margin-top:20px}
+    .form-actions{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap}
+    .upload-row{display:flex;gap:8px;align-items:flex-start}
 
     /* ── Badge ──────────────────────────────────────────────── */
     .badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;letter-spacing:.5px}
@@ -175,7 +177,7 @@
     /* ── Modal ──────────────────────────────────────────────── */
     .modal-overlay{
       display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);
-      z-index:1000;align-items:center;justify-content:center;
+      z-index:1000;align-items:center;justify-content:center;padding:16px;
     }
     .modal-overlay.open{display:flex}
     .modal{
@@ -201,28 +203,69 @@
     @media(max-width:768px){
       :root{--sidebar:0px}
       body{flex-direction:column}
+      #app{min-height:100vh}
       .sidebar{
         position:fixed;top:0;left:0;right:0;height:auto;z-index:100;
         flex-direction:row;align-items:center;
-        padding:0 16px;height:56px;
-        border-right:none;border-bottom:1px solid var(--border);
+        padding:0 12px;height:58px;
+        background:var(--surface);border-right:none;border-bottom:1px solid var(--border);
+        overflow:visible;box-shadow:0 8px 24px rgba(0,0,0,.22)
       }
       .sidebar__logo{padding:0;border-bottom:none;margin-right:auto;display:flex;align-items:center;gap:8px}
       .sidebar__logo img{height:24px}
       .sidebar__logo span{display:none}
-      .sidebar__nav{display:none;position:fixed;top:56px;left:0;right:0;background:var(--surface);border-bottom:1px solid var(--border);z-index:100;padding:4px 0}
+      .sidebar__nav{display:none;position:fixed;top:58px;left:8px;right:8px;background:var(--surface);border:1px solid var(--border);border-radius:0 0 14px 14px;z-index:100;padding:8px;box-shadow:0 16px 36px rgba(0,0,0,.34);max-height:calc(100vh - 70px);overflow-y:auto}
       .sidebar__nav.open{display:block}
+      .nav-item{border-radius:8px;padding:12px 14px;font-size:14px}
+      .nav-item.active{border-right:none;background:var(--accent-glow)}
       .sidebar__footer{display:none}
       .sidebar__toggle{display:flex!important}
-      .content{padding:20px 16px;margin-top:56px;max-width:none}
+      .content{padding:22px 14px;margin-top:58px;max-width:none;width:100%;overflow:visible}
+      .page-heading{align-items:flex-start;margin-bottom:18px;gap:12px}
+      .page-heading > div{min-width:0}
       .stat-grid{grid-template-columns:1fr 1fr;gap:10px}
+      .stat-grid--secondary{grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
       .stat-box{padding:14px}
       .stat-box__value{font-size:28px}
-      .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
-      .tbl-wrap table{min-width:600px}
+      .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin-left:-2px;margin-right:-2px;border-radius:12px}
+      .tbl-wrap table{min-width:680px}
+      .tbl-head{padding:14px 16px}
+      th{padding:10px 12px;white-space:nowrap}
+      td{padding:11px 12px}
       .page-heading h1{font-size:22px}
-      .modal{width:100%;max-width:100%;border-radius:14px;min-height:auto;max-height:90vh}
-      .confirm-box{width:100%;max-width:380px;min-height:auto;border-radius:16px}
+      .form-card{padding:16px;margin-bottom:16px}
+      .form-actions{flex-direction:column}
+      .form-actions .btn{width:100%}
+      .upload-row{flex-direction:column}
+      .upload-row .btn,.upload-row .form-input{width:100%}
+      #cover-img{width:100%!important;height:auto!important;max-height:180px}
+      .modal-overlay{align-items:flex-end;padding:10px}
+      .modal{width:100%;max-width:100%;border-radius:16px 16px 12px 12px;min-height:auto;max-height:calc(100vh - 20px);padding:20px 16px 16px}
+      .modal h3{font-size:17px;padding-right:34px;margin-bottom:16px}
+      .modal-footer{flex-direction:column-reverse;gap:8px}
+      .modal-footer .btn{width:100%;min-height:40px}
+      .modal-close{top:10px;right:10px;background:var(--surface-2)}
+      .confirm-box{width:100%;max-width:420px;min-height:auto;border-radius:16px}
+      #toast{left:12px;right:12px;bottom:12px;max-width:none}
+    }
+
+    @media(max-width:520px){
+      body{font-size:13px}
+      .login-box{width:100%;padding:32px 22px;border-radius:14px}
+      .login-logo{height:30px}
+      .login-box h2{font-size:20px}
+      .content{padding-left:10px;padding-right:10px}
+      .page-heading{flex-direction:column}
+      .page-heading .btn{width:100%;min-height:40px}
+      .stat-grid{grid-template-columns:1fr}
+      .stat-grid--secondary{grid-template-columns:1fr}
+      .stat-box__value{font-size:30px}
+      .btn{padding:8px 12px}
+      .btn-sm{padding:7px 10px}
+      .form-input{font-size:16px}
+      .checkbox-label{align-items:flex-start;line-height:1.35}
+      .empty{padding:28px 16px}
+      .tbl-wrap table{min-width:720px}
     }
 
     .sidebar__toggle{
@@ -308,7 +351,7 @@
         <div class="stat-box"><div class="stat-box__label">Пераходаў</div><div class="stat-box__value" id="s-cl">—</div></div>
       </div>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px">
+      <div class="stat-grid--secondary">
         <div class="stat-box">
           <div class="stat-box__label">Ручных перакладаў</div>
           <div class="stat-box__value" id="s-manual" style="color:var(--green)">—</div>
@@ -486,7 +529,7 @@
       </div>
       <div class="form-group span-2">
         <label>Вокладка</label>
-        <div style="display:flex;gap:8px;align-items:flex-start">
+        <div class="upload-row">
           <input class="form-input" id="g-cover" placeholder="https://... або загрузі файл справа" style="flex:1"/>
           <label class="btn btn-ghost" style="cursor:pointer;white-space:nowrap;height:40px;padding:0 14px;display:flex;align-items:center;gap:6px">
             📁 Загрузіць
