@@ -218,6 +218,68 @@
       border-radius: 8px;
     }
     @keyframes shimmer { to { background-position: -200% 0; } }
+
+    .site-dialog {
+      position: fixed;
+      inset: 0;
+      z-index: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: rgba(10, 10, 18, 0.72);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
+
+    .site-dialog__panel {
+      width: min(420px, 100%);
+      background: linear-gradient(145deg, var(--surface), var(--surface-2));
+      border: 1px solid var(--border);
+      border-top: 2px solid var(--accent);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 22px 60px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 38, 38, 0.08);
+      overflow: hidden;
+    }
+
+    .site-dialog__body { padding: 24px 24px 18px; }
+
+    .site-dialog__eyebrow {
+      margin-bottom: 8px;
+      color: var(--accent);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+    }
+
+    .site-dialog__text {
+      color: var(--text-body);
+      font-size: 15px;
+      font-weight: 600;
+      line-height: 1.5;
+    }
+
+    .site-dialog__actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      padding: 16px 24px 22px;
+    }
+
+    .site-dialog__actions .btn {
+      min-width: 92px;
+      height: 38px;
+      margin-top: 0;
+      padding: 0 18px;
+    }
+
+    .site-dialog__actions .btn:not(.btn--primary) {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--text-body);
+    }
   </style>
 </head>
 <body>
@@ -497,7 +559,7 @@ function renderGame(game) {
         const data = await res.json();
         window.open(data.url, '_blank', 'noopener');
       } catch {
-        alert(t('pages.game.linkError'));
+        showNotice(t('pages.game.linkError'));
       }
     });
   });
@@ -586,6 +648,7 @@ function renderReviewsSection(t) {
       <!-- Review form -->
       <div style="margin:24px 0 20px">
         <h4 style="font-size:16px;font-weight:700;margin-bottom:14px;color:var(--text)">${window.t('pages.game.leaveReview')}</h4>
+        <p style="font-size:13px;color:var(--text-muted);margin:-6px 0 14px">${window.t('pages.game.reviewUpdateHint')}</p>
         <div style="display:flex;flex-direction:column;gap:12px">
           <div>
             <label class="form-label" for="review-name">${window.t('pages.game.nameOptional')}</label>
@@ -712,6 +775,51 @@ function renderReviewCard(rev) {
     </div>`;
 }
 
+function showDialog(message, { confirm = false } = {}) {
+  return new Promise(resolve => {
+    const dialog = document.createElement('div');
+    dialog.className = 'site-dialog';
+    dialog.setAttribute('role', 'dialog');
+    dialog.setAttribute('aria-modal', 'true');
+    dialog.innerHTML = `
+      <div class="site-dialog__panel">
+        <div class="site-dialog__body">
+          <div class="site-dialog__eyebrow">JAVAR</div>
+          <div class="site-dialog__text"></div>
+        </div>
+        <div class="site-dialog__actions">
+          ${confirm ? `<button class="btn" data-dialog-cancel>${t('common.actions.cancel')}</button>` : ''}
+          <button class="btn btn--primary" data-dialog-ok>${confirm ? t('common.actions.confirm') : 'OK'}</button>
+        </div>
+      </div>`;
+
+    dialog.querySelector('.site-dialog__text').textContent = message;
+    document.body.appendChild(dialog);
+
+    const close = value => {
+      dialog.remove();
+      resolve(value);
+    };
+
+    dialog.querySelector('[data-dialog-ok]').focus();
+    dialog.querySelector('[data-dialog-ok]').addEventListener('click', () => close(true));
+    dialog.querySelector('[data-dialog-cancel]')?.addEventListener('click', () => close(false));
+    dialog.addEventListener('click', e => { if (e.target === dialog) close(!confirm); });
+    dialog.addEventListener('keydown', e => {
+      if (e.key === 'Escape') close(false);
+      if (e.key === 'Enter') close(true);
+    });
+  });
+}
+
+function showNotice(message) {
+  return showDialog(message);
+}
+
+function showConfirm(message) {
+  return showDialog(message, { confirm: true });
+}
+
 // ── Stars input ───────────────────────────────────────────────────────────
 let selectedRating = 0;
 
@@ -749,12 +857,18 @@ document.addEventListener('click', async (e) => {
   const name = document.getElementById('review-name').value.trim();
   const body = document.getElementById('review-body').value.trim();
 
-  if (!selectedRating) { alert(t('pages.game.chooseRating')); return; }
-
-  btn.disabled = true;
-  btn.textContent = t('common.actions.submitting');
+  if (!selectedRating) { await showNotice(t('pages.game.chooseRating')); return; }
 
   try {
+    const currentRes = await fetch(`${API}/api/reviews/current?translation_id=${tid}`);
+    if (currentRes.ok) {
+      const current = await currentRes.json();
+      if (current.exists && !(await showConfirm(t('pages.game.replaceReviewConfirm')))) return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = t('common.actions.submitting');
+
     const res = await fetch(`${API}/api/reviews`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -770,7 +884,7 @@ document.addEventListener('click', async (e) => {
 
     await reloadReviews(tid);
   } catch {
-    alert(t('pages.game.submitError'));
+    await showNotice(t('pages.game.submitError'));
   } finally {
     btn.disabled = false;
     btn.textContent = t('common.actions.submit');

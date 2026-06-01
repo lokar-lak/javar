@@ -136,6 +136,32 @@ func migrate(db *sql.DB) error {
 		return fmt.Errorf("create click_events index: %w", err)
 	}
 
+	if _, err := db.Exec(`ALTER TABLE reviews ADD COLUMN reviewer_id TEXT NOT NULL DEFAULT ''`); err != nil {
+		if !strings.Contains(strings.ToLower(err.Error()), "duplicate column name") {
+			return fmt.Errorf("add reviews.reviewer_id: %w", err)
+		}
+	}
+	if _, err := db.Exec(`
+		CREATE UNIQUE INDEX IF NOT EXISTS idx_reviews_one_per_reviewer_translation
+		ON reviews(translation_id, reviewer_id)
+		WHERE reviewer_id <> ''`); err != nil {
+		return fmt.Errorf("create reviews reviewer index: %w", err)
+	}
+	if _, err := db.Exec(`
+		CREATE TABLE IF NOT EXISTS review_events (
+			id          INTEGER PRIMARY KEY AUTOINCREMENT,
+			reviewer_id TEXT NOT NULL,
+			ip          TEXT NOT NULL,
+			created_at  DATETIME DEFAULT CURRENT_TIMESTAMP
+		)`); err != nil {
+		return fmt.Errorf("create review_events: %w", err)
+	}
+	if _, err := db.Exec(`
+		CREATE INDEX IF NOT EXISTS idx_review_events_rate_limit
+		ON review_events(reviewer_id, ip, created_at)`); err != nil {
+		return fmt.Errorf("create review_events index: %w", err)
+	}
+
 	// Migration: convert orthography from single string to JSON array
 	if _, err := db.Exec(`
 		UPDATE translations SET orthography =

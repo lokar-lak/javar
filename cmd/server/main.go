@@ -70,6 +70,7 @@ func main() {
 		r.Post("/translations/{id}/click", h.TrackClick)
 
 		r.Get("/reviews", h.ListReviews)
+		r.Get("/reviews/current", h.CurrentReview)
 		r.Post("/reviews", h.CreateReview)
 
 		r.Post("/translation-submissions", h.CreateTranslationSubmission)

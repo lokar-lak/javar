@@ -3,9 +3,11 @@ package handler
 import (
 	"context"
 	"crypto/hmac"
+	"crypto/rand"
 	"crypto/sha256"
 	"database/sql"
 	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -25,7 +27,10 @@ import (
 	"javar/internal/repository"
 )
 
-const adminSessionCookie = "javar_admin_session"
+const (
+	adminSessionCookie = "javar_admin_session"
+	reviewerCookie     = "javar_reviewer_id"
+)
 
 type Handler struct {
 	repo *repository.Repo
@@ -45,6 +50,54 @@ func writeJSON(w http.ResponseWriter, status int, v any) {
 
 func writeError(w http.ResponseWriter, status int, msg string) {
 	writeJSON(w, status, map[string]string{"error": msg})
+}
+
+func clientIP(r *http.Request) string {
+	ip := r.RemoteAddr
+	if host, _, err := net.SplitHostPort(ip); err == nil {
+		ip = host
+	}
+	if forwarded := r.Header.Get("X-Forwarded-For"); forwarded != "" {
+		if parts := strings.SplitN(forwarded, ",", 2); len(parts) > 0 {
+			ip = strings.TrimSpace(parts[0])
+		}
+	}
+	return ip
+}
+
+func reviewerID(w http.ResponseWriter, r *http.Request) (string, error) {
+	if cookie, err := r.Cookie(reviewerCookie); err == nil && validReviewerID(cookie.Value) {
+		return cookie.Value, nil
+	}
+
+	buf := make([]byte, 32)
+	if _, err := rand.Read(buf); err != nil {
+		return "", err
+	}
+	id := hex.EncodeToString(buf)
+	http.SetCookie(w, &http.Cookie{
+		Name:     reviewerCookie,
+		Value:    id,
+		Path:     "/",
+		MaxAge:   60 * 60 * 24 * 365,
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
+		Secure:   adminCookieSecure(r),
+	})
+	return id, nil
+}
+
+func validReviewerID(value string) bool {
+	if len(value) < 32 || len(value) > 128 {
+		return false
+	}
+	for _, r := range value {
+		if (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9') || r == '-' || r == '_' {
+			continue
+		}
+		return false
+	}
+	return true
 }
 
 // ── GET /api/genres ───────────────────────────────────────────────────────
@@ -159,16 +212,7 @@ func (h *Handler) TrackClick(w http.ResponseWriter, r *http.Request) {
 		writeError(w, 400, "invalid id")
 		return
 	}
-	ip := r.RemoteAddr
-	if host, _, err := net.SplitHostPort(ip); err == nil {
-		ip = host
-	}
-	if forwarded := r.Header.Get("X-Forwarded-For"); forwarded != "" {
-		if parts := strings.SplitN(forwarded, ",", 2); len(parts) > 0 {
-			ip = strings.TrimSpace(parts[0])
-		}
-	}
-	url, err := h.repo.IncrementClick(id, ip)
+	url, err := h.repo.IncrementClick(id, clientIP(r))
 	if err != nil {
 		writeError(w, 404, "translation not found")
 		return
@@ -195,6 +239,27 @@ func (h *Handler) ListReviews(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, 200, reviews)
 }
 
+// ── GET /api/reviews/current?translation_id=X ────────────────────────────
+
+func (h *Handler) CurrentReview(w http.ResponseWriter, r *http.Request) {
+	tid, err := strconv.Atoi(r.URL.Query().Get("translation_id"))
+	if err != nil || tid <= 0 {
+		writeError(w, 400, "translation_id required")
+		return
+	}
+	cookie, err := r.Cookie(reviewerCookie)
+	if err != nil || !validReviewerID(cookie.Value) {
+		writeJSON(w, 200, map[string]bool{"exists": false})
+		return
+	}
+	exists, err := h.repo.HasReviewByReviewer(tid, cookie.Value)
+	if err != nil {
+		writeError(w, 500, "internal error")
+		return
+	}
+	writeJSON(w, 200, map[string]bool{"exists": exists})
+}
+
 // ── POST /api/reviews ─────────────────────────────────────────────────────
 // Body: { translation_id, author_name?, rating, body }
 
@@ -213,13 +278,37 @@ func (h *Handler) CreateReview(w http.ResponseWriter, r *http.Request) {
 	}
 	req.Body = strings.TrimSpace(req.Body)
 
-	id, err := h.repo.CreateReview(req)
+	reviewerID, err := reviewerID(w, r)
 	if err != nil {
-		// Duplicate review
-		writeError(w, 409, err.Error())
+		writeError(w, 500, "internal error")
 		return
 	}
-	writeJSON(w, 201, map[string]int64{"id": id})
+	req.ReviewerID = reviewerID
+	ip := clientIP(r)
+	recent, err := h.repo.CountRecentReviewEvents(reviewerID, ip)
+	if err != nil {
+		writeError(w, 500, "internal error")
+		return
+	}
+	if recent >= 5 {
+		writeError(w, 429, "too many review submissions")
+		return
+	}
+
+	id, created, err := h.repo.SaveReview(req)
+	if err != nil {
+		writeError(w, 500, "internal error")
+		return
+	}
+	if err := h.repo.RecordReviewEvent(reviewerID, ip); err != nil {
+		writeError(w, 500, "internal error")
+		return
+	}
+	status := http.StatusOK
+	if created {
+		status = http.StatusCreated
+	}
+	writeJSON(w, status, map[string]any{"id": id, "updated": !created})
 }
 
 // ── POST /api/translation-submissions ─────────────────────────────────────

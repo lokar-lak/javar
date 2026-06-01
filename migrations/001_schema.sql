@@ -42,11 +42,26 @@ CREATE TABLE IF NOT EXISTS translations (
 CREATE TABLE IF NOT EXISTS reviews (
     id             INTEGER PRIMARY KEY AUTOINCREMENT,
     translation_id INTEGER NOT NULL REFERENCES translations(id) ON DELETE CASCADE,
+    reviewer_id    TEXT    NOT NULL DEFAULT '',
     author_name    TEXT    NOT NULL DEFAULT 'Ананім',
     rating         INTEGER NOT NULL CHECK(rating BETWEEN 1 AND 5),
     body           TEXT    NOT NULL,
     created_at     DATETIME DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_reviews_one_per_reviewer_translation
+ON reviews(translation_id, reviewer_id)
+WHERE reviewer_id <> '';
+
+CREATE TABLE IF NOT EXISTS review_events (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    reviewer_id TEXT NOT NULL,
+    ip          TEXT NOT NULL,
+    created_at  DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_review_events_rate_limit
+ON review_events(reviewer_id, ip, created_at);
 
 -- Auto-update updated_at in translations
 CREATE TRIGGER IF NOT EXISTS translations_updated_at

@@ -16,6 +16,8 @@ const TEXTS = {
       details: 'Падрабязней',
       submit: 'Адправіць',
       submitting: 'Адпраўляю...',
+      confirm: 'Так',
+      cancel: 'Не',
       backToCatalog: 'Вярнуцца ў каталог'
     },
     status: {
@@ -113,6 +115,8 @@ const TEXTS = {
       reviews: 'Водгукі',
       reviewsFor: 'Водгукі — {name}',
       leaveReview: 'Пакінуць водгук',
+      reviewUpdateHint: 'Калі вы ўжо ацэньвалі гэты пераклад, ваша адзнака абновіцца.',
+      replaceReviewConfirm: 'Вы ўжо ацэньвалі гэты пераклад. Хочаце змяніць сваю ацэнку?',
       nameOptional: 'Імя (неабавязкова)',
       anonymous: 'Ананім',
       rating: 'Рэйтынг',
@@ -121,7 +125,7 @@ const TEXTS = {
       noReviews: 'Водгукаў пакуль няма. Будзьце першым!',
       updateError: 'Памылка абнаўлення.',
       linkError: 'Не ўдалося атрымаць спасылку',
-      chooseRating: 'Абярыце рэйтынг',
+      chooseRating: 'Вы не ацанілі гульню. Калі ласка, пастаўце адзнаку.',
       writeComment: 'Напішыце каментарый',
       submitError: 'Памылка адпраўкі'
     },

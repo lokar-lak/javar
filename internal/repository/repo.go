@@ -612,7 +612,7 @@ func (r *Repo) ListAllGames(search string) ([]model.Game, error) {
 
 func (r *Repo) ReviewsByTranslation(id int) ([]model.Review, error) {
 	rows, err := r.db.Query(`
-		SELECT id, translation_id, author_name, rating, body, created_at
+		SELECT id, translation_id, reviewer_id, author_name, rating, body, created_at
 		FROM reviews WHERE translation_id=? ORDER BY created_at DESC`, id)
 	if err != nil {
 		return nil, err
@@ -621,7 +621,7 @@ func (r *Repo) ReviewsByTranslation(id int) ([]model.Review, error) {
 	var out []model.Review
 	for rows.Next() {
 		var rv model.Review
-		if err := rows.Scan(&rv.ID, &rv.TranslationID, &rv.AuthorName, &rv.Rating, &rv.Body, &rv.CreatedAt); err != nil {
+		if err := rows.Scan(&rv.ID, &rv.TranslationID, &rv.ReviewerID, &rv.AuthorName, &rv.Rating, &rv.Body, &rv.CreatedAt); err != nil {
 			return nil, err
 		}
 		out = append(out, rv)
@@ -632,14 +632,52 @@ func (r *Repo) ReviewsByTranslation(id int) ([]model.Review, error) {
 	return out, nil
 }
 
-func (r *Repo) CreateReview(req model.CreateReviewRequest) (int64, error) {
-	res, err := r.db.Exec(`
-		INSERT INTO reviews (translation_id,author_name,rating,body) VALUES (?,?,?,?)`,
-		req.TranslationID, strings.TrimSpace(req.AuthorName), req.Rating, strings.TrimSpace(req.Body))
-	if err != nil {
-		return 0, err
+func (r *Repo) SaveReview(req model.CreateReviewRequest) (int64, bool, error) {
+	var id int64
+	err := r.db.QueryRow(`SELECT id FROM reviews WHERE translation_id=? AND reviewer_id=?`, req.TranslationID, req.ReviewerID).Scan(&id)
+	if err == nil {
+		_, err = r.db.Exec(`
+			UPDATE reviews
+			SET author_name=?, rating=?, body=?, created_at=CURRENT_TIMESTAMP
+			WHERE id=?`,
+			strings.TrimSpace(req.AuthorName), req.Rating, strings.TrimSpace(req.Body), id)
+		return id, false, err
 	}
-	return res.LastInsertId()
+	if err != sql.ErrNoRows {
+		return 0, false, err
+	}
+
+	res, err := r.db.Exec(`
+		INSERT INTO reviews (translation_id,reviewer_id,author_name,rating,body) VALUES (?,?,?,?,?)`,
+		req.TranslationID, req.ReviewerID, strings.TrimSpace(req.AuthorName), req.Rating, strings.TrimSpace(req.Body))
+	if err != nil {
+		return 0, false, err
+	}
+	id, err = res.LastInsertId()
+	return id, true, err
+}
+
+func (r *Repo) HasReviewByReviewer(translationID int, reviewerID string) (bool, error) {
+	var id int
+	err := r.db.QueryRow(`SELECT id FROM reviews WHERE translation_id=? AND reviewer_id=?`, translationID, reviewerID).Scan(&id)
+	if err == sql.ErrNoRows {
+		return false, nil
+	}
+	return err == nil, err
+}
+
+func (r *Repo) CountRecentReviewEvents(reviewerID, ip string) (int, error) {
+	var count int
+	err := r.db.QueryRow(`
+		SELECT COUNT(*) FROM review_events
+		WHERE created_at > datetime('now', '-10 minutes')
+		  AND (reviewer_id=? OR ip=?)`, reviewerID, ip).Scan(&count)
+	return count, err
+}
+
+func (r *Repo) RecordReviewEvent(reviewerID, ip string) error {
+	_, err := r.db.Exec(`INSERT INTO review_events (reviewer_id, ip) VALUES (?, ?)`, reviewerID, ip)
+	return err
 }
 
 func (r *Repo) FindSimilarGames(title string) ([]model.SimilarGame, error) {
@@ -731,7 +769,7 @@ func (r *Repo) GetStats() (*model.AdminStats, error) {
 
 func (r *Repo) ListAllReviews() ([]model.AdminReview, error) {
 	rows, err := r.db.Query(`
-		SELECT rv.id, rv.translation_id, rv.author_name, rv.rating, rv.body, rv.created_at,
+		SELECT rv.id, rv.translation_id, rv.reviewer_id, rv.author_name, rv.rating, rv.body, rv.created_at,
 		       g.title, g.slug, COALESCE(t.studio,''), t.translator_names
 		FROM reviews rv
 		JOIN translations t ON t.id = rv.translation_id
@@ -745,7 +783,7 @@ func (r *Repo) ListAllReviews() ([]model.AdminReview, error) {
 	for rows.Next() {
 		var ar model.AdminReview
 		var namesJSON string
-		if err := rows.Scan(&ar.ID, &ar.TranslationID, &ar.AuthorName, &ar.Rating,
+		if err := rows.Scan(&ar.ID, &ar.TranslationID, &ar.ReviewerID, &ar.AuthorName, &ar.Rating,
 			&ar.Body, &ar.CreatedAt, &ar.GameTitle, &ar.GameSlug, &ar.Studio, &namesJSON); err != nil {
 			return nil, err
 		}

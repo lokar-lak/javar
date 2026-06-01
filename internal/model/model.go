@@ -67,6 +67,7 @@ type PublicStats struct {
 type Review struct {
 	ID            int       `json:"id"`
 	TranslationID int       `json:"translation_id"`
+	ReviewerID    string    `json:"-"`
 	AuthorName    string    `json:"author_name"`
 	Rating        int       `json:"rating"`
 	Body          string    `json:"body"`
@@ -102,6 +103,7 @@ type CreateTranslationRequest struct {
 
 type CreateReviewRequest struct {
 	TranslationID int    `json:"translation_id"`
+	ReviewerID    string `json:"-"`
 	AuthorName    string `json:"author_name"`
 	Rating        int    `json:"rating"`
 	Body          string `json:"body"`
