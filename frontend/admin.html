@@ -36,6 +36,7 @@
       background:var(--surface);border:1px solid var(--border);border-radius:16px;
       padding:48px 40px;width:380px;display:flex;flex-direction:column;gap:20px;
     }
+    .login-logo{height:36px;width:auto;display:block}
     .login-box h2{font-size:24px;font-weight:700}
     .login-box p{font-size:13px;color:var(--text-muted)}
 
@@ -51,10 +52,9 @@
     }
     .sidebar__logo{
       padding:24px 20px 20px;
-      font-size:28px;font-weight:700;letter-spacing:2px;
-      color:var(--accent);font-family:'Jaro','Arial Black',sans-serif;
       border-bottom:1px solid var(--border);
     }
+    .sidebar__logo img{height:28px;width:auto;display:block}
     .sidebar__logo span{display:block;font-family:var(--font);font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--text-muted);margin-top:2px}
     .sidebar__nav{padding:12px 0;flex:1}
     .nav-item{
@@ -207,7 +207,8 @@
         padding:0 16px;height:56px;
         border-right:none;border-bottom:1px solid var(--border);
       }
-      .sidebar__logo{padding:0;border-bottom:none;font-size:22px;margin-right:auto;display:flex;align-items:center;gap:8px}
+      .sidebar__logo{padding:0;border-bottom:none;margin-right:auto;display:flex;align-items:center;gap:8px}
+      .sidebar__logo img{height:24px}
       .sidebar__logo span{display:none}
       .sidebar__nav{display:none;position:fixed;top:56px;left:0;right:0;background:var(--surface);border-bottom:1px solid var(--border);z-index:100;padding:4px 0}
       .sidebar__nav.open{display:block}
@@ -239,9 +240,9 @@
 
 <!-- ── Login ──────────────────────────────────────────────── -->
 <div id="login-screen">
-  <div class="login-box">
-    <div>
-      <div style="font-family:'Jaro','Arial Black',sans-serif;font-size:32px;color:var(--accent);letter-spacing:2px">JAVAR</div>
+    <div class="login-box">
+      <div>
+      <img class="login-logo" src="JaVar_SVG.svg" alt="JAVAR" />
       <h2 style="margin-top:8px">Панэль адміністратара</h2>
       <p style="margin-top:6px">Увядзіце пароль для доступу</p>
     </div>
@@ -259,7 +260,7 @@
 
   <!-- Sidebar -->
   <aside class="sidebar">
-    <div class="sidebar__logo">JAVAR <span>Адміністрацыя</span></div>
+    <div class="sidebar__logo"><img src="JaVar_SVG.svg" alt="JAVAR" /><span>Панэль адміністратара</span></div>
     <button class="sidebar__toggle" data-toggle-sidebar aria-label="Меню">☰</button>
     <nav class="sidebar__nav">
       <div class="nav-item active" data-section="dashboard" onclick="gotoSection('dashboard',this)">
