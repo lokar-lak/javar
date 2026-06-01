@@ -24,6 +24,7 @@ type Game struct {
 	Genres           []Genre   `json:"genres,omitempty"`
 	HasOnlyAI        bool      `json:"has_only_ai,omitempty"`
 	HasOfficial      bool      `json:"has_official,omitempty"`
+	HasVerified      bool      `json:"has_verified,omitempty"`
 	BestRating       float64   `json:"best_rating"`
 	TranslationCount int       `json:"translation_count,omitempty"`
 }
@@ -35,18 +36,20 @@ type GameDetail struct {
 }
 
 type Translation struct {
-	ID              int       `json:"id"`
-	GameID          int       `json:"game_id"`
-	Studio          string    `json:"studio"`
-	TranslatorNames []string  `json:"translator_names"`
-	Type            string    `json:"type"`            // "manual" | "ai"
-	OfficialStatus  string    `json:"official_status"` // "official" | "semi-official" | "unofficial"
-	Coverage        []string  `json:"coverage"`
-	ExternalURL     string    `json:"external_url"`
-	Orthography     []string  `json:"orthography"` // ["academic","tarashkevitsa","lacinka"]
-	ClickCount      int       `json:"click_count"`
-	CreatedAt       time.Time `json:"created_at"`
-	UpdatedAt       time.Time `json:"updated_at"`
+	ID              int        `json:"id"`
+	GameID          int        `json:"game_id"`
+	Studio          string     `json:"studio"`
+	TranslatorNames []string   `json:"translator_names"`
+	Type            string     `json:"type"`            // "manual" | "ai"
+	OfficialStatus  string     `json:"official_status"` // "official" | "semi-official" | "unofficial"
+	Coverage        []string   `json:"coverage"`
+	ExternalURL     string     `json:"external_url"`
+	Orthography     []string   `json:"orthography"` // ["academic","tarashkevitsa","lacinka"]
+	Verified        bool       `json:"verified"`
+	VerifiedAt      *time.Time `json:"verified_at,omitempty"`
+	ClickCount      int        `json:"click_count"`
+	CreatedAt       time.Time  `json:"created_at"`
+	UpdatedAt       time.Time  `json:"updated_at"`
 }
 
 // TranslationDetail - translation plus aggregated rating and reviews
@@ -99,6 +102,7 @@ type CreateTranslationRequest struct {
 	Coverage        []string `json:"coverage"`
 	ExternalURL     string   `json:"external_url"`
 	Orthography     []string `json:"orthography"`
+	Verified        bool     `json:"verified"`
 }
 
 type CreateReviewRequest struct {

@@ -59,6 +59,7 @@ function renderGameCard(game, idx = 0) {
   const rating = bestRating(game);
   const aiOnly = hasOnlyAI(game);
   const off = game.has_official;
+  const verified = game.has_verified;
 
   return `
     <div class="game-card" onclick="location.href='game.html?slug=${game.slug}'" style="cursor:pointer">
@@ -67,6 +68,7 @@ function renderGameCard(game, idx = 0) {
         ${!game.cover_url ? `<span style="font-size:40px;opacity:.2">🎮</span>` : ''}
         ${aiOnly ? `<div class="game-card__ai-badge">${t('common.translationTypes.ai').toUpperCase()}</div>` : ''}
         ${off ? `<div class="game-card__official-badge">${t('common.officialStatus.official').toUpperCase()}</div>` : ''}
+        ${verified ? `<div class="game-card__verified-badge">ПРАВЕРАНА</div>` : ''}
       </div>
       <div class="game-card__body">
         <div class="game-card__meta">

@@ -149,6 +149,7 @@
     .badge-ai{background:rgba(122,122,154,.15);color:var(--text-muted)}
     .badge-genre{background:var(--accent-glow);color:var(--accent)}
     .badge-orth{background:var(--surface-2);border:1px solid var(--border);color:var(--text-muted)}
+    .badge-verified{background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.35);color:var(--green)}
 
     /* ── Stars ──────────────────────────────────────────────── */
     .stars{color:var(--accent);letter-spacing:2px}
@@ -403,8 +404,8 @@
 
       <div class="tbl-wrap">
         <table>
-          <thead><tr><th>Гульня</th><th>Аўтары</th><th>Тып</th><th>Правапіс / статус</th><th>Тып лакалізацыі</th><th>Пераходаў</th><th>Ацэнка</th><th></th></tr></thead>
-          <tbody id="translations-body"><tr><td colspan="8" class="empty">Загрузка...</td></tr></tbody>
+          <thead><tr><th>Гульня</th><th>Аўтары</th><th>Тып</th><th>Правапіс / статус</th><th>Праверанасць</th><th>Тып лакалізацыі</th><th>Пераходаў</th><th>Ацэнка</th><th></th></tr></thead>
+          <tbody id="translations-body"><tr><td colspan="9" class="empty">Загрузка...</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -607,6 +608,13 @@
       <div class="form-group span-2">
         <label>Перакладчыкі (праз коску)</label>
         <input class="form-input" id="tr-translators" placeholder="Іван Іваноў, Марыя Петрова"/>
+      </div>
+      <div class="form-group span-2">
+        <label>Праверанасць</label>
+        <label class="checkbox-label" style="padding-top:6px">
+          <input type="checkbox" id="tr-verified"> Пераклад правераны
+        </label>
+        <div id="tr-verified-date" style="display:none;margin-top:6px;font-size:12px;color:var(--text-muted)"></div>
       </div>
       <div class="form-group span-2">
         <label>Тып лакалізацыі</label>
@@ -1006,7 +1014,7 @@ function renderTranslationsTable() {
       : (_translations || []);
     const tbody = document.getElementById('translations-body');
     if (!list.length) {
-      tbody.innerHTML = '<tr><td colspan="8" class="empty">Перакладаў няма</td></tr>'; return;
+      tbody.innerHTML = '<tr><td colspan="9" class="empty">Перакладаў няма</td></tr>'; return;
     }
     tbody.innerHTML = list.map(t => `
       <tr>
@@ -1014,6 +1022,7 @@ function renderTranslationsTable() {
         <td>${translationName(t)}</td>
         <td><span class="badge badge-${t.type}">${t.type==='manual'?'Ручны':'Машынны'}</span></td>
         <td>${(t.orthography||[]).map(o => `<span class="badge badge-orth">${ORTH[o]||o}</span>`).join('')}<br/><span class="badge badge-orth" style="margin-top:4px">${OFFICIAL[t.official_status]||t.official_status}</span></td>
+        <td>${t.verified ? `<span class="badge badge-verified">Правераны</span><br/><span style="font-size:11px;color:var(--text-muted)">${t.verified_at ? new Date(t.verified_at).toLocaleDateString('be-BY') : ''}</span>` : '<span style="font-size:12px;color:var(--text-muted)">Не правераны</span>'}</td>
         <td style="font-size:12px;color:var(--text-muted)">${(t.coverage||[]).join(', ')||'—'}</td>
         <td style="font-family:var(--mono)">${t.click_count}</td>
         <td class="rating-num">${t.avg_rating ? t.avg_rating.toFixed(1) : '—'}</td>
@@ -1041,6 +1050,10 @@ function openTranslationModal(tOrId) {
   document.getElementById('tr-official').value    = t?.official_status || 'unofficial';
   document.getElementById('tr-studio').value      = t?.studio || '';
   document.getElementById('tr-translators').value = (t?.translator_names||[]).join(', ');
+  document.getElementById('tr-verified').checked  = !!t?.verified;
+  const verifiedDate = document.getElementById('tr-verified-date');
+  verifiedDate.style.display = t?.verified_at ? 'block' : 'none';
+  verifiedDate.textContent = t?.verified_at ? `Дата праверкі: ${new Date(t.verified_at).toLocaleString('be-BY')}` : '';
   const selectedOrth = t?.orthography || [];
   document.querySelectorAll('.orth-cb').forEach(cb => {
     cb.checked = selectedOrth.includes(cb.value);
@@ -1063,6 +1076,7 @@ async function saveTranslation() {
     studio:           document.getElementById('tr-studio').value.trim(),
     orthography:      [...document.querySelectorAll('.orth-cb:checked')].map(i => i.value),
     external_url:     document.getElementById('tr-url').value.trim(),
+    verified:         document.getElementById('tr-verified').checked,
     translator_names: document.getElementById('tr-translators').value.split(',').map(s=>s.trim()).filter(Boolean),
     coverage:         [...document.querySelectorAll('#tr-coverage input:checked')].map(i => i.value),
   };

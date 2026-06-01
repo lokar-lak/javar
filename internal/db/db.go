@@ -75,6 +75,16 @@ func migrate(db *sql.DB) error {
 			return fmt.Errorf("add translations.studio: %w", err)
 		}
 	}
+	if _, err := db.Exec(`ALTER TABLE translations ADD COLUMN verified INTEGER NOT NULL DEFAULT 0`); err != nil {
+		if !strings.Contains(strings.ToLower(err.Error()), "duplicate column name") {
+			return fmt.Errorf("add translations.verified: %w", err)
+		}
+	}
+	if _, err := db.Exec(`ALTER TABLE translations ADD COLUMN verified_at DATETIME`); err != nil {
+		if !strings.Contains(strings.ToLower(err.Error()), "duplicate column name") {
+			return fmt.Errorf("add translations.verified_at: %w", err)
+		}
+	}
 	if err := backfillTranslationStudios(db); err != nil {
 		return err
 	}

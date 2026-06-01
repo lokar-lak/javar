@@ -213,6 +213,7 @@ func (r *Repo) ListGames(f model.GameFilter) ([]model.Game, error) {
 		games[i].Genres, _ = r.genresByGame(games[i].ID)
 		games[i].HasOnlyAI = r.hasOnlyAI(games[i].ID)
 		games[i].HasOfficial = r.hasOfficial(games[i].ID)
+		games[i].HasVerified = r.hasVerified(games[i].ID)
 	}
 	return games, nil
 }
@@ -300,6 +301,7 @@ func (r *Repo) GetGameBySlug(slug string) (*model.GameDetail, error) {
 	g.Genres, _ = r.genresByGame(g.ID)
 	g.HasOnlyAI = r.hasOnlyAI(g.ID)
 	g.HasOfficial = r.hasOfficial(g.ID)
+	g.HasVerified = r.hasVerified(g.ID)
 
 	translations, err := r.translationsByGame(g.ID)
 	if err != nil {
@@ -372,6 +374,13 @@ func (r *Repo) hasOfficial(gameID int) bool {
 	r.db.QueryRow(`SELECT COUNT(*) FROM translations WHERE game_id=? AND official_status='official'`, gameID).Scan(&cnt)
 	return cnt > 0
 }
+
+func (r *Repo) hasVerified(gameID int) bool {
+	var cnt int
+	r.db.QueryRow(`SELECT COUNT(*) FROM translations WHERE game_id=? AND verified=1`, gameID).Scan(&cnt)
+	return cnt > 0
+}
+
 func (r *Repo) bestRating(gameID int) float64 {
 	var rating sql.NullFloat64
 	r.db.QueryRow(`
@@ -419,7 +428,7 @@ func (r *Repo) translationsByGame(gameID int) ([]model.TranslationDetail, error)
 	rows, err := r.db.Query(`
 		SELECT id, game_id, COALESCE(studio,''), translator_names, type,
 		       COALESCE(official_status,'unofficial'), COALESCE(orthography,'[]'),
-		       coverage, external_url, click_count, created_at, updated_at
+		       coverage, external_url, verified, verified_at, click_count, created_at, updated_at
 		FROM translations WHERE game_id=? ORDER BY created_at DESC`, gameID)
 	if err != nil {
 		return nil, err
@@ -430,10 +439,14 @@ func (r *Repo) translationsByGame(gameID int) ([]model.TranslationDetail, error)
 	for rows.Next() {
 		var t model.Translation
 		var namesJSON, orthJSON, coverageJSON string
+		var verifiedAt sql.NullTime
 		if err := rows.Scan(&t.ID, &t.GameID, &t.Studio, &namesJSON, &t.Type,
 			&t.OfficialStatus, &orthJSON, &coverageJSON, &t.ExternalURL,
-			&t.ClickCount, &t.CreatedAt, &t.UpdatedAt); err != nil {
+			&t.Verified, &verifiedAt, &t.ClickCount, &t.CreatedAt, &t.UpdatedAt); err != nil {
 			return nil, err
+		}
+		if verifiedAt.Valid {
+			t.VerifiedAt = &verifiedAt.Time
 		}
 		json.Unmarshal([]byte(namesJSON), &t.TranslatorNames)
 		json.Unmarshal([]byte(coverageJSON), &t.Coverage)
@@ -479,11 +492,15 @@ func (r *Repo) CreateTranslation(req model.CreateTranslationRequest) (int64, err
 	req.Coverage = normalizeCoverageValues(req.Coverage)
 	coverageJSON, _ := json.Marshal(req.Coverage)
 	orthJSON, _ := json.Marshal(req.Orthography)
+	var verifiedAt any
+	if req.Verified {
+		verifiedAt = time.Now()
+	}
 	res, err := r.db.Exec(`
-		INSERT INTO translations (game_id,studio,translator_names,type,official_status,orthography,coverage,external_url)
-		VALUES (?,?,?,?,?,?,?,?)`,
+		INSERT INTO translations (game_id,studio,translator_names,type,official_status,orthography,coverage,external_url,verified,verified_at)
+		VALUES (?,?,?,?,?,?,?,?,?,?)`,
 		req.GameID, req.Studio, string(namesJSON),
-		req.Type, req.OfficialStatus, string(orthJSON), string(coverageJSON), req.ExternalURL)
+		req.Type, req.OfficialStatus, string(orthJSON), string(coverageJSON), req.ExternalURL, req.Verified, verifiedAt)
 	if err != nil {
 		return 0, err
 	}
@@ -502,11 +519,28 @@ func (r *Repo) UpdateTranslation(id int, req model.CreateTranslationRequest) err
 	req.Coverage = normalizeCoverageValues(req.Coverage)
 	coverageJSON, _ := json.Marshal(req.Coverage)
 	orthJSON, _ := json.Marshal(req.Orthography)
-	_, err := r.db.Exec(`
-		UPDATE translations SET studio=?,translator_names=?,type=?,official_status=?,orthography=?,
-		  coverage=?,external_url=?,updated_at=? WHERE id=?`,
-		req.Studio, string(namesJSON), req.Type, req.OfficialStatus, string(orthJSON),
-		string(coverageJSON), req.ExternalURL, time.Now(), id)
+	var wasVerified bool
+	if err := r.db.QueryRow(`SELECT verified FROM translations WHERE id=?`, id).Scan(&wasVerified); err != nil {
+		return err
+	}
+	now := time.Now()
+	verifiedAtSQL := `verified_at`
+	if req.Verified != wasVerified {
+		if req.Verified {
+			verifiedAtSQL = `?`
+		} else {
+			verifiedAtSQL = `NULL`
+		}
+	}
+	q := `UPDATE translations SET studio=?,translator_names=?,type=?,official_status=?,orthography=?,
+		  coverage=?,external_url=?,verified=?,verified_at=` + verifiedAtSQL + `,updated_at=? WHERE id=?`
+	args := []any{req.Studio, string(namesJSON), req.Type, req.OfficialStatus, string(orthJSON),
+		string(coverageJSON), req.ExternalURL, req.Verified}
+	if req.Verified != wasVerified && req.Verified {
+		args = append(args, now)
+	}
+	args = append(args, now, id)
+	_, err := r.db.Exec(q, args...)
 	return err
 }
 
@@ -800,7 +834,7 @@ func (r *Repo) ListAllTranslations() ([]model.AdminTranslation, error) {
 	rows, err := r.db.Query(`
 		SELECT t.id, t.game_id, COALESCE(t.studio,''), t.translator_names, t.type,
 		       COALESCE(t.official_status,'unofficial'), COALESCE(t.orthography,'[]'), t.coverage, t.external_url,
-		       t.click_count, t.created_at, t.updated_at,
+		       t.verified, t.verified_at, t.click_count, t.created_at, t.updated_at,
 		       g.title, g.slug
 		FROM translations t
 		JOIN games g ON g.id = t.game_id
@@ -809,25 +843,27 @@ func (r *Repo) ListAllTranslations() ([]model.AdminTranslation, error) {
 		return nil, err
 	}
 	var raw []struct {
-		t         model.Translation
-		namesJSON string
-		orthJSON  string
-		covJSON   string
-		gTitle    string
-		gSlug     string
+		t          model.Translation
+		namesJSON  string
+		orthJSON   string
+		covJSON    string
+		verifiedAt sql.NullTime
+		gTitle     string
+		gSlug      string
 	}
 	for rows.Next() {
 		var x struct {
-			t         model.Translation
-			namesJSON string
-			orthJSON  string
-			covJSON   string
-			gTitle    string
-			gSlug     string
+			t          model.Translation
+			namesJSON  string
+			orthJSON   string
+			covJSON    string
+			verifiedAt sql.NullTime
+			gTitle     string
+			gSlug      string
 		}
 		if err := rows.Scan(&x.t.ID, &x.t.GameID, &x.t.Studio, &x.namesJSON, &x.t.Type,
 			&x.t.OfficialStatus, &x.orthJSON, &x.covJSON, &x.t.ExternalURL,
-			&x.t.ClickCount, &x.t.CreatedAt, &x.t.UpdatedAt,
+			&x.t.Verified, &x.verifiedAt, &x.t.ClickCount, &x.t.CreatedAt, &x.t.UpdatedAt,
 			&x.gTitle, &x.gSlug); err != nil {
 			rows.Close()
 			return nil, err
@@ -845,6 +881,9 @@ func (r *Repo) ListAllTranslations() ([]model.AdminTranslation, error) {
 		json.Unmarshal([]byte(x.namesJSON), &x.t.TranslatorNames)
 		json.Unmarshal([]byte(x.orthJSON), &x.t.Orthography)
 		json.Unmarshal([]byte(x.covJSON), &x.t.Coverage)
+		if x.verifiedAt.Valid {
+			x.t.VerifiedAt = &x.verifiedAt.Time
+		}
 		at := model.AdminTranslation{
 			TranslationDetail: model.TranslationDetail{Translation: x.t},
 			GameTitle:         x.gTitle,
@@ -917,14 +956,15 @@ func (r *Repo) DeleteGenre(id int) error {
 func (r *Repo) GetTranslationByID(id int) (*model.Translation, error) {
 	var t model.Translation
 	var namesJSON, orthJSON, covJSON string
+	var verifiedAt sql.NullTime
 	err := r.db.QueryRow(`
 		SELECT id, game_id, COALESCE(studio,''), translator_names, type,
 		       COALESCE(official_status,'unofficial'), COALESCE(orthography,'[]'), coverage, external_url,
-		       click_count, created_at, updated_at
+		       verified, verified_at, click_count, created_at, updated_at
 		FROM translations WHERE id=?`, id).
 		Scan(&t.ID, &t.GameID, &t.Studio, &namesJSON, &t.Type,
 			&t.OfficialStatus, &orthJSON, &covJSON, &t.ExternalURL,
-			&t.ClickCount, &t.CreatedAt, &t.UpdatedAt)
+			&t.Verified, &verifiedAt, &t.ClickCount, &t.CreatedAt, &t.UpdatedAt)
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}
@@ -934,5 +974,8 @@ func (r *Repo) GetTranslationByID(id int) (*model.Translation, error) {
 	json.Unmarshal([]byte(namesJSON), &t.TranslatorNames)
 	json.Unmarshal([]byte(orthJSON), &t.Orthography)
 	json.Unmarshal([]byte(covJSON), &t.Coverage)
+	if verifiedAt.Valid {
+		t.VerifiedAt = &verifiedAt.Time
+	}
 	return &t, nil
 }

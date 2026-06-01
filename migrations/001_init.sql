@@ -47,6 +47,8 @@ CREATE TABLE IF NOT EXISTS translations (
     official_status  TEXT    NOT NULL DEFAULT 'unofficial' CHECK(official_status IN ('official','semi-official','unofficial')),
     coverage         TEXT    NOT NULL DEFAULT '[]',  -- JSON: ["subtitles","menu",...]
     external_url     TEXT    NOT NULL,
+    verified         INTEGER NOT NULL DEFAULT 0,
+    verified_at      DATETIME,
     click_count      INTEGER NOT NULL DEFAULT 0,
     created_at       DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at       DATETIME DEFAULT CURRENT_TIMESTAMP
