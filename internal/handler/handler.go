@@ -211,10 +211,7 @@ func (h *Handler) CreateReview(w http.ResponseWriter, r *http.Request) {
 		writeError(w, 400, "rating must be 1–5")
 		return
 	}
-	if req.Body == "" {
-		writeError(w, 400, "body required")
-		return
-	}
+	req.Body = strings.TrimSpace(req.Body)
 
 	id, err := h.repo.CreateReview(req)
 	if err != nil {

@@ -695,6 +695,7 @@ function renderRatingSummary(avg, total, counts) {
 
 function renderReviewCard(rev) {
   const initials = rev.author_name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+  const body = (rev.body || '').trim();
   return `
     <div class="review-card">
       <div class="review-card__header">
@@ -707,7 +708,7 @@ function renderReviewCard(rev) {
         </div>
         <div class="stars review-card__stars">${stars(rev.rating)}</div>
       </div>
-      <p class="review-card__text">${rev.body}</p>
+      ${body ? `<p class="review-card__text">${body}</p>` : ''}
     </div>`;
 }
 
@@ -749,7 +750,6 @@ document.addEventListener('click', async (e) => {
   const body = document.getElementById('review-body').value.trim();
 
   if (!selectedRating) { alert(t('pages.game.chooseRating')); return; }
-  if (!body) { alert(t('pages.game.writeComment')); return; }
 
   btn.disabled = true;
   btn.textContent = t('common.actions.submitting');
