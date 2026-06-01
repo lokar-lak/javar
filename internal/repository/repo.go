@@ -160,7 +160,7 @@ func (r *Repo) ListGames(f model.GameFilter) ([]model.Game, error) {
 	}
 
 	// ── Sorting ──────────────────────────────────────────────────────────
-	sortBy := "g.created_at"
+	sortBy := "COALESCE((SELECT MAX(t2.created_at) FROM translations t2 WHERE t2.game_id = g.id), g.created_at)"
 	sortOrder := "DESC"
 	sortMissing := ""
 	switch f.SortBy {
