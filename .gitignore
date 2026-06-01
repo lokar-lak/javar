@@ -427,6 +427,4 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
-javar.db-shm
-javar.db-wal
 server
