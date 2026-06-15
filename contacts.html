@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="be" data-title-key="pages.contacts.title">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JAVAR — Кантакты</title>
+  <link rel="icon" type="image/svg+xml" href="JaVar_icon.svg" />
+  <!-- Fonts: async, non-blocking for rendering -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preload" as="style"
+    href="https://fonts.googleapis.com/css2?family=Jaro&family=Manrope:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap"
+    onload="this.onload=null;this.rel='stylesheet'" />
+  <noscript><link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Jaro&family=Manrope:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap"
+  /></noscript>
+  
+  
+  
+  <link rel="stylesheet" href="styles.css?v=3" />
+</head>
+<body>
+<div class="page">
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a href="index.html" class="navbar__logo" aria-label="JAVAR">
+      <img src="JaVar_SVG.svg" alt="JAVAR" style="height:28px;width:auto;display:block" />
+    </a>
+    <button class="navbar__toggle" data-toggle-nav aria-label="Меню"><span></span><span></span><span></span></button>
+    <div class="navbar__menu">
+    <ul class="navbar__links">
+      <li><a href="index.html" data-i18n="common.nav.home">Галоўная</a></li>
+      <li><a href="catalog.html" data-i18n="common.nav.catalog">Каталог</a></li>
+      <li><a href="contacts.html" class="active" data-i18n="common.nav.contacts">Кантакты</a></li>
+      <li><a href="faq.html" data-i18n="common.nav.faq">FAQ</a></li>
+    </ul>
+    <div class="navbar__submit-item"><button type="button" class="navbar__submit" data-open-submission data-i18n="common.nav.submit">Дадаць беларусізатар</button></div>
+    <div class="navbar__search">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <circle cx="6.5" cy="6.5" r="5" stroke="#7A7A9A" stroke-width="1.5"/>
+        <line x1="10.5" y1="10.5" x2="14" y2="14" stroke="#7A7A9A" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <input type="text" placeholder="Пошук..." data-i18n-placeholder="common.nav.searchPlaceholder" />
+    </div>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- Contact block -->
+    <div class="contacts-content">
+      <div style="
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-xl);
+        padding: 60px 80px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 24px;
+        max-width: 640px;
+        width: 100%;
+      ">
+        <!-- Icon -->
+        <div style="
+          width: 72px; height: 72px;
+          background: var(--accent-glow);
+          border-radius: 50%;
+          display: flex; align-items: center; justify-content: center;
+          font-size: 32px;
+        ">✉️</div>
+
+        <h2 style="font-family:var(--font-head); font-size:28px; font-weight:700; color:var(--text); text-align:center">
+          <span data-i18n="pages.contacts.heading">Звяжыцеся з намі</span>
+        </h2>
+
+        <p style="font-size:15px; color:var(--text-muted); text-align:center; line-height:1.7">
+          <span data-i18n="pages.contacts.text">Ёсць пытанні, прапановы або хочаце далучыцца да праекту?<br/>
+          Напішыце нам у Telegram-бот, і мы адкажам як мага хутчэй.</span>
+        </p>
+
+        <p style="font-size:15px; color:var(--text); text-align:center; line-height:1.7">
+          <span data-i18n="pages.contacts.botLabel">Наш Telegram-бот:</span>
+          <a
+            href="https://t.me/javar_bot"
+            target="_blank"
+            rel="noopener noreferrer"
+            style="color:var(--accent); font-weight:700; text-decoration:underline"
+          >
+            t.me/javar_bot
+          </a>
+        </p>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer__brand">
+      <span class="footer__logo">
+        <img src="JaVar_SVG.svg" alt="JAVAR" style="height:24px;width:auto;display:block" />
+      </span>
+      <span class="footer__copy" data-i18n="common.footer.copyright">© 2026 Javar. Каталог беларускіх лакалізацый гульняў. Усе правы абароненыя</span>
+    </div>
+    <ul class="footer__nav">
+      <li><a href="index.html" data-i18n="common.nav.home">Галоўная</a></li>
+      <li><a href="catalog.html" data-i18n="common.nav.catalog">Каталог</a></li>
+      <li><a href="contacts.html" data-i18n="common.nav.contacts">Кантакты</a></li>
+      <li><a href="faq.html" data-i18n="common.nav.faq">FAQ</a></li>
+    </ul>
+  </footer>
+
+</div>
+<script src="texts.js?v=3"></script>
+<script src="submission.js?v=3"></script>
+<script>
+document.querySelector('[data-toggle-nav]')?.addEventListener('click', e => {
+  e.stopPropagation();
+  document.querySelector('.navbar').classList.toggle('open');
+});
+document.addEventListener('click', e => {
+  if (!e.target.closest('.navbar')) document.querySelector('.navbar')?.classList.remove('open');
+});
+</script>
+</body>
+</html>
