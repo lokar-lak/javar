@@ -291,7 +291,7 @@
       <p style="margin-top:6px">Увядзіце пароль для доступу</p>
     </div>
     <div class="form-group">
-      <label>Admin Password</label>
+      <label>Пароль</label>
       <input class="form-input" type="password" id="password-input" placeholder="••••••••" />
     </div>
     <button class="btn btn-primary" onclick="doLogin()" style="width:100%;height:44px">Увайсці</button>
@@ -1330,9 +1330,9 @@ async function uploadCover(input) {
 
     // Паказваем сапраўдную выяву з сервера
     document.getElementById('cover-img').src = data.url;
-    toast('Выява загружана ✓');
+    toast('Відарыс загружаны ✓');
   } catch (e) {
-    toast('Памылка загрузкі: ' + e.message, 'err');
+    toast('Адбылася памылка загрузкі: ' + e.message, 'err');
     clearCover();
   }
 }
@@ -1389,9 +1389,9 @@ async function autofillFromSteam() {
       input.checked = genre ? genreSlugs.has(genre.slug) : false;
       input.dispatchEvent(new Event('change'));
     });
-    toast('Дадзеныя Steam загружаныя ✓');
+    toast('Даныя Steam загружаны ✓');
   } catch (e) {
-    toast('Не атрымалася атрымаць дадзеныя Steam: ' + e.message, 'err');
+    toast('Не ўдалося атрымаць даныя Steam: ' + e.message, 'err');
   }
 }
 
