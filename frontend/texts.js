@@ -10,7 +10,7 @@ const TEXTS = {
       searchPlaceholder: 'Пошук...'
     },
     footer: {
-      copyright: '© {year} Javar. Каталог беларускіх лакалізацый.'
+      copyright: '© {year} Javar. Каталог беларускіх лакалізацый. Усе правы абароненыя.'
     },
     actions: {
       details: 'Падрабязней',
@@ -86,7 +86,7 @@ const TEXTS = {
       sortTranslationAsc: 'Па рэйтынгу перакладу (адваротны)',
       emptyTitle: 'Нічога не знойдзена',
       emptyHint: 'Паспрабуйце змяніць фільтры',
-      errorTitle: 'Памылка загрузкі',
+      errorTitle: 'Адбылася памылка загрузкі',
       errorHint: 'Праверце, ці запушчаны сервер',
       prevPage: '← Назад',
       nextPage: 'Далей →'
@@ -166,8 +166,8 @@ const TEXTS = {
     gameUrl: 'Спасылка на гульню',
     translationUrl: 'Спасылка на беларусізатар',
     description: 'Апісанне лакалізацыі',
-    platformRequired: 'Абярыце хаця б адну платформу.',
-    typeRequired: 'Абярыце хаця б адзін тып лакалізацыі.',
+    platformRequired: 'Выберыце хаця б адну платформу.',
+    typeRequired: 'Выберыце хаця б адзін тып лакалізацыі.',
     duplicate: 'Падобная гульня ўжо ёсць у каталогу{names}',
     genericError: 'Не атрымалася адправіць прапанову.',
     success: 'Дзякуй! Прапанова адпраўлена на мадэрацыю.',
