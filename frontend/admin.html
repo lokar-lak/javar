@@ -364,7 +364,7 @@
       </div>
 
       <div class="tbl-wrap">
-        <div class="tbl-head"><h3>Топ гульняў па кліках</h3></div>
+        <div class="tbl-head"><h3>Топ гульняў па пераходах</h3></div>
         <table>
           <thead><tr><th>#</th><th>Назва</th><th>Пераходаў</th><th>Водгукаў</th></tr></thead>
           <tbody id="top-games-body"><tr><td colspan="4" class="empty">Загрузка...</td></tr></tbody>
@@ -531,7 +531,7 @@
       <div class="form-group span-2">
         <label>Вокладка</label>
         <div class="upload-row">
-          <input class="form-input" id="g-cover" placeholder="https://... або загрузі файл справа" style="flex:1"/>
+          <input class="form-input" id="g-cover" placeholder="https://... або загрузі файл" style="flex:1"/>
           <label class="btn btn-ghost" style="cursor:pointer;white-space:nowrap;height:40px;padding:0 14px;display:flex;align-items:center;gap:6px">
             📁 Загрузіць
             <input type="file" id="g-cover-file" accept="image/jpeg,image/png,image/webp"
@@ -647,7 +647,7 @@
   <div class="modal confirm-box">
     <h3>Пацвердзіць выдаленне</h3>
     <p id="confirm-text">Вы ўпэўнены?</p>
-    <p style="color:var(--accent);font-size:12px;margin-top:4px">Гэта дзеянне нельга скасаваць.</p>
+    <p style="color:var(--accent);font-size:12px;margin-top:4px">Гэта дзеянне немагчыма адрабіць.</p>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('modal-confirm')">Скасаваць</button>
       <button class="btn btn-danger" id="confirm-ok">Выдаліць</button>
@@ -685,7 +685,7 @@ async function doLogin() {
     return;
   }
   if (!res.ok) {
-    showLoginError('Памылка сервера, паспрабуйце яшчэ раз');
+    showLoginError('Адбылася памылка сервера, паспрабуйце яшчэ раз');
     return;
   }
 
@@ -805,7 +805,7 @@ async function loadDashboard() {
 
     const tbody = document.getElementById('top-games-body');
     if (!s.top_games?.length) {
-      tbody.innerHTML = '<tr><td colspan="4" class="empty">Дадзеных пакуль няма</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="4" class="empty">Даных пакуль няма</td></tr>';
       return;
     }
     tbody.innerHTML = s.top_games.map((g, i) => `
@@ -1089,7 +1089,7 @@ async function saveTranslation() {
       toast('Пераклад абноўлены ✓');
     } else {
       await apiReq('POST', '/api/admin/translations', body);
-      toast('Пераклад дадadzены ✓');
+      toast('Пераклад дадaдзены ✓');
     }
     closeModal('modal-translation');
     loadTranslations();
