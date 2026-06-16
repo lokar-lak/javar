@@ -863,7 +863,7 @@ func (r *Repo) ListAllTranslations() ([]model.AdminTranslation, error) {
 		}
 		if err := rows.Scan(&x.t.ID, &x.t.GameID, &x.t.GameTitle, &x.t.Studio, &x.namesJSON, &x.t.Type,
 			&x.t.OfficialStatus, &x.orthJSON, &x.covJSON, &x.t.ExternalURL,
-			&x.t.Verified, &x.verifiedAt, &x.t.ClickCount, &x.t.CreatedAt, &x.t.UpdatedAt,
+			&x.t.Verified, &x.verifiedAt, &x.t.Incomplete, &x.t.Broken, &x.t.ClickCount, &x.t.CreatedAt, &x.t.UpdatedAt,
 			&x.gTitle, &x.gSlug); err != nil {
 			rows.Close()
 			return nil, err
