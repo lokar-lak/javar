@@ -48,6 +48,8 @@ type Translation struct {
 	Orthography     []string   `json:"orthography"` // ["academic","tarashkevitsa","lacinka"]
 	Verified        bool       `json:"verified"`
 	VerifiedAt      *time.Time `json:"verified_at,omitempty"`
+	Incomplete      bool       `json:"incomplete"`
+	Broken          bool       `json:"broken"`
 	ClickCount      int        `json:"click_count"`
 	CreatedAt       time.Time  `json:"created_at"`
 	UpdatedAt       time.Time  `json:"updated_at"`
@@ -104,6 +106,8 @@ type CreateTranslationRequest struct {
 	ExternalURL     string   `json:"external_url"`
 	Orthography     []string `json:"orthography"`
 	Verified        bool     `json:"verified"`
+	Incomplete      bool     `json:"incomplete"`
+	Broken          bool     `json:"broken"`
 }
 
 type CreateReviewRequest struct {

@@ -126,6 +126,16 @@ func migrate(db *sql.DB) error {
 			return fmt.Errorf("add translations.verified_at: %w", err)
 		}
 	}
+	if _, err := db.Exec(`ALTER TABLE translations ADD COLUMN incomplete INTEGER NOT NULL DEFAULT 0`); err != nil {
+		if !strings.Contains(strings.ToLower(err.Error()), "duplicate column name") {
+			return fmt.Errorf("add translations.incomplete: %w", err)
+		}
+	}
+	if _, err := db.Exec(`ALTER TABLE translations ADD COLUMN broken INTEGER NOT NULL DEFAULT 0`); err != nil {
+		if !strings.Contains(strings.ToLower(err.Error()), "duplicate column name") {
+			return fmt.Errorf("add translations.broken: %w", err)
+		}
+	}
 	if err := backfillTranslationStudios(db); err != nil {
 		return err
 	}

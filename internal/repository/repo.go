@@ -428,7 +428,7 @@ func (r *Repo) translationsByGame(gameID int) ([]model.TranslationDetail, error)
 	rows, err := r.db.Query(`
 		SELECT id, game_id, COALESCE(game_title,''), COALESCE(studio,''), translator_names, type,
 		       COALESCE(official_status,'unofficial'), COALESCE(orthography,'[]'),
-		       coverage, external_url, verified, verified_at, click_count, created_at, updated_at
+		       coverage, external_url, verified, verified_at, incomplete, broken, click_count, created_at, updated_at
 		FROM translations WHERE game_id=? ORDER BY created_at DESC`, gameID)
 	if err != nil {
 		return nil, err
@@ -442,7 +442,7 @@ func (r *Repo) translationsByGame(gameID int) ([]model.TranslationDetail, error)
 		var verifiedAt sql.NullTime
 		if err := rows.Scan(&t.ID, &t.GameID, &t.GameTitle, &t.Studio, &namesJSON, &t.Type,
 			&t.OfficialStatus, &orthJSON, &coverageJSON, &t.ExternalURL,
-			&t.Verified, &verifiedAt, &t.ClickCount, &t.CreatedAt, &t.UpdatedAt); err != nil {
+			&t.Verified, &verifiedAt, &t.Incomplete, &t.Broken, &t.ClickCount, &t.CreatedAt, &t.UpdatedAt); err != nil {
 			return nil, err
 		}
 		if verifiedAt.Valid {
@@ -497,10 +497,10 @@ func (r *Repo) CreateTranslation(req model.CreateTranslationRequest) (int64, err
 		verifiedAt = time.Now()
 	}
 	res, err := r.db.Exec(`
-		INSERT INTO translations (game_id,game_title,studio,translator_names,type,official_status,orthography,coverage,external_url,verified,verified_at)
-		VALUES (?,(SELECT title FROM games WHERE id=?),?,?,?,?,?,?,?,?,?)`,
+		INSERT INTO translations (game_id,game_title,studio,translator_names,type,official_status,orthography,coverage,external_url,verified,verified_at,incomplete,broken)
+		VALUES (?,(SELECT title FROM games WHERE id=?),?,?,?,?,?,?,?,?,?,?,?)`,
 		req.GameID, req.GameID, req.Studio, string(namesJSON),
-		req.Type, req.OfficialStatus, string(orthJSON), string(coverageJSON), req.ExternalURL, req.Verified, verifiedAt)
+		req.Type, req.OfficialStatus, string(orthJSON), string(coverageJSON), req.ExternalURL, req.Verified, verifiedAt, req.Incomplete, req.Broken)
 	if err != nil {
 		return 0, err
 	}
