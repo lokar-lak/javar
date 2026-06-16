@@ -390,6 +390,16 @@ function verifiedBadge(translation) {
   return `<span class="tag-sm tag-sm--green">✓ Праверана${date}</span>`;
 }
 
+function incompleteBadge(translation) {
+  if (!translation.incomplete) return '';
+  return `<span class="tag-sm" style="background:rgba(255,38,38,.12);border:1px solid rgba(255,38,38,.35);color:var(--red)">⚠ Няпоўны пераклад</span>`;
+}
+
+function brokenBadge(translation) {
+  if (!translation.broken) return '';
+  return `<span class="tag-sm" style="background:rgba(255,38,38,.12);border:1px solid rgba(255,38,38,.35);color:var(--red)">✕ Не працуе</span>`;
+}
+
 function esc(value) {
   return String(value ?? '').replace(/[&<>'"]/g, ch => ({
     '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;'
@@ -597,6 +607,8 @@ function renderTranslationCard(t, open = false) {
     ${badge(t.type)}
     ${officialBadge(t.official_status)}
     ${verifiedBadge(t)}
+    ${incompleteBadge(t)}
+    ${brokenBadge(t)}
     ${(t.orthography||[]).map(o => `<span class="tag-sm tag-sm--neutral">${ORTH_LABELS[o] || o}</span>`).join(' ')}
     <span class="tag-sm tag-sm--neutral">${window.t('pages.game.clicks', { count: t.click_count })}</span>
   `;
