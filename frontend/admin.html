@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>JAVAR — Адміністратар</title>
+  <title>Адміністратар</title>
   <link rel="icon" type="image/svg+xml" href="JaVar_icon.svg"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -815,7 +815,7 @@ async function loadDashboard() {
         <td style="font-family:var(--mono);color:var(--yellow)">${g.clicks}</td>
         <td style="font-family:var(--mono)">${g.reviews}</td>
       </tr>`).join('');
-  } catch (e) { toast('Памылка загрузкі: ' + e.message, 'err'); }
+  } catch (e) { toast('Адбылася памылка загрузкі: ' + e.message, 'err'); }
 }
 
 // ══ GAMES ═════════════════════════════════════════════════════════════════
