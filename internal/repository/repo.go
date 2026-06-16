@@ -533,9 +533,9 @@ func (r *Repo) UpdateTranslation(id int, req model.CreateTranslationRequest) err
 		}
 	}
 	q := `UPDATE translations SET studio=?,translator_names=?,type=?,official_status=?,orthography=?,
-		  coverage=?,external_url=?,verified=?,verified_at=` + verifiedAtSQL + `,updated_at=? WHERE id=?`
+		  coverage=?,external_url=?,verified=?,incomplete=?,broken=?,verified_at=` + verifiedAtSQL + `,updated_at=? WHERE id=?`
 	args := []any{req.Studio, string(namesJSON), req.Type, req.OfficialStatus, string(orthJSON),
-		string(coverageJSON), req.ExternalURL, req.Verified}
+		string(coverageJSON), req.ExternalURL, req.Verified, req.Incomplete, req.Broken}
 	if req.Verified != wasVerified && req.Verified {
 		args = append(args, now)
 	}
@@ -834,7 +834,7 @@ func (r *Repo) ListAllTranslations() ([]model.AdminTranslation, error) {
 	rows, err := r.db.Query(`
 		SELECT t.id, t.game_id, COALESCE(t.game_title,''), COALESCE(t.studio,''), t.translator_names, t.type,
 		       COALESCE(t.official_status,'unofficial'), COALESCE(t.orthography,'[]'), t.coverage, t.external_url,
-		       t.verified, t.verified_at, t.click_count, t.created_at, t.updated_at,
+		       t.verified, t.verified_at, t.incomplete, t.broken, t.click_count, t.created_at, t.updated_at,
 		       g.title, g.slug
 		FROM translations t
 		JOIN games g ON g.id = t.game_id
