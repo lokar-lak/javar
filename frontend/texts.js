@@ -22,7 +22,7 @@ const TEXTS = {
     },
     status: {
       noRating: 'Яшчэ без ацэнак',
-      loadingError: 'Памылка загрузкі.',
+      loadingError: 'Адбылася памылка загрузкі.',
       gameNotFound: 'Гульня не знойдзена.'
     },
     labels: {
@@ -49,7 +49,7 @@ const TEXTS = {
   },
   pages: {
     home: {
-      title: 'JAVAR — Галоўная',
+      title: 'Галоўная',
       statsLabel: 'Колькасць перакладаў',
       translationsTitle: 'Пераклады',
       officialCount: 'Афіцыйных',
@@ -62,7 +62,7 @@ const TEXTS = {
       noGames: 'Гульняў пакуль няма.'
     },
     catalog: {
-      title: 'JAVAR — Каталог',
+      title: 'Каталог',
       heading: 'Каталог',
       searchPlaceholder: 'Назва або распрацоўшчык...',
       genre: 'Жанр',
@@ -92,7 +92,7 @@ const TEXTS = {
       nextPage: 'Далей →'
     },
     game: {
-      title: 'JAVAR — Гульня',
+      title: 'Гульня',
       steamPositive: 'станоўчых водгукаў',
       translationRating: 'Рэйтынг перакладу',
       avgRating: 'сярэдняя ацэнка',
@@ -131,13 +131,13 @@ const TEXTS = {
       submitError: 'Адбылася памылка адпраўкі'
     },
     contacts: {
-      title: 'JAVAR — Кантакты',
+      title: 'Кантакты',
       heading: 'Звяжыцеся з намі',
       text: 'Ёсць пытанні, прапановы або хочаце далучыцца да праекту?<br/>Напішыце нам у Telegram-бот, і мы адкажам як мага хутчэй.',
       botLabel: 'Наш Telegram-бот:'
     },
     faq: {
-      title: 'JAVAR — FAQ',
+      title: 'FAQ',
       heading: 'Частыя пытанні',
       intro: 'Адказы на асноўныя пытанні пра беларусізатары, спасылкі і даданне новых лакалізацый у каталог.',
       items: [
@@ -169,7 +169,7 @@ const TEXTS = {
     platformRequired: 'Выберыце хаця б адну платформу.',
     typeRequired: 'Выберыце хаця б адзін тып лакалізацыі.',
     duplicate: 'Падобная гульня ўжо ёсць у каталогу{names}',
-    genericError: 'Не атрымалася адправіць прапанову.',
+    genericError: 'Не ўдалося адправіць прапанову.',
     success: 'Дзякуй! Прапанова адпраўлена на мадэрацыю.',
     networkError: 'Адбылася памылка інтэрнэт-злучэння. Паспрабуйце яшчэ раз.'
   }
