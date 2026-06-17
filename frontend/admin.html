@@ -1032,9 +1032,9 @@ function renderTranslationsTable() {
         <td><span class="badge badge-${t.type}">${t.type==='manual'?'Ручны':'Машынны'}</span></td>
         <td>${(t.orthography||[]).map(o => `<span class="badge badge-orth">${ORTH[o]||o}</span>`).join('')}<br/><span class="badge badge-orth" style="margin-top:4px">${OFFICIAL[t.official_status]||t.official_status}</span></td>
         <td>${
-          t.broken ? `<span class="badge badge-broken">${window.t('common.status.broken')}</span>` :
-          t.incomplete ? `<span class="badge badge-incomplete">${window.t('common.status.incomplete')}</span>` :
-          t.verified ? `<span class="badge badge-verified">${window.t('common.status.verified')}</span><br/><span style="font-size:11px;color:var(--text-muted)">${t.verified_at ? new Date(t.verified_at).toLocaleDateString('be-BY') : ''}</span>` :
+          t.broken ? `<span class="badge badge-broken">${window.t('common.status.brokenShort')}</span>` :
+          t.incomplete ? `<span class="badge badge-incomplete">${window.t('common.status.incompleteShort')}</span>` :
+          t.verified ? `<span class="badge badge-verified">${window.t('common.status.verifiedShort')}</span><br/><span style="font-size:11px;color:var(--text-muted)">${t.verified_at ? new Date(t.verified_at).toLocaleDateString('be-BY') : ''}</span>` :
           '<span style="font-size:12px;color:var(--text-muted)">Не правераны</span>'
         }</td>
         <td style="font-size:12px;color:var(--text-muted)">${(t.coverage||[]).join(', ')||'—'}</td>
