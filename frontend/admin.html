@@ -406,8 +406,8 @@
 
       <div class="tbl-wrap">
         <table>
-          <thead><tr><th>Гульня</th><th>Аўтары</th><th>Тып</th><th>Правапіс / статус</th><th>Праверанасць</th><th>Тып лакалізацыі</th><th>Пераходаў</th><th>Ацэнка</th><th></th></tr></thead>
-          <tbody id="translations-body"><tr><td colspan="9" class="empty">Загрузка...</td></tr></tbody>
+          <thead><tr><th>Гульня</th><th>Аўтары</th><th>Тып</th><th>Правапіс</th><th>Статус</th><th>Праверанасць</th><th>Недахопы</th><th>Тып лакалізацыі</th><th>Пераходаў</th><th>Ацэнка</th><th></th></tr></thead>
+          <tbody id="translations-body"><tr><td colspan="11" class="empty">Загрузка...</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -617,6 +617,9 @@
           <input type="checkbox" id="tr-verified"> <span data-i18n="common.status.verified">Пераклад правераны</span>
         </label>
         <div id="tr-verified-date" style="display:none;margin-top:6px;font-size:12px;color:var(--text-muted)"></div>
+      </div>
+      <div class="form-group span-2">
+        <label>Недахопы</label>
         <label class="checkbox-label" style="padding-top:6px">
           <input type="checkbox" id="tr-incomplete"> <span data-i18n="common.status.incomplete">Пераклад няпоўны</span>
         </label>
@@ -1023,19 +1026,22 @@ function renderTranslationsTable() {
       : (_translations || []);
     const tbody = document.getElementById('translations-body');
     if (!list.length) {
-      tbody.innerHTML = '<tr><td colspan="9" class="empty">Перакладаў няма</td></tr>'; return;
+      tbody.innerHTML = '<tr><td colspan="11" class="empty">Перакладаў няма</td></tr>'; return;
     }
     tbody.innerHTML = list.map(t => `
       <tr>
         <td><a href="game.html?slug=${t.game_slug}" target="_blank" style="color:var(--accent)">${t.game_title}</a></td>
         <td>${translationName(t)}</td>
         <td><span class="badge badge-${t.type}">${t.type==='manual'?'Ручны':'Машынны'}</span></td>
-        <td>${(t.orthography||[]).map(o => `<span class="badge badge-orth">${ORTH[o]||o}</span>`).join('')}<br/><span class="badge badge-orth" style="margin-top:4px">${OFFICIAL[t.official_status]||t.official_status}</span></td>
+        <td>${(t.orthography||[]).map(o => `<span class="badge badge-orth">${ORTH[o]||o}</span>`).join('')}</td>
+        <td><span class="badge badge-orth">${OFFICIAL[t.official_status]||t.official_status}</span></td>
         <td>${
-          (t.verified ? `<span class="badge badge-verified">${window.t('common.status.verifiedShort')}</span>${t.verified_at ? `<br/><span style="font-size:11px;color:var(--text-muted)">${new Date(t.verified_at).toLocaleDateString('be-BY')}</span>` : ''}` : '')
-          + (t.incomplete ? `<span class="badge badge-incomplete">${window.t('common.status.incompleteShort')}</span>` : '')
+          t.verified ? `<span class="badge badge-verified">${window.t('common.status.verifiedShort')}</span>${t.verified_at ? `<br/><span style="font-size:11px;color:var(--text-muted)">${new Date(t.verified_at).toLocaleDateString('be-BY')}</span>` : ''}` : '<span style="font-size:12px;color:var(--text-muted)">Не правераны</span>'
+        }</td>
+        <td>${
+          (t.incomplete ? `<span class="badge badge-incomplete">${window.t('common.status.incompleteShort')}</span>` : '')
           + (t.broken ? `<span class="badge badge-broken">${window.t('common.status.brokenShort')}</span>` : '')
-          + (!t.verified && !t.incomplete && !t.broken ? '<span style="font-size:12px;color:var(--text-muted)">Не правераны</span>' : '')
+          || '<span style="font-size:12px;color:var(--text-muted)">—</span>'
         }</td>
         <td style="font-size:12px;color:var(--text-muted)">${(t.coverage||[]).join(', ')||'—'}</td>
         <td style="font-family:var(--mono)">${t.click_count}</td>
