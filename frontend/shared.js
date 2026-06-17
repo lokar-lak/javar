@@ -68,7 +68,7 @@ function renderGameCard(game, idx = 0) {
         ${!game.cover_url ? `<span style="font-size:40px;opacity:.2">🎮</span>` : ''}
         ${aiOnly ? `<div class="game-card__ai-badge">${t('common.translationTypes.ai').toUpperCase()}</div>` : ''}
         ${off ? `<div class="game-card__official-badge">${t('common.officialStatus.official').toUpperCase()}</div>` : ''}
-        ${verified ? `<div class="game-card__verified-badge">${t('common.status.verified')}</div>` : ''}
+        ${verified ? `<div class="game-card__verified-badge">${t('common.status.verifiedShort')}</div>` : ''}
       </div>
       <div class="game-card__body">
         <div class="game-card__meta">

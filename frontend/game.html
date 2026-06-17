@@ -387,17 +387,17 @@ function officialBadge(status) {
 function verifiedBadge(translation) {
   if (!translation.verified) return '';
   const date = translation.verified_at ? ` · ${formatDate(translation.verified_at)}` : '';
-  return `<span class="tag-sm tag-sm--green">✓ ${window.t('common.status.verified')}${date}</span>`;
+  return `<span class="tag-sm tag-sm--green">✓ ${window.t('common.status.verifiedShort')}${date}</span>`;
 }
 
 function incompleteBadge(translation) {
   if (!translation.incomplete) return '';
-  return `<span class="tag-sm" style="background:rgba(255,38,38,.12);border:1px solid rgba(255,38,38,.35);color:var(--red)">⚠ ${window.t('common.status.incomplete')}</span>`;
+  return `<span class="tag-sm" style="background:rgba(255,38,38,.12);border:1px solid rgba(255,38,38,.35);color:var(--red)">⚠ ${window.t('common.status.incompleteShort')}</span>`;
 }
 
 function brokenBadge(translation) {
   if (!translation.broken) return '';
-  return `<span class="tag-sm" style="background:rgba(255,38,38,.12);border:1px solid rgba(255,38,38,.35);color:var(--red)">✕ ${window.t('common.status.broken')}</span>`;
+  return `<span class="tag-sm" style="background:rgba(255,38,38,.12);border:1px solid rgba(255,38,38,.35);color:var(--red)">✕ ${window.t('common.status.brokenShort')}</span>`;
 }
 
 function esc(value) {
