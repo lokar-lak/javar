@@ -837,6 +837,7 @@ img { display: block; max-width: 100%; }
 .tag-sm--green { background: rgba(38,194,106,0.12); color: #26C26A; }
 .tag-sm--neutral { background: var(--surface-2); border: 1px solid var(--border); color: var(--text-muted); }
 
+
 /* Stats wide */
 .stat-cards-wide {
   display: grid;
