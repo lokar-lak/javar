@@ -23,7 +23,11 @@ const TEXTS = {
     status: {
       noRating: 'Яшчэ без ацэнак',
       loadingError: 'Адбылася памылка загрузкі.',
-      gameNotFound: 'Гульня не знойдзена.'
+      gameNotFound: 'Гульня не знойдзена.',
+      verified: 'Пераклад правераны',
+      verifiedWithDate: 'Пераклад правераны {date}',
+      incomplete: 'Пераклад няпоўны',
+      broken: 'Пераклад не працуе'
     },
     labels: {
       reviewCount: 'Колькасць водгукаў: {count}',
