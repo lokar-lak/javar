@@ -1,10 +1,14 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
 	"strings"
+	"syscall"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	chimw "github.com/go-chi/chi/v5/middleware"
@@ -105,6 +109,7 @@ func main() {
 			r.Post("/translation-submissions/{id}/accept", h.AcceptTranslationSubmission)
 			r.Delete("/translation-submissions/{id}", h.DeleteTranslationSubmission)
 			r.Post("/genres", h.CreateGenre)
+			r.Put("/genres/{id}", h.UpdateGenre)
 			r.Delete("/genres/{id}", h.DeleteGenre)
 			r.Get("/export/csv", h.ExportCSV)
 			r.Post("/upload", h.UploadImage)
@@ -117,8 +122,24 @@ func main() {
 	})
 	r.Handle("/*", cacheStatic(http.FileServer(http.Dir("./frontend"))))
 
-	log.Printf("▶  http://localhost:%s", port)
-	log.Fatal(http.ListenAndServe(":"+port, r))
+	srv := &http.Server{Addr: ":" + port, Handler: r}
+
+	go func() {
+		log.Printf("▶  http://localhost:%s", port)
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("listen: %v", err)
+		}
+	}()
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	log.Print("спыненне сервера...")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	database.Exec("PRAGMA wal_checkpoint(TRUNCATE)")
+	srv.Shutdown(ctx)
 }
 
 func cacheStatic(next http.Handler) http.Handler {
