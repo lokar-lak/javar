@@ -653,6 +653,28 @@
   </div>
 </div>
 
+<!-- ══ MODAL — GENRE ═══════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-genre">
+  <div class="modal" style="position:relative;max-width:440px">
+    <button class="modal-close" type="button" aria-label="Закрыць" onclick="closeModal('modal-genre')">×</button>
+    <h3 id="modal-genre-title">Рэдагаваць жанр</h3>
+    <input type="hidden" id="genre-id"/>
+    <div class="form-grid cols-1">
+      <div class="form-group">
+        <label>Назва</label>
+        <input class="form-input" id="genre-edit-name" placeholder="Хорар"/>
+      </div>
+      <div class="form-group">
+        <label>Slug</label>
+        <input class="form-input" id="genre-edit-slug" placeholder="horror"/>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="saveGenre()">Захаваць</button>
+    </div>
+  </div>
+</div>
+
 <!-- ══ MODAL — CONFIRM ════════════════════════════════════════ -->
 <div class="modal-overlay" id="modal-confirm">
   <div class="modal confirm-box">
@@ -1267,7 +1289,12 @@ async function loadGenres() {
         <td style="font-family:var(--mono);color:var(--text-muted)">${g.id}</td>
         <td>${g.name}</td>
         <td style="color:var(--text-muted)">${g.slug}</td>
-        <td><button class="btn btn-danger btn-sm" onclick="deleteGenre(${g.id},'${g.name}')">🗑</button></td>
+        <td>
+          <div class="td-actions">
+            <button class="btn btn-ghost btn-sm" onclick="openGenreModal(${g.id})">✏️</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteGenre(${g.id},'${g.name.replace(/'/g,"\\'")}')">🗑</button>
+          </div>
+        </td>
       </tr>`).join('');
   } catch (e) { toast(e.message, 'err'); }
 }
@@ -1281,6 +1308,28 @@ async function createGenre() {
     toast('Жанр дададзены ✓');
     document.getElementById('genre-name').value = '';
     document.getElementById('genre-slug').value = '';
+    loadGenres();
+  } catch (e) { toast(e.message, 'err'); }
+}
+
+function openGenreModal(id) {
+  const g = _genres.find(x => x.id === id);
+  document.getElementById('modal-genre-title').textContent = 'Рэдагаваць жанр';
+  document.getElementById('genre-id').value = g?.id || '';
+  document.getElementById('genre-edit-name').value = g?.name || '';
+  document.getElementById('genre-edit-slug').value = g?.slug || '';
+  openModal('modal-genre');
+}
+
+async function saveGenre() {
+  const id = document.getElementById('genre-id').value;
+  const name = document.getElementById('genre-edit-name').value.trim();
+  const slug = document.getElementById('genre-edit-slug').value.trim();
+  if (!name || !slug) { toast('Назва і slug абавязковыя', 'err'); return; }
+  try {
+    await apiReq('PUT', `/api/admin/genres/${id}`, { name, slug });
+    toast('Жанр абноўлены ✓');
+    closeModal('modal-genre');
     loadGenres();
   } catch (e) { toast(e.message, 'err'); }
 }

@@ -948,6 +948,11 @@ func (r *Repo) CreateGenre(name, slug string) (int64, error) {
 	return res.LastInsertId()
 }
 
+func (r *Repo) UpdateGenre(id int, name, slug string) error {
+	_, err := r.db.Exec(`UPDATE genres SET name=?, slug=? WHERE id=?`, name, slug, id)
+	return err
+}
+
 func (r *Repo) DeleteGenre(id int) error {
 	_, err := r.db.Exec(`DELETE FROM genres WHERE id=?`, id)
 	return err

@@ -734,6 +734,25 @@ func (h *Handler) CreateGenre(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, 201, map[string]int64{"id": id})
 }
 
+// ── PUT /api/admin/genres/{id} ───────────────────────────────────────────
+
+func (h *Handler) UpdateGenre(w http.ResponseWriter, r *http.Request) {
+	id, _ := strconv.Atoi(chi.URLParam(r, "id"))
+	var req struct {
+		Name string `json:"name"`
+		Slug string `json:"slug"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil || req.Name == "" || req.Slug == "" {
+		writeError(w, 400, "name and slug required")
+		return
+	}
+	if err := h.repo.UpdateGenre(id, req.Name, req.Slug); err != nil {
+		writeError(w, 500, err.Error())
+		return
+	}
+	writeJSON(w, 200, map[string]string{"status": "updated"})
+}
+
 // ── DELETE /api/admin/genres/{id} ────────────────────────────────────────
 
 func (h *Handler) DeleteGenre(w http.ResponseWriter, r *http.Request) {
